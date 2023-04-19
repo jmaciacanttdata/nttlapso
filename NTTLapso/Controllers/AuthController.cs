@@ -31,7 +31,7 @@ namespace NTTLapso.Controllers
             LoginResponse userData = await _service.Login(request);
             if (userData != null)
             {
-                var token = _service.GenerateToken(userData, _config);
+                var token = await _service.GenerateToken(userData, _config);
                 LoginDataResponse response = new LoginDataResponse();
                 response.Data = userData;
                 response.DateLogin = DateTime.Now;
@@ -50,7 +50,7 @@ namespace NTTLapso.Controllers
         [Authorize]
         public async Task<String> GetNombreUsuario(CancellationToken cancellationToken) {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
-            LoginResponse Data = _service.GetCurrentUser(identity);
+            LoginResponse Data = await _service.GetCurrentUser(identity);
             String response = "";
             response = Data.Nombre;
             if (Data.Apellidos != null)
