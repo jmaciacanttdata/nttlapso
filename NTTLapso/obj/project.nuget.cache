@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "G898es1nVuPVSBRYWJCRJVAgd0nq+hd1MYnaWSoK9V8Ha2zr1F20aEvnWd5SXdpv3N+d4l2jgCA8aWL6JQIUhg==",
+  "dgSpecHash": "dQPK8UEHxu1akaB37JsmDvM+tdHNBj5eCHXSooNaMoxtx67R+AJwZM1wtwn+v2YyrrqmwM8Y3I/yZRiz72tLnw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\NTTLapso\\NTTLapso\\NTTLapso.csproj",
+  "projectFilePath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\jmcjo\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\jmcjo\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.16\\microsoft.aspnetcore.authentication.jwtbearer.6.0.16.nupkg.sha512",
