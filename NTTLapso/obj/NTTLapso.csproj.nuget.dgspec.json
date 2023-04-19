@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\NTTLapso\\NTTLapso\\NTTLapso.csproj": {}
+    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\NTTLapso\\NTTLapso\\NTTLapso.csproj": {
+    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\NTTLapso\\NTTLapso\\NTTLapso.csproj",
+        "projectUniqueName": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
         "projectName": "NTTLapso",
-        "projectPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\NTTLapso\\NTTLapso\\NTTLapso.csproj",
+        "projectPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
         "packagesPath": "C:\\Users\\jmcjo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\NTTLapso\\NTTLapso\\obj\\",
+        "outputPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
