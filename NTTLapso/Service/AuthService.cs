@@ -16,7 +16,7 @@ namespace NTTLapso.Service
             return await _repo.Login(loginRequest);
         }
 
-        public string GenerateToken(LoginResponse user, IConfiguration _config)
+        public async Task<string> GenerateToken(LoginResponse user, IConfiguration _config)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -40,7 +40,7 @@ namespace NTTLapso.Service
 
         }
 
-        public LoginResponse GetCurrentUser(ClaimsIdentity identity)
+        public async Task<LoginResponse> GetCurrentUser(ClaimsIdentity identity)
         { 
             if (identity != null)
             {
