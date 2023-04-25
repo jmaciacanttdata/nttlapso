@@ -1,5 +1,7 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
+using NTTLapso.Models.Categories;
 using NTTLapso.Models.Login;
 
 namespace NTTLapso.Repository
@@ -11,6 +13,34 @@ namespace NTTLapso.Repository
 
         public MastersRepository() { 
             conn = new MySqlConnection(connectionString);
+        }
+        public async Task<CategoriesResponse> SetCategories(CategoriesRequest categoriesData)
+        {
+            CategoriesResponse resp = new CategoriesResponse();
+            string SQLQuery = "INSERT INTO Category (Id, Value) VALUES ('" + categoriesData.IdCategory + "', "+ categoriesData.Value +")";
+            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
+            return resp;
+        }
+        public async Task<CategoriesResponse> GetCategories(CategoriesRequest categoriesRequest)
+        {
+            CategoriesResponse resp = new CategoriesResponse();
+            string SQLQuery = "SELECT Id, Value FROM Category WHERE Id '" + categoriesRequest.IdCategory + "'";
+            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
+            return resp;
+        }
+        public async Task<CategoriesResponse> UpdateCategories(CategoriesRequest categoriesData)
+        {
+            CategoriesResponse resp = new CategoriesResponse();
+            string SQLQuery = "UPDATE Category SET Value = `"+categoriesData.Value+ "` WHERE Id = "+categoriesData.IdCategory+"";
+            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
+            return resp;
+        }
+        public async Task<CategoriesResponse> DeleteCategories(CategoriesRequest categoriesRequest)
+        {
+            CategoriesResponse resp = new CategoriesResponse();
+            string SQLQuery = "DELETE FROM Category WHERE Id '" + categoriesRequest.IdCategory + "'";
+            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
+            return resp;
         }
     }
 }
