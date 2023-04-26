@@ -6,6 +6,6 @@ namespace NTTLapso.Models.Categories
     {
         //public IdValue IdCategory { get; set;}
         public int IdCategory { get; set; }
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }

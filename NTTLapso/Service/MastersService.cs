@@ -12,15 +12,15 @@ namespace NTTLapso.Service
     {
         private MastersRepository _repo = new MastersRepository();
         public MastersService() { }
-        public async Task<CategoriesResponse> RegisterCategories(CategoriesRequest categoriesRequest)
+        public async Task<CategoriesResponse> SetCategories(CategoriesRequest categoriesRequest)
         {
             return await _repo.SetCategories(categoriesRequest);
         }
-        public async Task<CategoriesResponse> EditCategories(CategoriesRequest categoriesRequest)
+        public async Task<CategoriesResponse> UpdateCategories(CategoriesRequest categoriesRequest)
         {
             return await _repo.UpdateCategories(categoriesRequest);
         }
-        public async Task<CategoriesResponse> GetCategories(CategoriesRequest categoriesRequest)
+        public async Task<CategoriesDataResponse> GetCategories(CategoriesRequest categoriesRequest)
         {
             return await _repo.GetCategories(categoriesRequest);
         }

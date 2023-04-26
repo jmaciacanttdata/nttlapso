@@ -26,54 +26,50 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("SetCategories")]
-        public async Task<ActionResult> SetCategories(CategoriesRequest  request)
+        public async Task<ActionResult> SetCategories(CategoriesRequest request)
         {
-            CategoriesResponse categoriesData = await _service.RegisterCategories(request);
-            CategoriesDataResponse response = new CategoriesDataResponse();
+            CategoriesResponse categoriesData = await _service.SetCategories(request);
+            CategoriesResponse response = new CategoriesResponse();
             if (categoriesData != null)
             {
-                response.isSuccessful = 1;
+                response.isSuccess = true;
                 return Ok(response);
             }
             else
             {
-                response.isSuccessful = 0;
-                return Forbid();
+                return BadRequest();
             }
         }
 
         [HttpPost]
-        [Route("EditCategories")]
-        public async Task<ActionResult> EditCategories(CategoriesRequest request)
+        [Route("UpdateCategories")]
+        public async Task<ActionResult> UpdateCategories(CategoriesRequest request)
         {
-            CategoriesResponse categoriesData = await _service.EditCategories(request);
-            CategoriesDataResponse response = new CategoriesDataResponse();
+            CategoriesResponse categoriesData = await _service.UpdateCategories(request);
+            CategoriesResponse response = new CategoriesResponse();
             if (categoriesData != null)
             {
-                response.isSuccessful = 1;
+                response.isSuccess = true;
                 return Ok(response);
             }
             else
             {
-                response.isSuccessful = 0;
-                return Forbid();
+                return BadRequest();
             }
         }
 
         [HttpGet]
         [Route("GetCategories")]
-        public async Task<ActionResult> GetCategories(CategoriesRequest request)
+        public async Task<ActionResult> GetCategories([FromQuery]CategoriesRequest request)
         {
-            CategoriesResponse categoriesData = await _service.GetCategories(request);
-            CategoriesDataResponse response = new CategoriesDataResponse();
+            CategoriesDataResponse categoriesData = await _service.GetCategories(request);
             if (categoriesData != null)
             {
-                response.Data = categoriesData;
-                return Ok(response);
+                return Ok(categoriesData);
             }
             else
             {
-                return Forbid();
+                return BadRequest();
             }
         }
 
@@ -82,16 +78,15 @@ namespace NTTLapso.Controllers
         public async Task<ActionResult> DeleteCategories(CategoriesRequest request)
         {
             CategoriesResponse categoriesData = await _service.DeleteCategories(request);
-            CategoriesDataResponse response = new CategoriesDataResponse();
+            CategoriesResponse response = new CategoriesResponse();
             if (categoriesData != null)
             {
-                response.isSuccessful = 1;
+                response.isSuccess = true;
                 return Ok(response);
             }
             else
             {
-                response.isSuccessful = 0;
-                return Forbid();
+                return BadRequest();
             }
         }
     }

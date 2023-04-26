@@ -4,8 +4,9 @@ namespace NTTLapso.Models.Categories
 {
     public class CategoriesResponse
     {
-        //public IdValue IdValue { get; set; }
-        public int id { get; set; }
-        public string? value { get; set; }
+        public bool isSuccess { get; set; }
+        //public ErrorResponse? Error { get; set; }
+        public string? ErrorType { get; set; }
+        public string? ErrorMessage { get; set; }
     }
 }

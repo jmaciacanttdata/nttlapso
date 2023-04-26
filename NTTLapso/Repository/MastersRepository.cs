@@ -21,11 +21,11 @@ namespace NTTLapso.Repository
             resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
             return resp;
         }
-        public async Task<CategoriesResponse> GetCategories(CategoriesRequest categoriesRequest)
+        public async Task<CategoriesDataResponse> GetCategories(CategoriesRequest categoriesRequest)
         {
-            CategoriesResponse resp = new CategoriesResponse();
+            CategoriesDataResponse resp = new CategoriesDataResponse();
             string SQLQuery = "SELECT Id, Value FROM Category WHERE Id '" + categoriesRequest.IdCategory + "'";
-            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
+            resp = conn.Query<CategoriesDataResponse>(SQLQuery).FirstOrDefault();
             return resp;
         }
         public async Task<CategoriesResponse> UpdateCategories(CategoriesRequest categoriesData)
