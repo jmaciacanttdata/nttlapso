@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using MySqlConnector;
 using NTTLapso.Models.Login;
+using NTTLapso.Models.TextNotification;
 
 namespace NTTLapso.Repository
 {
@@ -11,6 +12,35 @@ namespace NTTLapso.Repository
 
         public MastersRepository() { 
             conn = new MySqlConnection(connectionString);
+        }
+
+        public async Task<TextNotificationResponse> SetTextNotification(TextNotificationRequest textNotificationData)
+        {
+            TextNotificationResponse resp = new TextNotificationResponse();
+            string SQLQuery = "INSERT INTO text_notification (`Subject`, `Content`) VALUES ('"+ textNotificationData.Subject +"', '"+textNotificationData.Content+"')";
+            resp = conn.Query(SQLQuery).FirstOrDefault();
+            return resp;
+        }
+        public async Task<TextNotificationDataResponse?> GetTextNotification(TextNotificationRequest textNotificationRequest)
+        {
+            TextNotificationDataResponse resp = new TextNotificationDataResponse();
+            string SQLQuery = "SELECT Id, `Subject`, `Content` FROM text_notification WHERE Id = '"+textNotificationRequest.IdNotification+"'";
+            resp = conn.Query(SQLQuery).FirstOrDefault();
+            return resp;
+        }
+        public async Task<TextNotificationResponse> UpdateTextNotification(TextNotificationRequest textNotificationData)
+        {
+            TextNotificationResponse resp = new TextNotificationResponse();
+            string SQLQuery = "UPDATE text_notification SET Subject = '"+textNotificationData.Subject+"', Content = '"+textNotificationData.Content+"' WHERE Id = '"+textNotificationData.IdNotification+"'";
+            resp = conn.Query(SQLQuery).FirstOrDefault();
+            return resp;
+        }
+        public async Task<TextNotificationResponse> DeleteTextNotification(TextNotificationRequest textNotificationData)
+        {
+            TextNotificationResponse resp = new TextNotificationResponse();
+            string SQLQuery = "DELETE FROM text_notification WHERE Id = '"+textNotificationData.IdNotification+"'";
+            resp = conn.Query(SQLQuery).FirstOrDefault();
+            return resp;
         }
     }
 }

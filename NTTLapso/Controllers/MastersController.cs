@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NTTLapso.Models.Login;
+using NTTLapso.Models.TextNotification;
 using NTTLapso.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -23,5 +24,110 @@ namespace NTTLapso.Controllers
             _config = config;
         }
 
+        [HttpPost]
+        [Route("SetTextNotification")]
+        public async Task<ActionResult> SetTextNotification(TextNotificationRequest request)
+        {
+            TextNotificationResponse textNotificationData = await _service.SetTextNotification(request);
+            TextNotificationResponse response = new TextNotificationResponse();
+            if (textNotificationData != null)
+            {
+                
+                return Ok(response);
+            }
+            else
+            {
+                
+                if (BadRequest().StatusCode == 500)
+                {
+                   
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                   
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else { return BadRequest(); }
+            }
+        }
+
+        [HttpGet]
+        [Route("GetTextNotification")]
+        public async Task<ActionResult> GetTextNotification([FromQuery]TextNotificationRequest request)
+        {
+            TextNotificationDataResponse textNotificationData = await _service.GetTextNotification(request);
+            if (textNotificationData != null)
+            {
+                return Ok(textNotificationData);
+            }
+            else
+            {
+                if(BadRequest().StatusCode == 500)
+                {
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else { return BadRequest(); }
+            }
+        }
+
+        [HttpPost]
+        [Route("UpdateTextNotification")]
+        public async Task<ActionResult> UpdateTextNotification(TextNotificationRequest request)
+        {
+            TextNotificationResponse textNotificationData = await _service.UpdateTextNotification(request);
+            TextNotificationResponse response = new TextNotificationResponse();
+            if (textNotificationData != null)
+            {
+                
+                return Ok(response);
+            }
+            else
+            {
+                
+                if (BadRequest().StatusCode == 500)
+                {
+                   
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else { return BadRequest(); }
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeleteTextNotification")]
+        public async Task<ActionResult> DeleteTextNotification(TextNotificationRequest request)
+        {
+            TextNotificationResponse textNotificationData = await _service.DeleteTextNotification(request);
+            TextNotificationResponse response = new TextNotificationResponse();
+            if (textNotificationData != null)
+            {
+                
+                return Ok(response);
+            }
+            else
+            {
+                
+                if (BadRequest().StatusCode == 500)
+                {
+                   
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                   
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else { return BadRequest(); }
+            }
+        }
     }
 }
