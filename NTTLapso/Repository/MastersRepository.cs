@@ -22,7 +22,7 @@ namespace NTTLapso.Repository
             return response;
         }
 
-        public async Task<PetitionStatusDataResponse> GetPetitionStatus(PetitionStatusRequest petitionStatusRequest)
+        public async Task<PetitionStatusDataResponse?> GetPetitionStatus(PetitionStatusRequest petitionStatusRequest)
         {
             PetitionStatusDataResponse response = new PetitionStatusDataResponse();
             string SQLQuery = "SELECT Id, `Value`, `IdTextNotification` FROM petition_state WHERE Id = " + petitionStatusRequest.Id;

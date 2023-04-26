@@ -58,7 +58,7 @@ namespace NTTLapso.Controllers
         {
 
             PetitionStatusDataResponse response = await _service.GetPetitionStatus(petitionStatusRequest);
-            if (response.Id != 0)
+            if (response != null)
             {
                 //    response.Value = request.Value;
                 //    response.Registration = request.Registration;
