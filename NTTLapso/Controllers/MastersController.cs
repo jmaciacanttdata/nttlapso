@@ -34,7 +34,7 @@ namespace NTTLapso.Controllers
             {
                 PermissionResponse response = new PermissionResponse();
                 response.IsRegistered = true;
-                return Ok(response + "completed successfully");
+                return Ok(response);
             }
             else
             {
@@ -66,7 +66,7 @@ namespace NTTLapso.Controllers
             //    response.Read = request.Read;
             //    response.Edit = request.Edit;
             //    response.Delete = request.Delete;
-                return Ok(response + "completed successfully");
+                return Ok(response);
             }
             else
             {
