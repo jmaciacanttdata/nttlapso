@@ -40,11 +40,11 @@ namespace NTTLapso.Controllers
             {
                 if (BadRequest().StatusCode == 500)
                 {
-                    return BadRequest("Fallo en la respuesta del servidor");
+                    return BadRequest("Server response failed");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
-                    return BadRequest("Compruebe que ha introducido todos los datos correctamente");
+                    return BadRequest("Check that the data entered is correct");
                 }
                 else
                 {
@@ -72,11 +72,11 @@ namespace NTTLapso.Controllers
             {
                 if(BadRequest().StatusCode == 500)
                 {
-                    return BadRequest("Fallo en la respuesta del servidor");
+                    return BadRequest("Server response failed");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
-                    return BadRequest("Compruebe que ha introducido todos los datos correctamente");
+                    return BadRequest("Check that the data entered is correct");
                 }
                 else
                 {
@@ -100,11 +100,11 @@ namespace NTTLapso.Controllers
             {
                 if (BadRequest().StatusCode == 500)
                 {
-                    return BadRequest("Fallo en la respuesta del servidor");
+                    return BadRequest("Server response failed");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
-                    return BadRequest("Compruebe que ha introducido todos los datos correctamente");
+                    return BadRequest("Check that the data entered is correct");
                 }
                 else
                 {
@@ -128,11 +128,11 @@ namespace NTTLapso.Controllers
             {
                 if (BadRequest().StatusCode == 500)
                 {
-                    return BadRequest("Fallo en la respuesta del servidor");
+                    return BadRequest("Server response failed");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
-                    return BadRequest("Compruebe que ha introducido todos los datos correctamente");
+                    return BadRequest("Check that the data entered is correct");
                 }
                 else
                 {
