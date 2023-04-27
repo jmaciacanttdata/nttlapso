@@ -13,7 +13,7 @@ namespace NTTLapso.Service
         private MastersRepository _repo = new MastersRepository();
         public MastersService() { }
 
-        public async Task<TextNotificationResponse> SetTextNotification(TextNotificationRequest textNotificationRequest)
+        public async Task<TextNotificationResponse> SetTextNotification(SetTextNotificationRequest textNotificationRequest)
         {
             return await _repo.SetTextNotification(textNotificationRequest);
         }

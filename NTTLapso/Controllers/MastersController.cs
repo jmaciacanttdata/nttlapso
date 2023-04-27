@@ -26,29 +26,27 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("SetTextNotification")]
-        public async Task<ActionResult> SetTextNotification(TextNotificationRequest request)
+        public async Task<ActionResult> SetTextNotification(SetTextNotificationRequest request)
         {
             TextNotificationResponse textNotificationData = await _service.SetTextNotification(request);
-            TextNotificationResponse response = new TextNotificationResponse();
-            if (textNotificationData != null)
+            if (textNotificationData.isSuccess == true)
             {
-                
-                return Ok(response);
+                return Ok("OKAY");
             }
             else
-            {
-                
+            {    
                 if (BadRequest().StatusCode == 500)
                 {
-                   
                     return BadRequest("The server is not responding, check your connection and try again");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
-                   
                     return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
                 }
-                else { return BadRequest(); }
+                else 
+                { 
+                    return BadRequest(); 
+                }
             }
         }
 
@@ -75,30 +73,29 @@ namespace NTTLapso.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("UpdateTextNotification")]
         public async Task<ActionResult> UpdateTextNotification(TextNotificationRequest request)
         {
             TextNotificationResponse textNotificationData = await _service.UpdateTextNotification(request);
-            TextNotificationResponse response = new TextNotificationResponse();
-            if (textNotificationData != null)
+            if (textNotificationData.isSuccess == true)
             {
-                
-                return Ok(response);
+                return Ok("OKAY");
             }
             else
             {
-                
                 if (BadRequest().StatusCode == 500)
                 {
-                   
                     return BadRequest("The server is not responding, check your connection and try again");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
                     return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
                 }
-                else { return BadRequest(); }
+                else
+                {
+                    return BadRequest();
+                }
             }
         }
 
@@ -107,26 +104,24 @@ namespace NTTLapso.Controllers
         public async Task<ActionResult> DeleteTextNotification(TextNotificationRequest request)
         {
             TextNotificationResponse textNotificationData = await _service.DeleteTextNotification(request);
-            TextNotificationResponse response = new TextNotificationResponse();
-            if (textNotificationData != null)
+            if (textNotificationData.isSuccess == true)
             {
-                
-                return Ok(response);
+                return Ok("OKAY");
             }
             else
             {
-                
                 if (BadRequest().StatusCode == 500)
                 {
-                   
                     return BadRequest("The server is not responding, check your connection and try again");
                 }
                 else if (BadRequest().StatusCode == 400)
                 {
-                   
                     return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
                 }
-                else { return BadRequest(); }
+                else
+                {
+                    return BadRequest();
+                }
             }
         }
     }
