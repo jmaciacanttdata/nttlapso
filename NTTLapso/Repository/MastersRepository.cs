@@ -14,14 +14,23 @@ namespace NTTLapso.Repository
         public MastersRepository() { 
             conn = new MySqlConnection(connectionString);
         }
-        public async Task<CategoriesResponse> SetCategories(CategoriesRequest categoriesData)
+        public async Task<CategoriesResponse> SetCategories(SetCategoriesRequest categoriesData)
         {
-            CategoriesResponse resp = new CategoriesResponse();
-            string SQLQuery = "INSERT INTO Category (Id, Value) VALUES ('" + categoriesData.IdCategory + "', "+ categoriesData.Value +")";
-            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
-            return resp;
+            string SQLQuery = "INSERT INTO Category (Value) VALUES ("+ categoriesData.Value +")";
+            int resp = conn.Execute(SQLQuery);
+            CategoriesResponse response = new CategoriesResponse();
+            if (resp > 0)
+            {
+                response.isSuccess = true;
+                return response;
+            }
+            else
+            {
+                response.isSuccess = false;
+                return response;
+            };
         }
-        public async Task<CategoriesDataResponse> GetCategories(CategoriesRequest categoriesRequest)
+        public async Task<CategoriesDataResponse?> GetCategories(CategoriesRequest categoriesRequest)
         {
             CategoriesDataResponse resp = new CategoriesDataResponse();
             string SQLQuery = "SELECT Id, Value FROM Category WHERE Id '" + categoriesRequest.IdCategory + "'";
@@ -30,17 +39,35 @@ namespace NTTLapso.Repository
         }
         public async Task<CategoriesResponse> UpdateCategories(CategoriesRequest categoriesData)
         {
-            CategoriesResponse resp = new CategoriesResponse();
             string SQLQuery = "UPDATE Category SET Value = `"+categoriesData.Value+ "` WHERE Id = "+categoriesData.IdCategory+"";
-            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
-            return resp;
+            int resp = conn.Execute(SQLQuery);
+            CategoriesResponse response = new CategoriesResponse();
+            if (resp > 0)
+            {
+                response.isSuccess = true;
+                return response;
+            }
+            else
+            {
+                response.isSuccess = false;
+                return response;
+            }; ;
         }
         public async Task<CategoriesResponse> DeleteCategories(CategoriesRequest categoriesRequest)
         {
-            CategoriesResponse resp = new CategoriesResponse();
             string SQLQuery = "DELETE FROM Category WHERE Id '" + categoriesRequest.IdCategory + "'";
-            resp = conn.Query<CategoriesResponse>(SQLQuery).FirstOrDefault();
-            return resp;
+            int resp = conn.Execute(SQLQuery);
+            CategoriesResponse response = new CategoriesResponse();
+            if (resp > 0)
+            {
+                response.isSuccess = true;
+                return response;
+            }
+            else
+            {
+                response.isSuccess = false;
+                return response;
+            };
         }
     }
 }

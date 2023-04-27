@@ -12,7 +12,7 @@ namespace NTTLapso.Service
     {
         private MastersRepository _repo = new MastersRepository();
         public MastersService() { }
-        public async Task<CategoriesResponse> SetCategories(CategoriesRequest categoriesRequest)
+        public async Task<CategoriesResponse> SetCategories(SetCategoriesRequest categoriesRequest)
         {
             return await _repo.SetCategories(categoriesRequest);
         }

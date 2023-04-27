@@ -26,35 +26,53 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("SetCategories")]
-        public async Task<ActionResult> SetCategories(CategoriesRequest request)
+        public async Task<ActionResult> SetCategories(SetCategoriesRequest request)
         {
             CategoriesResponse categoriesData = await _service.SetCategories(request);
-            CategoriesResponse response = new CategoriesResponse();
-            if (categoriesData != null)
+            if (categoriesData.isSuccess == true)
             {
-                response.isSuccess = true;
-                return Ok(response);
+                return Ok("OKAY");
             }
             else
             {
-                return BadRequest();
+                if (BadRequest().StatusCode == 500)
+                {
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("UpdateCategories")]
         public async Task<ActionResult> UpdateCategories(CategoriesRequest request)
         {
             CategoriesResponse categoriesData = await _service.UpdateCategories(request);
-            CategoriesResponse response = new CategoriesResponse();
-            if (categoriesData != null)
+            if (categoriesData.isSuccess == true)
             {
-                response.isSuccess = true;
-                return Ok(response);
+                return Ok("OKAY");
             }
             else
             {
-                return BadRequest();
+                if (BadRequest().StatusCode == 500)
+                {
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
         }
 
@@ -69,7 +87,18 @@ namespace NTTLapso.Controllers
             }
             else
             {
-                return BadRequest();
+                if (BadRequest().StatusCode == 500)
+                {
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
         }
 
@@ -78,15 +107,24 @@ namespace NTTLapso.Controllers
         public async Task<ActionResult> DeleteCategories(CategoriesRequest request)
         {
             CategoriesResponse categoriesData = await _service.DeleteCategories(request);
-            CategoriesResponse response = new CategoriesResponse();
-            if (categoriesData != null)
+            if (categoriesData.isSuccess == true)
             {
-                response.isSuccess = true;
-                return Ok(response);
+                return Ok("OKAY");
             }
             else
             {
-                return BadRequest();
+                if (BadRequest().StatusCode == 500)
+                {
+                    return BadRequest("The server is not responding, check your connection and try again");
+                }
+                else if (BadRequest().StatusCode == 400)
+                {
+                    return BadRequest("The data entered does not exist or is incorrect, please review it and try again");
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
         }
     }
