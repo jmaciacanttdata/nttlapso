@@ -30,11 +30,15 @@ namespace NTTLapso.Controllers
         public async Task<ActionResult> PermissionRegister(PermissionRequest request)
         {
             int permissionData = await _service.PermissionRegister(request);
-            if (permissionData != 0)
+            if (permissionData > 0)
             {
                 PermissionResponse response = new PermissionResponse();
                 response.IsRegistered = true;
                 return Ok(response);
+            }
+            else if (permissionData == -2)
+            {
+                return BadRequest("The entered data already exists");
             }
             else
             {

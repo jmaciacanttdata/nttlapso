@@ -15,10 +15,20 @@ namespace NTTLapso.Repository
         }
         public async Task<int> PermissionRegister(PermissionRequest permissionRequest)
         {
+            string checkIfExist = "SELECT `Value` FROM permission WHERE `Value` = '" + permissionRequest.Value + "';";
+            var value = conn.Query<PermissionDataResponse>(checkIfExist).FirstOrDefault();
             int response = 0;
             string SQLQuery = "INSERT INTO permission (`Value`, `Registration`, `Read`, `Edit`, `Delete`) VALUES ('" + permissionRequest.Value + "', '"+ permissionRequest.Registration + "', " + permissionRequest.Read + ", "+permissionRequest.Edit + ", "+permissionRequest.Delete +");";
-            response = conn.Execute(SQLQuery);
-            return response;
+            if (value == null)
+            {
+                response = conn.Execute(SQLQuery);
+                return response;
+            } else
+            {
+                response = -2;
+                return response;
+            }
+             ;
         }
 
         public async Task<PermissionDataResponse> GetPermission(PermissionRequest permissionRequest)
