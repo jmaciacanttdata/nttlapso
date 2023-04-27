@@ -29,11 +29,15 @@ namespace NTTLapso.Controllers
         public async Task<ActionResult> PetitionRegister(PetitionStatusSetRequest petitionStatusRequest)
         {
             int petitionData = await _service.PetitionRegister(petitionStatusRequest);
-            if (petitionData != 0)
+            if (petitionData > 0)
             {
                 PetitionStatusResponse response = new PetitionStatusResponse();
                 response.IsSucces = true;
                 return Ok(response);
+            }
+            else if (petitionData == -2)
+            {
+                return BadRequest("The entered data already exists");
             }
             else
             {

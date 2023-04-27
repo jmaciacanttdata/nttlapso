@@ -16,10 +16,19 @@ namespace NTTLapso.Repository
 
         public async Task<int> PetitionRegister(PetitionStatusSetRequest petitionStatusRequest)
         {
+            string checkIfExist = "SELECT `Value` FROM petition_state WHERE `Value` = '" + petitionStatusRequest.Value + "';";
+            var value = conn.Query<PetitionStatusDataResponse>(checkIfExist).FirstOrDefault();
             int response = 0;
             string SQLQuery = "INSERT INTO petition_state (`Value`, `IdTextNotification`) VALUES ('" + petitionStatusRequest.Value + "', '" + petitionStatusRequest.IdTextNotification + "');";
-            response = conn.Execute(SQLQuery);
-            return response;
+            if (value == null)
+            {
+                response = conn.Execute(SQLQuery);
+                return response;
+            } else
+            {
+                response = -2;
+                return response;
+            }
         }
 
         public async Task<PetitionStatusDataResponse?> GetPetitionStatus(PetitionStatusRequest petitionStatusRequest)
