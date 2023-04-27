@@ -26,7 +26,7 @@ namespace NTTLapso.Controllers
         }
 
         [HttpPost]
-        [Route("Permission")]
+        [Route("SetPermission")]
         public async Task<ActionResult> PermissionRegister(PermissionRequest request)
         {
             int permissionData = await _service.PermissionRegister(request);
@@ -86,7 +86,7 @@ namespace NTTLapso.Controllers
         }
 
         [HttpDelete]
-        [Route("Delete")]
+        [Route("DeletePermission")]
         public async Task<ActionResult> DeletePermission(PermissionRequest request)
         {
             int permissionData = await _service.DeletePermission(request);
@@ -114,7 +114,7 @@ namespace NTTLapso.Controllers
         }
 
         [HttpPut]
-        [Route("Update")]
+        [Route("UpdatePermission")]
         public async Task<ActionResult> UpdatePermission(PermissionRequest request)
         {
             int permissionData = await _service.UpdatePermission(request);
