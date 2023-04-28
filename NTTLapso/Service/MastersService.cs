@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Login;
+using NTTLapso.Models.UserSchedule;
 using NTTLapso.Models.RolPermission;
 using NTTLapso.Repository;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,6 +16,24 @@ namespace NTTLapso.Service
         private MastersRepository _repo = new MastersRepository();
         public MastersService() { }
 
+        public Task<int> SetUserSchedule(UserScheduleSetRequest userScheduleRequest)
+        {
+            return _repo.SetUserSchedule(userScheduleRequest);
+        }
+
+        public Task<UserScheduleDataResponse> GetUserSchedule(UserScheduleRequest userScheduleRequest)
+        {
+            return _repo.GetUserSchedule(userScheduleRequest);
+        }
+
+        public Task<int> DeleteUserSchedule(UserScheduleRequest userScheduleRequest)
+        {
+            return _repo.DeleteUserSchedule(userScheduleRequest);
+        }
+
+        public Task<int> UpdateUserSchedule(UserScheduleRequest userScheduleRequest)
+        {
+            return _repo.UpdateUserSchedule(userScheduleRequest);
         // Register a new rol with it's permissions.
         internal async Task<ErrorResponse> SetRolPermission(SetRolPermissionRequest request)
         {
