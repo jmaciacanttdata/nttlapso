@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NTTLapso.Models.Category;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Login;
-using NTTLapso.Models.PetitionStatus;
 using NTTLapso.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -14,13 +14,13 @@ using System.Text;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("PetitionState")]
-    public class PetitionStateController : ControllerBase
+    [Route("Category")]
+    public class CategoryController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<PetitionStateController> _logger;
-        private PetitionStateService _service = new PetitionStateService();
-        public PetitionStateController(ILogger<PetitionStateController> logger, IConfiguration config)
+        private readonly ILogger<CategoryController> _logger;
+        private CategoryService _service = new CategoryService();
+        public CategoryController(ILogger<CategoryController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
@@ -30,8 +30,8 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("List")]
         [AllowAnonymous]
-        public async Task<ListPetitionStatusResponse> List(IdValue? request) {
-            ListPetitionStatusResponse response = new ListPetitionStatusResponse();
+        public async Task<ListCategoryResponse> List(IdValue? request) {
+            ListCategoryResponse response = new ListCategoryResponse();
             List<IdValue> responseList = new List<IdValue>();
             try
             {
@@ -53,13 +53,13 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
-        public async Task<PeticionStatusResponse> Create(CreatePetitionStatusRequest request)
+        public async Task<CategoryResponse> Create(string value)
         {
-            PeticionStatusResponse response = new PeticionStatusResponse();
+            CategoryResponse response = new CategoryResponse();
 
             try
             {
-                await _service.Create(request);
+                await _service.Create(value);
                 response.IsSuccess = true;
             }catch(Exception ex)
             {
@@ -75,9 +75,9 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Edit")]
         [AllowAnonymous]
-        public async Task<PeticionStatusResponse> Edit(EditPetitionStatusRequest request)
+        public async Task<CategoryResponse> Edit(IdValue request)
         {
-            PeticionStatusResponse response = new PeticionStatusResponse();
+            CategoryResponse response = new CategoryResponse();
 
             try
             {
@@ -98,9 +98,9 @@ namespace NTTLapso.Controllers
         [HttpGet]
         [Route("Delete")]
         [AllowAnonymous]
-        public async Task<PeticionStatusResponse> Delete(int Id)
+        public async Task<CategoryResponse> Delete(int Id)
         {
-            PeticionStatusResponse response = new PeticionStatusResponse();
+            CategoryResponse response = new CategoryResponse();
 
             try
             {
