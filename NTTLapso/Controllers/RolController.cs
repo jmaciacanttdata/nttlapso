@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NTTLapso.Models.Category;
 using NTTLapso.Models.General;
-using NTTLapso.Models.Category;
 using NTTLapso.Models.Login;
+using NTTLapso.Models.Rol;
 using NTTLapso.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -16,12 +16,12 @@ namespace NTTLapso.Controllers
 {
     [ApiController]
     [Route("Category")]
-    public class CategoryController : ControllerBase
+    public class RolController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<CategoryController> _logger;
+        private readonly ILogger<RolController> _logger;
         private CategoryService _service = new CategoryService();
-        public CategoryController(ILogger<CategoryController> logger, IConfiguration config)
+        public RolController(ILogger<RolController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
@@ -31,8 +31,8 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("List")]
         [AllowAnonymous]
-        public async Task<ListCategoryResponse> List(IdValue? request) {
-            ListCategoryResponse response = new ListCategoryResponse();
+        public async Task<ListRolResponse> List(IdValue? request) {
+            ListRolResponse response = new ListRolResponse();
             List<IdValue> responseList = new List<IdValue>();
             try
             {
@@ -54,9 +54,9 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
-        public async Task<CategoryResponse> Create(string value)
+        public async Task<RolResponse> Create(string value)
         {
-            CategoryResponse response = new CategoryResponse();
+            RolResponse response = new RolResponse();
 
             try
             {
@@ -76,9 +76,9 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Edit")]
         [AllowAnonymous]
-        public async Task<CategoryResponse> Edit(IdValue request)
+        public async Task<RolResponse> Edit(IdValue request)
         {
-            CategoryResponse response = new CategoryResponse();
+            RolResponse response = new RolResponse();
 
             try
             {
@@ -99,9 +99,9 @@ namespace NTTLapso.Controllers
         [HttpGet]
         [Route("Delete")]
         [AllowAnonymous]
-        public async Task<CategoryResponse> Delete(int Id)
+        public async Task<RolResponse> Delete(int Id)
         {
-            CategoryResponse response = new CategoryResponse();
+            RolResponse response = new RolResponse();
 
             try
             {
