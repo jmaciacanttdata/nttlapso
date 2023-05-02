@@ -1,23 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
+    "C:\\Users\\jmaciaca\\Desktop\\Proyectos\\NTTLapso\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
+    "C:\\Users\\jmaciaca\\Desktop\\Proyectos\\NTTLapso\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
+        "projectUniqueName": "C:\\Users\\jmaciaca\\Desktop\\Proyectos\\NTTLapso\\nttlapso\\NTTLapso\\NTTLapso.csproj",
         "projectName": "NTTLapso",
-        "projectPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
-        "packagesPath": "C:\\Users\\jmcjo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\Formaciones\\WebAPI\\Project\\nttlapso\\NTTLapso\\obj\\",
+        "projectPath": "C:\\Users\\jmaciaca\\Desktop\\Proyectos\\NTTLapso\\nttlapso\\NTTLapso\\NTTLapso.csproj",
+        "packagesPath": "C:\\Users\\jmaciaca\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\jmaciaca\\Desktop\\Proyectos\\NTTLapso\\nttlapso\\NTTLapso\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\jmcjo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jmaciaca\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -48,6 +49,10 @@
             "Dapper": {
               "target": "Package",
               "version": "[2.0.123, )"
+            },
+            "Microsoft.AspNet.Mvc": {
+              "target": "Package",
+              "version": "[5.2.9, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
@@ -81,7 +86,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }
