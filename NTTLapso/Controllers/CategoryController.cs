@@ -54,7 +54,7 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
-        public async Task<CategoryResponse> Create(string value)
+        public async Task<CategoryResponse> Create([FromBody] string value)
         {
             CategoryResponse response = new CategoryResponse();
 
