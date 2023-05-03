@@ -1,39 +1,33 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using NTTLapso.Models.Category;
+﻿using Microsoft.AspNetCore.Mvc;
 using NTTLapso.Models.General;
-using NTTLapso.Models.Login;
 using NTTLapso.Models.Rol;
 using NTTLapso.Service;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using NTTLapso.Models.PetitionType;
 
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Rol")]
-    public class RolController : ControllerBase
+    [Route("PetitionType")]
+    public class PetitionTypeController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<RolController> _logger;
-        private RolService _service = new RolService();
-        public RolController(ILogger<RolController> logger, IConfiguration config)
+        private readonly ILogger<PetitionTypeController> _logger;
+        private PetitionTypeService _service = new PetitionTypeService();
+        public PetitionTypeController(ILogger<PetitionTypeController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
         }
 
-
+        // Get petition type list.
         [HttpPost]
         [Route("List")]
         [AllowAnonymous]
-        public async Task<ListRolResponse> List(IdValue? request) {
-            ListRolResponse response = new ListRolResponse();
-            List<IdValue> responseList = new List<IdValue>();
+        public async Task<ListPetitionTypeResponse> List(PetitionTypeRequest? request)
+        {
+            ListPetitionTypeResponse response = new ListPetitionTypeResponse();
+            List<PetitionTypeDataResponse> responseList = new List<PetitionTypeDataResponse>();
             try
             {
                 responseList = await _service.List(request);
@@ -51,18 +45,20 @@ namespace NTTLapso.Controllers
             return response;
         }
 
+        // Create new petition type.
         [HttpPost]
         [Route("Create")]
         [AllowAnonymous]
-        public async Task<RolResponse> Create(string value)
+        public async Task<PetitionTypeResponse> Create(string value, bool selectable)
         {
-            RolResponse response = new RolResponse();
+            PetitionTypeResponse response = new PetitionTypeResponse();
 
             try
             {
-                await _service.Create(value);
+                await _service.Create(value, selectable);
                 response.IsSuccess = true;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Error _error = new Error(ex);
                 response.IsSuccess = false;
@@ -73,12 +69,13 @@ namespace NTTLapso.Controllers
             return response;
         }
 
+        // Edit a petition type.
         [HttpPost]
         [Route("Edit")]
         [AllowAnonymous]
-        public async Task<RolResponse> Edit(IdValue request)
+        public async Task<PetitionTypeResponse> Edit(PetitionTypeRequest request)
         {
-            RolResponse response = new RolResponse();
+            PetitionTypeResponse response = new PetitionTypeResponse();
 
             try
             {
@@ -96,12 +93,13 @@ namespace NTTLapso.Controllers
             return response;
         }
 
+        // Delete a petition type
         [HttpGet]
         [Route("Delete")]
         [AllowAnonymous]
-        public async Task<RolResponse> Delete(int Id)
+        public async Task<PetitionTypeResponse> Delete(int Id)
         {
-            RolResponse response = new RolResponse();
+            PetitionTypeResponse response = new PetitionTypeResponse();
 
             try
             {
