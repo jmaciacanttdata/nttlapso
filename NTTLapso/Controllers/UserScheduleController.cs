@@ -22,7 +22,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListUserScheduleResponse> List(IdValue? request)
         {
             ListUserScheduleResponse response = new ListUserScheduleResponse();
@@ -46,15 +46,25 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<UserScheduleResponse> Create(string value)
         {
             UserScheduleResponse response = new UserScheduleResponse();
 
             try
             {
-                await _service.Create(value);
-                response.IsSuccess = true;
+                if(value != null && value != "")
+                {
+                    await _service.Create(value);
+                    response.IsSuccess = true;
+                }
+                else
+                {
+                    Error _error = new Error("The value field cant be empty",null);
+                    response.IsSuccess = false;
+                    response.Error = _error;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -69,7 +79,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<UserScheduleResponse> Edit(IdValue request)
         {
             UserScheduleResponse response = new UserScheduleResponse();
@@ -92,7 +102,7 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<UserScheduleResponse> Delete(int Id)
         {
             UserScheduleResponse response = new UserScheduleResponse();

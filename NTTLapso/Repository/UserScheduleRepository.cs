@@ -38,16 +38,8 @@ namespace NTTLapso.Repository
 
         public async Task Create(string value)
         {
-            if(value == null || value == "") 
-            {
-                throw new Exception(message: " The body must have content to create a new record ");
-            }
-            else
-            {
                 string SQLQueryGeneral = String.Format("INSERT INTO user_schedule(Value) VALUES('{0}')", value);
                 conn.Query(SQLQueryGeneral);
-            }
-
 
         }
 
