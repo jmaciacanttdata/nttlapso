@@ -47,22 +47,31 @@ namespace NTTLapso.Repository
 
         public async Task Edit(EditPermissionRequest request)
         {
+            string SQLSet = "";
             string SQLQueryPartial = "UPDATE permission SET";
             if (request.Value != null && request.Value != "")
-                SQLQueryPartial += " Value='{1}'";
+                SQLSet += " Value='{1}'";
 
             if (request.Registration != null)
-                SQLQueryPartial += ", `Registration`={2}";
+                SQLSet += ", `Registration`={2}";
 
             if (request.Read != null)
-                SQLQueryPartial += ", `Read`={3}";
+                SQLSet += ", `Read`={3}";
 
             if (request.Edit != null)
-                SQLQueryPartial += ", `Edit`={4}";
+                SQLSet += ", `Edit`={4}";
 
             if (request.Delete != null)
-                SQLQueryPartial += ", `Delete`={5}";
+                SQLSet += ", `Delete`={5}";
 
+            if (SQLSet != "")
+            {
+                char[] stringArray = SQLSet.ToCharArray();
+                if(stringArray[0] == ',' )
+                    SQLSet = SQLSet.Substring(1, SQLSet.Length - 1);
+            }
+
+            SQLQueryPartial += SQLSet;
             SQLQueryPartial += " WHERE Id={0};";
 
             string SQLQueryGeneral = String.Format(SQLQueryPartial, request.Id, request.Value, request.Registration, request.Read, request.Edit, request.Delete);
