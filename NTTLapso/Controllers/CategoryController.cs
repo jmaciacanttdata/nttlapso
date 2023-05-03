@@ -60,8 +60,16 @@ namespace NTTLapso.Controllers
 
             try
             {
-                await _service.Create(value);
-                response.IsSuccess = true;
+                if (value != null && value != "")
+                {
+                    await _service.Create(value);
+                    response.IsSuccess = true;
+                }
+                else {
+                    Error _error = new Error("El valor de categoria no puede ser nulo",null);
+                    response.IsSuccess = false;
+                    response.Error = _error;
+                }
             }catch(Exception ex)
             {
                 Error _error = new Error(ex);
