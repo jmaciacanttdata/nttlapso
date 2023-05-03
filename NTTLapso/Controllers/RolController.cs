@@ -20,7 +20,7 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<RolController> _logger;
-        private CategoryService _service = new CategoryService();
+        private RolService _service = new RolService();
         public RolController(ILogger<RolController> logger, IConfiguration config)
         {
             _logger = logger;
