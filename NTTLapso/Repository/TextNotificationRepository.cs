@@ -37,7 +37,7 @@ namespace NTTLapso.Repository
 
         public async Task Create(TextNotificationRequest request)
         {
-            string SQLQueryGeneral = String.Format("INSERT INTO text_notification(Subject, Content) VALUES({0},{1})", request.Subject, request.Content);
+            string SQLQueryGeneral = String.Format("INSERT INTO text_notification(Subject, Content) VALUES('{0}', '{1}')", request.Subject, request.Content);
             conn.Query(SQLQueryGeneral);
 
         }
