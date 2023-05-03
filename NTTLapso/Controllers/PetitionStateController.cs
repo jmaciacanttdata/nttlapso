@@ -22,7 +22,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListPetitionStatusResponse> List(IdValue? request) {
             ListPetitionStatusResponse response = new ListPetitionStatusResponse();
             List<IdValue> responseList = new List<IdValue>();
@@ -45,7 +45,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PeticionStatusResponse> Create(CreatePetitionStatusRequest request)
         {
             PeticionStatusResponse response = new PeticionStatusResponse();
@@ -67,7 +67,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PeticionStatusResponse> Edit(EditPetitionStatusRequest request)
         {
             PeticionStatusResponse response = new PeticionStatusResponse();
@@ -90,7 +90,7 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PeticionStatusResponse> Delete(int Id)
         {
             PeticionStatusResponse response = new PeticionStatusResponse();

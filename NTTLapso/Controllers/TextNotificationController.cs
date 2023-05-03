@@ -30,7 +30,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListTextNotificationResponse> List(IdTextNotificationRequest? request)
         {
             ListTextNotificationResponse response = new ListTextNotificationResponse();
@@ -54,7 +54,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<TextNotificationResponse> Create(TextNotificationRequest request)
         {
             TextNotificationResponse response = new TextNotificationResponse();
@@ -77,7 +77,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<TextNotificationResponse> Edit(IdTextNotificationRequest request)
         {
             TextNotificationResponse response = new TextNotificationResponse();
@@ -100,7 +100,7 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<TextNotificationResponse> Delete(int Id)
         {
             TextNotificationResponse response = new TextNotificationResponse();

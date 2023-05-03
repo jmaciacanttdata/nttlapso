@@ -30,7 +30,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListCategoryResponse> List(IdValue? request) {
             ListCategoryResponse response = new ListCategoryResponse();
             List<IdValue> responseList = new List<IdValue>();
@@ -53,7 +53,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<CategoryResponse> Create([FromBody] string value)
         {
             CategoryResponse response = new CategoryResponse();
@@ -83,7 +83,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<CategoryResponse> Edit(IdValue request)
         {
             CategoryResponse response = new CategoryResponse();
@@ -106,7 +106,7 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<CategoryResponse> Delete(int Id)
         {
             CategoryResponse response = new CategoryResponse();

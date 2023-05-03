@@ -30,7 +30,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListRolResponse> List(IdValue? request) {
             ListRolResponse response = new ListRolResponse();
             List<IdValue> responseList = new List<IdValue>();
@@ -53,7 +53,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<RolResponse> Create(string value)
         {
             RolResponse response = new RolResponse();
@@ -75,7 +75,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<RolResponse> Edit(IdValue request)
         {
             RolResponse response = new RolResponse();
@@ -98,7 +98,7 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<RolResponse> Delete(int Id)
         {
             RolResponse response = new RolResponse();
