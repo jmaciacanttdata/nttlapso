@@ -20,8 +20,8 @@ namespace NTTLapso.Controllers
         }
 
         [HttpPost]
-        [Route("Permission")]
-        [AllowAnonymous]
+        [Route("List")]
+        [Authorize]
         public async Task<ListPermissions> List(PermissionDataResponse? request)
         {
             ListPermissions response = new ListPermissions();
@@ -45,15 +45,24 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PermissionResponse> Create(CreatePermissionRequest request)
         {
             PermissionResponse response = new PermissionResponse();
 
             try
             {
-                await _service.Create(request);
-                response.IsSuccess = true;
+                if(request.Value != null && request.Value != "")
+                {
+                    await _service.Create(request);
+                    response.IsSuccess = true;
+                }
+                else
+                {
+                    Error _error = new Error(" The Value field cant be empty ",null);
+                    response.IsSuccess = false;
+                    response.Error = _error;
+                }
             }
             catch (Exception ex)
             {
@@ -68,7 +77,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PermissionResponse> Edit(EditPermissionRequest request)
         {
             PermissionResponse response = new PermissionResponse();
@@ -91,7 +100,7 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PermissionResponse> Delete(int Id)
         {
             PermissionResponse response = new PermissionResponse();
