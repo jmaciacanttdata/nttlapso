@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using MySqlConnector;
 using NTTLapso.Models.General;
+using NTTLapso.Models.Permissions;
 using NTTLapso.Models.RolPermission;
 
 namespace NTTLapso.Repository
