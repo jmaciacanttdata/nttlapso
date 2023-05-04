@@ -58,15 +58,8 @@ namespace NTTLapso.Repository
 
             if (query.Count() == 0) // If doesn´t exist we insert petition type.
             {
-                if (!value.IsEmpty()) // Check if value is empty string.
-                {
-                    string SQLQueryGeneral = String.Format("INSERT INTO petition_type(Value, Selectable) VALUES('{0}', {1})", value, selectable);
-                    await conn.QueryAsync(SQLQueryGeneral);
-                }
-                else
-                {
-                    throw new Exception(message: $"The value can't be empty");
-                }
+                string SQLQueryGeneral = String.Format("INSERT INTO petition_type(Value, Selectable) VALUES('{0}', {1})", value, selectable);
+                await conn.QueryAsync(SQLQueryGeneral);
             }
             else
             {
@@ -82,15 +75,8 @@ namespace NTTLapso.Repository
 
             if (query.Count() != 0) // If exists we update petition type.
             {
-                if (!request.Value.IsEmpty() && request.Selectable.HasValue) // Check if value of request is empty string.
-                {
-                    string SQLQueryGeneral = String.Format("UPDATE petition_type SET Value='{1}', Selectable={2} WHERE Id={0}", request.Id, request.Value, request.Selectable);
-                    await conn.QueryAsync(SQLQueryGeneral);
-                }
-                else
-                {
-                    throw new Exception(message: $"The value / selectable fields can't be empty or null");
-                }
+                string SQLQueryGeneral = String.Format("UPDATE petition_type SET Value='{1}', Selectable={2} WHERE Id={0}", request.Id, request.Value, request.Selectable);
+                await conn.QueryAsync(SQLQueryGeneral);
             }
             else
             {

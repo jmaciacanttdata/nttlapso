@@ -4,6 +4,7 @@ using NTTLapso.Models.Rol;
 using NTTLapso.Service;
 using Microsoft.AspNetCore.Authorization;
 using NTTLapso.Models.PetitionType;
+using System.Web.WebPages;
 
 namespace NTTLapso.Controllers
 {
@@ -23,7 +24,7 @@ namespace NTTLapso.Controllers
         // Get petition type list.
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListPetitionTypeResponse> List(PetitionTypeRequest? request)
         {
             ListPetitionTypeResponse response = new ListPetitionTypeResponse();
@@ -48,22 +49,28 @@ namespace NTTLapso.Controllers
         // Create new petition type.
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PetitionTypeResponse> Create(string value, bool selectable)
         {
             PetitionTypeResponse response = new PetitionTypeResponse();
 
             try
             {
-                await _service.Create(value, selectable);
-                response.IsSuccess = true;
+                if (!value.IsEmpty()) // Check if value is empty string.
+                {
+                    await _service.Create(value, selectable);
+                    response.IsSuccess = true;
+                }
+                else
+                {
+                    Error _error = new Error("The value / selectable fields can't be empty or null", null);
+                }
             }
             catch (Exception ex)
             {
                 Error _error = new Error(ex);
                 response.IsSuccess = false;
                 response.Error = _error;
-
             }
 
             return response;
@@ -72,15 +79,22 @@ namespace NTTLapso.Controllers
         // Edit a petition type.
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PetitionTypeResponse> Edit(PetitionTypeRequest request)
         {
             PetitionTypeResponse response = new PetitionTypeResponse();
 
             try
             {
-                await _service.Edit(request);
-                response.IsSuccess = true;
+                if (!request.Value.IsEmpty() && request.Selectable.HasValue) // Check if value is empty string.
+                {
+                    await _service.Edit(request);
+                    response.IsSuccess = true;
+                }
+                else
+                {
+                    Error _error = new Error("The value / selectable fields can't be empty or null", null);
+                }
             }
             catch (Exception ex)
             {
@@ -96,7 +110,7 @@ namespace NTTLapso.Controllers
         // Delete a petition type
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<PetitionTypeResponse> Delete(int Id)
         {
             PetitionTypeResponse response = new PetitionTypeResponse();
