@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Process.UserCharge;
-using NTTLapso.Models.Rol;
 using NTTLapso.Service;
 
 namespace NTTLapso.Controllers

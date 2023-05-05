@@ -1,5 +1,6 @@
 ﻿using NTTLapso.Models.General;
 using NTTLapso.Models.Process.UserCharge;
+using NTTLapso.Models.Users;
 using NTTLapso.Repository;
 
 namespace NTTLapso.Service
@@ -14,7 +15,8 @@ namespace NTTLapso.Service
         {
             int compensatedDays = _config.GetValue<int>("UserCharge:CompensatedDays");
             int vacationDays = _config.GetValue<int>("UserCharge:VacationDays");
-            List<UserDataResponse> users = (new UserController).List();
+            UserRepository userRepository = new UserRepository();
+            List<UserDataResponse> users = userRepository.List(new UserDataResponse { }).Result;
             int year = DateTime.Now.Year;
 
             if(users.Count > 0) // Check if users in data base.
@@ -64,12 +66,12 @@ namespace NTTLapso.Service
                 if (schedule.Value == "Extendido")
                 {
                     request.TotalCompensatedDays = CheckDaysNewUser(newUserChargeRequest.RegisterDate, compensatedDays);
-                    await _repo.SetUsersCharge(request);
+                    await _repo.SetNewUserCharge(request);
                 }
                 else if (schedule.Value == "General")
                 {
                     request.TotalCompensatedDays = 0;
-                    await _repo.SetUsersCharge(request);
+                    await _repo.SetNewUserCharge(request);
                 }
             }
             else
@@ -81,19 +83,25 @@ namespace NTTLapso.Service
         // Method that checks how many days (Vacation, compensated ...) you get for the remainder of the year.
         private int CheckDaysNewUser(DateTime registerDate, int totalDays)
         {
-            // Get remaining days of year.
-            DateTime endOfYear = new DateTime(registerDate.Year, 12, 31);
-            TimeSpan remainingDays = endOfYear - registerDate;
-            int daysLeft = remainingDays.Days;
+            if (registerDate.Year == DateTime.Now.Year ) //  Check if register date is fom current year.
+            {
+                // Get remaining days of year.
+                DateTime endOfYear = new DateTime(registerDate.Year, 12, 31);
+                TimeSpan remainingDays = endOfYear - registerDate;
+                int daysLeft = remainingDays.Days;
 
-            // Divide totalDays by months / days of month.
-            decimal totalDaysPerDay = totalDays / 12 / 30;
-            int totalDaysPerDayRounded = (int)Math.Round(totalDaysPerDay);
+                // Divide totalDays by months / days of month.
+                decimal totalDaysPerDay = ((decimal)totalDays / 12) / 30;
 
-            // Days for the remaining of the year.
-            int result = totalDaysPerDayRounded* daysLeft;
+                // Days for the remaining of the year.
+                int result = (int)Math.Round(totalDaysPerDay * daysLeft);
 
-            return result;
+                return result;
+            }
+            else
+            {
+                throw new Exception(message: "The date has to match current year");
+            }
         }
     }
 }
