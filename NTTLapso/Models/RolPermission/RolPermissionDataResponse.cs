@@ -1,4 +1,6 @@
-﻿using NTTLapso.Models.Permissions;
+﻿
+
+using NTTLapso.Models.Permissions;
 
 namespace NTTLapso.Models.RolPermission
 {
