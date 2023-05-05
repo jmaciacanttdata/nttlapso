@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\NTT Lapso\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
+    "C:\\Users\\amontefe\\Documents\\GitHub\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\NTT Lapso\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
+    "C:\\Users\\amontefe\\Documents\\GitHub\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\NTT Lapso\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
+        "projectUniqueName": "C:\\Users\\amontefe\\Documents\\GitHub\\nttlapso\\NTTLapso\\NTTLapso.csproj",
         "projectName": "NTTLapso",
-        "projectPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\NTT Lapso\\Project\\nttlapso\\NTTLapso\\NTTLapso.csproj",
-        "packagesPath": "C:\\Users\\jmcjo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jmcjo\\Desktop\\Diseños\\NTT Data\\NTT Lapso\\Project\\nttlapso\\NTTLapso\\obj\\",
+        "projectPath": "C:\\Users\\amontefe\\Documents\\GitHub\\nttlapso\\NTTLapso\\NTTLapso.csproj",
+        "packagesPath": "C:\\Users\\amontefe\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\amontefe\\Documents\\GitHub\\nttlapso\\NTTLapso\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\jmcjo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\amontefe\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
