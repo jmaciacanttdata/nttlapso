@@ -1,8 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using NTTLapso.Models.General;
 using NTTLapso.Models.PetitionStatus;
 using NTTLapso.Service;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NTTLapso.Controllers
 {
@@ -33,7 +38,7 @@ namespace NTTLapso.Controllers
                 response.Data = responseList;
                 response.Error = null;
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 Error _error = new Error(ex);
                 response.IsSuccess = false;
