@@ -1,15 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using NTTLapso.Models.General;
-using NTTLapso.Models.Login;
 using NTTLapso.Models.PetitionStatus;
 using NTTLapso.Service;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
 
 namespace NTTLapso.Controllers
 {
@@ -29,8 +22,8 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
-        public async Task<ListPetitionStatusResponse> ListPetitionStatus(IdValue? request) {
+        [Authorize]
+        public async Task<ListPetitionStatusResponse> List(IdValue? request) {
             ListPetitionStatusResponse response = new ListPetitionStatusResponse();
             List<IdValue> responseList = new List<IdValue>();
             try
@@ -52,8 +45,8 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
-        public async Task<PeticionStatusResponse> CreatePetitionStatus(CreatePetitionStatusRequest request)
+        [Authorize]
+        public async Task<PeticionStatusResponse> Create(CreatePetitionStatusRequest request)
         {
             PeticionStatusResponse response = new PeticionStatusResponse();
 
@@ -74,8 +67,8 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
-        public async Task<PeticionStatusResponse> EditPetitionStatus(EditPetitionStatusRequest request)
+        [Authorize]
+        public async Task<PeticionStatusResponse> Edit(EditPetitionStatusRequest request)
         {
             PeticionStatusResponse response = new PeticionStatusResponse();
 
@@ -97,8 +90,8 @@ namespace NTTLapso.Controllers
 
         [HttpGet]
         [Route("Delete")]
-        [AllowAnonymous]
-        public async Task<PeticionStatusResponse> DeletePetitionStatus(int Id)
+        [Authorize]
+        public async Task<PeticionStatusResponse> Delete(int Id)
         {
             PeticionStatusResponse response = new PeticionStatusResponse();
 
