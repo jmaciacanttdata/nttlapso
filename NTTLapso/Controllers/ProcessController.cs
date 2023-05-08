@@ -12,11 +12,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<ProcessController> _logger;
-        private ProcessService _service = new ProcessService();
+        private ProcessService _service;
         public ProcessController(ILogger<ProcessController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new ProcessService(_config);
         }
 
         // Method for inserting user's vacation and compensated days at beginning of year.
@@ -29,7 +30,7 @@ namespace NTTLapso.Controllers
 
             try
             {
-                await _service.SetUsersCharge(this._config);
+                await _service.SetUsersCharge();
                 response.IsSuccess = true;
             }
             catch (Exception ex)
@@ -53,7 +54,7 @@ namespace NTTLapso.Controllers
 
             try
             {
-                await _service.SetNewUserCharge(this._config, newUserChargeRequest);
+                await _service.SetNewUserCharge(newUserChargeRequest);
                 response.IsSuccess = true;
             }
             catch (Exception ex)

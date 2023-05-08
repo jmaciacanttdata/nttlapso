@@ -4,6 +4,7 @@ using MySqlConnector;
 using NTTLapso.Models.Permissions;
 using NTTLapso.Support_methods;
 using NTTLapso.Models.Users;
+using NTTLapso.Models.Process.UserCharge;
 
 namespace NTTLapso.Repository
 {
@@ -51,13 +52,23 @@ namespace NTTLapso.Repository
             }
             return response;
         }
-        public async Task Create(CreateUserRequest request)
+        public async Task<NewUserChargeRequest> Create(CreateUserRequest request)
         {
             string SQLQueryHeaders = "INSERT INTO user(`Name`, `Surnames`, `Email`, `IdCategory`, `IdUserSchedule`, `UserName`, `UserPass`, `Active`) ";
             string SQLQueryValues = "VALUES('{0}', '{1}', '{2}', {3}, {4}, '{5}', MD5('{6}'), {7})";
 
             string SQLQueryGeneral = String.Format((SQLQueryHeaders + SQLQueryValues), request.Name, request.Surnames, request.Email, request.IdCategory, request.IdUserSchedule, request.UserName, request.UserPass, request.Active);
             conn.Query(SQLQueryGeneral);
+
+            string SQLQuerGetId = "SELECT Id FROM user ORDER BY Id DESC LIMIT 1;";
+            int idUser = conn.Query<int>(SQLQuerGetId).FirstOrDefault();
+
+            NewUserChargeRequest response = new NewUserChargeRequest();
+            response.IdUser = idUser;
+            response.IdSchedule = request.IdUserSchedule;
+            response.RegisterDate = DateTime.Now;
+
+            return response;
 
         }
 
