@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NTTLapso.Models.General;
-using NTTLapso.Models.Permissions;
 using NTTLapso.Models.Process.UserCharge;
 using NTTLapso.Models.Users;
 using NTTLapso.Service;
@@ -16,7 +15,7 @@ namespace NTTLapso.Controllers
         private readonly IConfiguration _config;
         private readonly ILogger<UserController> _logger;
         private UserService _service = new UserService();
-        private ProcessService _serviceProcess;
+        private ProcessService _serviceProcess; 
         public UserController(ILogger<UserController> logger, IConfiguration config)
         {
             _logger = logger;
@@ -57,8 +56,8 @@ namespace NTTLapso.Controllers
 
             try
             {
-                
-                    await _service.Create(request);
+
+                    userCharge = await _service.Create(request);
                     await _serviceProcess.SetNewUserCharge(userCharge);
                     response.IsSuccess = true;
                 
