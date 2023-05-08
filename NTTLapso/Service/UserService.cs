@@ -1,4 +1,5 @@
 ﻿using NTTLapso.Models.Permissions;
+using NTTLapso.Models.Process.UserCharge;
 using NTTLapso.Models.Users;
 using NTTLapso.Repository;
 
@@ -13,9 +14,9 @@ namespace NTTLapso.Service
         {
             return await _repo.List(request);
         }
-        public async Task Create(CreateUserRequest request)
+        public async Task<NewUserChargeRequest> Create(CreateUserRequest request)
         {
-            await _repo.Create(request);
+            return await _repo.Create(request);
         }
         public async Task Edit(EditUserRequest request)
         {

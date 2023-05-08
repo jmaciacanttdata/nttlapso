@@ -8,10 +8,13 @@ namespace NTTLapso.Service
     public class ProcessService
     {
         private ProcessRepository _repo = new ProcessRepository();
-        public ProcessService() { }
+        private IConfiguration _config;
+        public ProcessService(IConfiguration conf) { 
+            this._config = conf;
+        }
 
         // Method for inserting user's vacation and compensated days at beginning of year.
-        public async Task SetUsersCharge(IConfiguration _config)
+        public async Task SetUsersCharge()
         {
             int compensatedDays = _config.GetValue<int>("UserCharge:CompensatedDays");
             int vacationDays = _config.GetValue<int>("UserCharge:VacationDays");
@@ -47,7 +50,7 @@ namespace NTTLapso.Service
         }
 
         // Method for inserting new user's vacation and compensated days at registration date.
-        public async Task SetNewUserCharge(IConfiguration _config, NewUserChargeRequest newUserChargeRequest)
+        public async Task SetNewUserCharge(NewUserChargeRequest newUserChargeRequest)
         {
             int compensatedDays = _config.GetValue<int>("UserCharge:CompensatedDays");
             int vacationDays = _config.GetValue<int>("UserCharge:VacationDays");
@@ -85,16 +88,25 @@ namespace NTTLapso.Service
         {
             if (registerDate.Year == DateTime.Now.Year ) //  Check if register date is fom current year.
             {
-                // Get remaining days of year.
-                DateTime endOfYear = new DateTime(registerDate.Year, 12, 31);
-                TimeSpan remainingDays = endOfYear - registerDate;
-                int daysLeft = remainingDays.Days;
+                //Get total vacations day per day
+                float totalVacationsPerDay = (totalDays / 12)/30;
+                int totalDaysLabor = 0;
 
-                // Divide totalDays by months / days of month.
-                decimal totalDaysPerDay = ((decimal)totalDays / 12) / 30;
+                //Get month diff from now to end of year
+                int monthDiff = 12 - registerDate.Month;
+
+                //Get total days labor from now to end of year
+                if (monthDiff > 0)
+                {
+                    totalDaysLabor += monthDiff * 30;
+                }
+                totalDaysLabor += 30 - registerDate.Day;
+
+                //Calculate the vacations day from now to end of year
+                float totalVacationsDayUser = totalDaysLabor * totalVacationsPerDay;
 
                 // Days for the remaining of the year.
-                int result = (int)Math.Round(totalDaysPerDay * daysLeft);
+                int result = (int)Math.Round(totalVacationsDayUser);
 
                 return result;
             }

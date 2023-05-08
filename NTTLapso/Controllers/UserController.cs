@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Permissions;
+using NTTLapso.Models.Process.UserCharge;
 using NTTLapso.Models.Users;
 using NTTLapso.Service;
 
@@ -15,10 +16,12 @@ namespace NTTLapso.Controllers
         private readonly IConfiguration _config;
         private readonly ILogger<UserController> _logger;
         private UserService _service = new UserService();
+        private ProcessService _serviceProcess;
         public UserController(ILogger<UserController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _serviceProcess = new ProcessService(_config);
         }
         [HttpPost]
         [Route("List")]
@@ -50,11 +53,13 @@ namespace NTTLapso.Controllers
         public async Task<UserResponse> Create(CreateUserRequest request)
         {
             UserResponse response = new UserResponse();
+            NewUserChargeRequest userCharge = new NewUserChargeRequest();
 
             try
             {
                 
                     await _service.Create(request);
+                    await _serviceProcess.SetNewUserCharge(userCharge);
                     response.IsSuccess = true;
                 
     
