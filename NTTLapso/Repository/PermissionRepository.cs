@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using MySqlConnector;
+using NTTLapso.Models.Login;
 using NTTLapso.Models.Permissions;
 
 namespace NTTLapso.Repository
@@ -14,6 +15,34 @@ namespace NTTLapso.Repository
             conn = new MySqlConnection(connectionString);
         }
 
+        public async Task<List<LoginUserPermissionResponse>> ListUserPermission(int userId)
+        {
+            List < LoginUserPermissionResponse > response = new List < LoginUserPermissionResponse >();
+
+            string idTeamQuery = "SELECT IdTeam FROM user_team WHERE IdUser = " + userId;
+            List<int> idTeam = conn.Query<int>(idTeamQuery).ToList();//put into a list the teams which the user belongs
+
+            foreach (int id in idTeam ) 
+            {
+                string SQLQuery = "SELECT T.Id AS TeamId, P.Value, P.Registration, P.Read, P.Edit, P.Delete FROM user U INNER JOIN " +
+                    "user_team UT ON UT.IdUser = U.Id INNER JOIN " +
+                    "team T ON T.Id = UT.IdTeam INNER JOIN " +
+                    "user_team_rol_permission UTRP ON UTRP.IdUserTeam=UT.Id INNER JOIN " +
+                    "rol_permission RP ON RP.Id=UTRP.IdRolPermission INNER JOIN " +
+                    "rol R ON R.Id=RP.IdRol INNER JOIN " +
+                    " permission P ON P.Id=RP.IdPermission WHERE " +
+                    "U.Id = " + userId + " AND T.Id = " + id;
+
+                string Query = String.Format(SQLQuery);
+ 
+                List<LoginUserPermissionResponse> resp = (conn.Query<LoginUserPermissionResponse>(Query).ToList());
+                foreach (var permissions in resp)
+                {
+                    response.Add(permissions);
+                }
+            }
+            return response;
+        }
         public async Task<List<PermissionDataResponse>> List(PermissionDataResponse? request)
         {
             List<PermissionDataResponse> response = new List<PermissionDataResponse>();
