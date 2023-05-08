@@ -1,4 +1,5 @@
 ﻿using NTTLapso.Models.General;
+using NTTLapso.Models.Login;
 using NTTLapso.Models.Permissions;
 using NTTLapso.Models.PetitionStatus;
 using NTTLapso.Repository;
@@ -10,6 +11,11 @@ namespace NTTLapso.Service
         private PermissionRepository _repo = new PermissionRepository();
         public PermissionService() { }
 
+        //Used to send to the login token a list of permissions for each user team
+        public async Task<List<LoginUserPermissionResponse>> ListUserPermission(int userId)
+        {
+            return await _repo.ListUserPermission(userId);
+        }
         public async Task<List<PermissionDataResponse>> List(PermissionDataResponse request)
         {
             return await _repo.List(request);
