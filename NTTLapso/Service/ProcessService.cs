@@ -31,14 +31,14 @@ namespace NTTLapso.Service
                     request.Year = year;
                     request.TotalVacationDays = vacationDays;
 
-                    if (user.Schedule == "Extendido")
-                    {
-                        request.TotalCompensatedDays = compensatedDays;
-                        await _repo.SetUsersCharge(request);
-                    }
-                    else if (user.Schedule == "General")
+                    if (user.Schedule.Id == 1)
                     {
                         request.TotalCompensatedDays = 0;
+                        await _repo.SetUsersCharge(request);
+                    }
+                    else if (user.Schedule.Id == 2)
+                    {
+                        request.TotalCompensatedDays = compensatedDays;
                         await _repo.SetUsersCharge(request);
                     }
                 }
@@ -61,25 +61,15 @@ namespace NTTLapso.Service
             request.Year = year;
             request.TotalVacationDays = CheckDaysNewUser(newUserChargeRequest.RegisterDate, vacationDays);
 
-            UserScheduleRepository repository = new UserScheduleRepository();
-            IdValue schedule = (await repository.List(new IdValue() { Id = newUserChargeRequest.IdSchedule, Value = "" })).FirstOrDefault();
-
-            if(schedule != default) // Check if schedule exists in data base.
+            if (newUserChargeRequest.IdSchedule == 1)
             {
-                if (schedule.Value == "Extendido")
-                {
-                    request.TotalCompensatedDays = CheckDaysNewUser(newUserChargeRequest.RegisterDate, compensatedDays);
-                    await _repo.SetNewUserCharge(request);
-                }
-                else if (schedule.Value == "General")
-                {
-                    request.TotalCompensatedDays = 0;
-                    await _repo.SetNewUserCharge(request);
-                }
+                request.TotalCompensatedDays = 0;
+                await _repo.SetNewUserCharge(request);
             }
-            else
+            else if (newUserChargeRequest.IdSchedule == 2)
             {
-                throw new Exception(message: $"There are no schedules in database with id: {newUserChargeRequest.IdSchedule}");
+                request.TotalCompensatedDays = CheckDaysNewUser(newUserChargeRequest.RegisterDate, compensatedDays);
+                await _repo.SetNewUserCharge(request);
             }
         }
 
@@ -89,7 +79,7 @@ namespace NTTLapso.Service
             if (registerDate.Year == DateTime.Now.Year ) //  Check if register date is fom current year.
             {
                 //Get total vacations day per day
-                float totalVacationsPerDay = (totalDays / 12)/30;
+                float totalVacationsPerDay = ((float)totalDays / 12)/30;
                 int totalDaysLabor = 0;
 
                 //Get month diff from now to end of year
