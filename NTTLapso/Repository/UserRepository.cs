@@ -5,6 +5,8 @@ using NTTLapso.Models.Permissions;
 using NTTLapso.Support_methods;
 using NTTLapso.Models.Users;
 using NTTLapso.Models.Process.UserCharge;
+using System.Diagnostics.Eventing.Reader;
+using NTTLapso.Models.General;
 
 namespace NTTLapso.Repository
 {
@@ -22,7 +24,7 @@ namespace NTTLapso.Repository
         {
             List<UserDataResponse> response = new List<UserDataResponse>();
 
-            string SQLQueryGeneral = "SELECT user.Id, `Name`, `Surnames`, `Email`, category.Value 'Category', user_schedule.Value 'Schedule', `UserName`, `UserPass`, `Active` FROM user INNER JOIN user_schedule ON user.IdUserSchedule = user_schedule.Id INNER JOIN category ON user.IdCategory = category.Id WHERE 1=1";
+            string SQLQueryGeneral = "SELECT user.Id, `Name`, `Surnames`, `Email`, category.Id 'CategoryId', category.Value 'CategoryValue', user_schedule.Id 'ScheduleId', user_schedule.Value 'ScheduleValue', `UserName`, `UserPass`, `Active` FROM user INNER JOIN user_schedule ON user.IdUserSchedule = user_schedule.Id INNER JOIN category ON user.IdCategory = category.Id WHERE 1=1";
             if (request != null && request.Id > 0)
                 SQLQueryGeneral += " AND user.Id={0}";
             if (request != null && request.Name != null && request.Name != "")
@@ -44,9 +46,27 @@ namespace NTTLapso.Repository
 
             string SQLQuery = String.Format(SQLQueryGeneral, request.Id, request.Name, request.Surnames, request.Email, request.Category, request.Schedule, request.UserName, request.UserPass, request.Active);
 
-            response = conn.Query<UserDataResponse>(SQLQuery).ToList();
+             var userQuery = (await conn.QueryAsync(SQLQuery)).ToList();
 
-            if (response.Count == 0)
+            if (userQuery.Count != 0)
+            {
+                foreach (var user in userQuery)
+                {
+                    UserDataResponse userDataResponse = new UserDataResponse();
+                    userDataResponse.Id = user.Id;
+                    userDataResponse.Name = user.Name;
+                    userDataResponse.Surnames = user.Surnames;
+                    userDataResponse.Email = user.Email;
+                    userDataResponse.Category = new IdValue() { Id = user.CategoryId, Value = user.CategoryValue };
+                    userDataResponse.Schedule = new IdValue() { Id = user.ScheduleId, Value = user.ScheduleValue };
+                    userDataResponse.UserName = user.UserName;
+                    userDataResponse.UserPass = user.UserPass;
+                    userDataResponse.Active = user.Active == 1 ? true : false;
+
+                    response.Add(userDataResponse);
+                }
+            }
+            else
             {
                 throw new Exception(message: "No results found");
             }
