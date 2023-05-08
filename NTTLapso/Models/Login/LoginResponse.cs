@@ -9,5 +9,6 @@
         public int IdCategoria { get; set; }
         public int IdUsuarioHorario { get; set; }
         public int Activo { get; set; }
+        public List<LoginUserPermissionResponse>? Permission { get; set; }
     }
 }

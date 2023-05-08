@@ -17,6 +17,7 @@ namespace NTTLapso.Controllers
         private readonly IConfiguration _config;
         private readonly ILogger<AuthController> _logger;
         private AuthService _service = new AuthService();
+        private PermissionService _permissionService = new PermissionService();
         public AuthController(ILogger<AuthController> logger, IConfiguration config)
         {
             _logger = logger;
@@ -29,6 +30,7 @@ namespace NTTLapso.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> Login(LoginRequest request) {
             LoginResponse userData = await _service.Login(request);
+            List<LoginUserPermissionResponse> userPermissionResponse;
             if (userData != null)
             {
                 var token = await _service.GenerateToken(userData, _config);
@@ -37,6 +39,10 @@ namespace NTTLapso.Controllers
                 response.DateLogin = DateTime.Now;
                 response.DateLoginExpires = DateTime.Now.AddMinutes(System.Convert.ToInt32(_config["Jwt:TimeExpires"]));
                 response.Token = token;
+
+                userPermissionResponse = await _permissionService.ListUserPermission(userData.IdUsuario);
+                userData.Permission = userPermissionResponse;
+                response.Data = userData;
                 return Ok(response);
             }
             else
