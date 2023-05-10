@@ -19,7 +19,7 @@ namespace NTTLapso.Repository
         public async Task Create(CreateVacationRequest request)
         {
 
-            string SQLQuery = "INSERT INTO vacation (`IdUserPetition`, `PetitionDate`, `IdPetitionType`, `IdPetitionState`) VALUES ({0}, '{1}', {2}, 1)";
+            string SQLQuery = "INSERT INTO vacation (`IdUserPetition`, `PetitionDate`, `IdPetitionType`) VALUES ({0}, '{1}', {2})";
             string SQLQueryGeneral = String.Format(SQLQuery, request.IdUserPetition, request.Day.ToString("yyyy-MM-dd"), request.IdPetitionType);
 
             conn.Query(SQLQueryGeneral);
