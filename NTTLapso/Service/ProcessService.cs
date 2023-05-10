@@ -1,4 +1,8 @@
-﻿using NTTLapso.Models.General;
+﻿using Microsoft.Extensions.Configuration;
+using NTTLapso.Models.Enum;
+using NTTLapso.Models.General;
+using NTTLapso.Models.Mail;
+using NTTLapso.Models.Process.EmailConfig;
 using NTTLapso.Models.Process.UserCharge;
 using NTTLapso.Models.Users;
 using NTTLapso.Repository;
@@ -7,10 +11,11 @@ namespace NTTLapso.Service
 {
     public class ProcessService
     {
-        private ProcessRepository _repo = new ProcessRepository();
         private IConfiguration _config;
-        public ProcessService(IConfiguration conf) { 
+        private ProcessRepository _repo;
+        public ProcessService(IConfiguration conf) {
             this._config = conf;
+            _repo = new ProcessRepository(_config);
         }
 
         // Method for inserting user's vacation and compensated days at beginning of year.
@@ -19,7 +24,7 @@ namespace NTTLapso.Service
             int compensatedDays = _config.GetValue<int>("UserCharge:CompensatedDays");
             int vacationDays = _config.GetValue<int>("UserCharge:VacationDays");
             UserRepository userRepository = new UserRepository();
-            List<UserDataResponse> users = userRepository.List(new UserDataResponse { }).Result;
+            List<UserDataResponse> users = userRepository.List(new UserListRequest { }).Result;
             int year = DateTime.Now.Year;
 
             if(users.Count > 0) // Check if users in data base.
@@ -103,6 +108,18 @@ namespace NTTLapso.Service
             else
             {
                 throw new Exception(message: "The date has to match current year");
+            }
+        }
+
+        internal async Task SendNotification(MailSender sender)
+        {
+            try
+            {
+                await _repo.SendNotification(sender);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(message: e.Message);
             }
         }
     }
