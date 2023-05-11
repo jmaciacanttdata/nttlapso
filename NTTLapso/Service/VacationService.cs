@@ -1,5 +1,6 @@
 ﻿using NTTLapso.Models.Vacations;
 using NTTLapso.Repository;
+using System.Collections.Generic;
 
 namespace NTTLapso.Service
 {
@@ -16,5 +17,6 @@ namespace NTTLapso.Service
         {
             //await _repo.Edit(id);
         }
+        public async Task<List<VacationData>> List(ListVacationRequest request) => await _repo.List(request);
     }
 }

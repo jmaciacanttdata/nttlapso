@@ -67,5 +67,29 @@ namespace NTTLapso.Controllers
             await _service.Edit(id);
             return response;
         }
+
+        [HttpPost]
+        [Route("List")]
+        [AllowAnonymous]
+        public async Task<ListVacationResponse> List(ListVacationRequest request)
+        {
+            ListVacationResponse response = new ListVacationResponse();
+            List<VacationData> responseList = new List<VacationData>();
+            try
+            {
+                responseList = await _service.List(request);
+                response.IsSuccess = true;
+                response.Data = responseList;
+                response.Error = null;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+
+            return response;
+        }
     }
 }

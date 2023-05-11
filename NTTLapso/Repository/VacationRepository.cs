@@ -3,6 +3,7 @@ using MySqlConnector;
 using NTTLapso.Models.Vacations;
 using System;
 using System.Reflection;
+using System.Web.WebPages;
 
 namespace NTTLapso.Repository
 {
@@ -65,6 +66,29 @@ namespace NTTLapso.Repository
             conn.Query(SQLQueryGeneral);
         }
 
-    }
+        public async Task<List<VacationData>> List(ListVacationRequest? request)
+        {
+            List<VacationData> response = new List<VacationData>();
 
+            string SQLQueryGeneral = "SELECT IdUserPetition, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1";
+            if (request != null && request.IdUser > 0)
+            {
+                SQLQueryGeneral += " AND IdUserPetition={0}";
+            }
+            if (request != null && request.PetitionDate != "" && request.PetitionDate != null)
+            {
+                SQLQueryGeneral += " AND PetitionDate LIKE '%{1}%'";
+            }
+            if (request != null && request.IdPetitionType > 0)
+            {
+                SQLQueryGeneral += " AND IdPetitionType={2}";
+            }
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.PetitionDate.AsDateTime(), request.IdPetitionType);
+
+            response = conn.Query<VacationData>(SQLQuery).ToList();
+            return response;
+        }
+
+
+    }
 }
