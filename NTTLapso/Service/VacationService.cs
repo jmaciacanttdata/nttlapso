@@ -12,9 +12,9 @@ namespace NTTLapso.Service
         {
             await _repo.Create(request);
         }
-        public async Task Edit(int id)
+        public async Task Edit(EditVacationRequest request)
         {
-            //await _repo.Edit(id);
+            await _repo.Edit(request);
         }
     }
 }
