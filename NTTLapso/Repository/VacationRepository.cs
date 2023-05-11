@@ -76,6 +76,31 @@ namespace NTTLapso.Repository
 
         }
 
+        // Delete vacation
+        internal async Task Delete(int IdVacation)
+        {
+            string SQLQueryGeneral = "SELECT `Id` FROM vacation WHERE `Id` = {0};";
+
+            string SQLQuery = String.Format(SQLQueryGeneral, IdVacation);
+
+            var response = await conn.QueryAsync(SQLQuery); // Check if vacation exits
+
+            if (response.Count() != 0) // If exists we delete data.
+            {
+                // Delete from table Vacation.
+                string SQLQueryDelete = String.Format("DELETE FROM vacation WHERE Id={0};", IdVacation);
+                await conn.QueryAsync(SQLQueryDelete);
+
+                // Delete from table Vacation_State_log
+                SQLQueryDelete = String.Format("DELETE FROM vacation_state_log WHERE IdVacation={0};", IdVacation);
+                await conn.QueryAsync(SQLQueryDelete);
+            }
+            else
+            {
+                throw new Exception(message: $"There is no data in the database matching the id {IdVacation}");
+            }
+        }
+
         public async Task VacationApproved(VacationApprovedRequest request)
         {
             CreateLogRequest requestLog = new CreateLogRequest();
@@ -143,31 +168,6 @@ namespace NTTLapso.Repository
             }
 
             return response;
-        }
-      
-        // Delete vacation
-        internal async Task Delete(int IdVacation)
-        {
-            string SQLQueryGeneral = "SELECT `Id` FROM vacation WHERE `Id` = {0};";
-
-            string SQLQuery = String.Format(SQLQueryGeneral, IdVacation);
-
-            var response = await conn.QueryAsync(SQLQuery); // Check if vacation exits
-
-            if (response.Count() != 0) // If exists we delete data.
-            {
-                // Delete from table Vacation.
-                string SQLQueryDelete = String.Format("DELETE FROM vacation WHERE Id={0};", IdVacation);
-                await conn.QueryAsync(SQLQueryDelete);
-
-                // Delete from table Vacation_State_log
-                SQLQueryDelete = String.Format("DELETE FROM vacation_state_log WHERE IdVacation={0};", IdVacation);
-                await conn.QueryAsync(SQLQueryDelete);
-            }
-            else
-            {
-                throw new Exception(message: $"There is no data in the database matching the id {IdVacation}");
-            }
         }
     }
 }

@@ -94,6 +94,31 @@ namespace NTTLapso.Controllers
             }
             return response;
         }
+
+        // Delete vacation
+        [HttpGet]
+        [Route("Delete")]
+        [Authorize]
+        public async Task<VacationResponse> Delete(int IdVacation)
+        {
+            VacationResponse response = new VacationResponse();
+
+            try
+            {
+                await _service.Delete(IdVacation);
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+
+            }
+
+            return response;
+        }
+
         [HttpPost]
         [Route("VacationApproved")]
         [AllowAnonymous]
@@ -142,30 +167,6 @@ namespace NTTLapso.Controllers
                 Error _error = new Error(ex);
                 response.IsSuccess = false;
                 response.Error = _error;
-            }
-
-            return response;
-        }
-
-        // Delete vacation
-        [HttpGet]
-        [Route("Delete")]
-        [Authorize]
-        public async Task<VacationResponse> Delete(int IdVacation)
-        {
-            VacationResponse response = new VacationResponse();
-
-            try
-            {
-                await _service.Delete(IdVacation);
-                response.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                Error _error = new Error(ex);
-                response.IsSuccess = false;
-                response.Error = _error;
-
             }
 
             return response;

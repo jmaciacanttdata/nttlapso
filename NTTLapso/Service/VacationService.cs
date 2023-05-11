@@ -20,6 +20,12 @@ namespace NTTLapso.Service
             await _repo.Edit(request);
         }
 
+        // Delete vacation
+        internal async Task Delete(int IdVacation)
+        {
+            await _repo.Delete(IdVacation);
+        }
+
         public async Task VacationApproved(VacationApprovedRequest request)
         {
             await _repo.VacationApproved(request);
@@ -29,12 +35,6 @@ namespace NTTLapso.Service
         public async Task<List<VacationStateLogDataResponse>> VacationStateLogList(VacationStateLogListRequest? request)
         {
             return await _repo.VacationStateLogList(request);
-        }
-
-        // Delete vacation
-        internal async Task Delete(int IdVacation)
-        {
-            await _repo.Delete(IdVacation);
         }
     }
 }
