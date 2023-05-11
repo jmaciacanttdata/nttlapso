@@ -24,7 +24,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<VacationResponse> Create(CreateVacationRequest request)
         {
             VacationResponse response = new VacationResponse();
@@ -60,7 +60,7 @@ namespace NTTLapso.Controllers
         }
         [HttpPost]
         [Route("Edit")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<VacationResponse> Edit(EditVacationRequest request)
         {
             VacationResponse response = new VacationResponse();
@@ -121,7 +121,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("VacationApproved")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<VacationResponse> VacationApproved(VacationApprovedRequest request)
         {
             VacationResponse response = new VacationResponse();
@@ -150,7 +150,7 @@ namespace NTTLapso.Controllers
         // Get vacation state log list.
         [HttpPost]
         [Route("VacationStateLogList")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<VacationStateLogListResponse> VacationStateLogList(VacationStateLogListRequest? request)
         {
             VacationStateLogListResponse response = new VacationStateLogListResponse();

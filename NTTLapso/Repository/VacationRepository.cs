@@ -28,7 +28,6 @@ namespace NTTLapso.Repository
             requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetititonDate = '" + request.Day.ToString("yyyy-MM-dd") +"'");
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
-            requestLog.StateDate = request.Day;
             requestLog.Detail = "";
             CreateLog(requestLog);
         }
@@ -62,13 +61,13 @@ namespace NTTLapso.Repository
         {
             EditLogRequest requestLog = new EditLogRequest();
             string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserPetition + " AND PetitionDate = '" + request.OldPetitionDate.Date.ToString("yyyy-MM-dd") + "'";
-            requestLog.IdVacation = conn.ExecuteScalar<int>(query);
+            /*requestLog.IdVacation = conn.ExecuteScalar<int>(query);
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
             requestLog.OldPetitionDate = request.OldPetitionDate;
             requestLog.StateDate = request.PetitionDate;
             requestLog.Detail = "";
-            EditLog(requestLog);
+            EditLog(requestLog);*/
 
             VacationResponse response = new VacationResponse();
             string SQLQuery = String.Format("UPDATE vacation SET PetitionDate = '{2}', IdPetitionType = {3}  WHERE IdUserPetition = {0} AND PetitionDate = '{1}'",request.IdUserPetition, request.OldPetitionDate.Date.ToString("yyyy-MM-dd"), request.PetitionDate.Date.ToString("yyyy-MM-dd"),request.IdPetitionType);
@@ -107,28 +106,31 @@ namespace NTTLapso.Repository
             string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserState + " AND PetitionDate = '" + request.StateDate.Date.ToString("yyyy-MM-dd") + "'";
             int IdVacation = conn.ExecuteScalar<int>(query);
             requestLog.IdVacation = IdVacation;
-            requestLog.StateDate = request.StateDate;
             requestLog.IdUserState = request.IdUserState;
             requestLog.IdState = request.IdPetitionState;
-            string SQLQuery = String.Format("INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`) VALUES ({0}, {1}, {2}, '{3}')", IdVacation,requestLog.IdUserState,request.IdPetitionState, requestLog.StateDate.Date.ToString("yyyy-MM-dd"));
+            if(request.Detail == null)
+            {
+                request.Detail = "";
+            }
+            string SQLQuery = String.Format("INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{3}')", IdVacation,requestLog.IdUserState,request.IdPetitionState, request.Detail);
             conn.Query(SQLQuery);
         }
       
         public async Task CreateLog(CreateLogRequest request)
         {
-            string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, '{3}', '{4}')";
-            string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState,request.StateDate.ToString("yyyy-MM-dd"), request.Detail);
+            string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{4}')";
+            string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
 
             conn.Query(SQLQueryGeneral);
         }
 
-           public async Task EditLog(EditLogRequest request)
+         /*  public async Task EditLog(EditLogRequest request)
         {
 
             string SQLQuery = "UPDATE vacation_state_log SET StateDate = '{2}' WHERE IdVacation = {0} AND StateDate = '{1}'";
             string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.OldPetitionDate?.Date.ToString("yyyy-MM-dd"), request.StateDate?.ToString("yyyy-MM-dd"));
             conn.Query(SQLQueryGeneral);
-        }
+        }*/
       
         // Get vacation state log list.
         public async Task<List<VacationStateLogDataResponse>> VacationStateLogList(VacationStateLogListRequest? request)
