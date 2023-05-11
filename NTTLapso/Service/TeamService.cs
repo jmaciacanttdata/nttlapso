@@ -28,5 +28,12 @@ namespace NTTLapso.Service
         {
             await _repo.Delete(Id);
         }
+
+        public async Task<GetTeamManagerResponse> GetTeamManager(int IdTeam)
+        {
+            GetTeamManagerResponse response = await _repo.GetTeamManager(IdTeam);
+
+            return response;
+        }
     }
 }

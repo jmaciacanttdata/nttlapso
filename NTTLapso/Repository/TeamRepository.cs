@@ -13,6 +13,7 @@ namespace NTTLapso.Repository
         {
             conn = new MySqlConnection(connectionString);
         }
+
         public async Task<List<TeamData>> List(TeamRequest? request)
         {
             List<TeamData> response = new List<TeamData>();
@@ -35,23 +36,36 @@ namespace NTTLapso.Repository
             response = conn.Query<TeamData>(SQLQuery).ToList();
             return response;
         }
+
         public async Task Create(TeamRequest request)
         {
             string SQLQueryGeneral = String.Format("INSERT INTO team(team, IdUserManager) VALUES('{0}', {1})", request.Team, request.IdManager);
             conn.Query(SQLQueryGeneral);
 
         }
+
         public async Task Edit(TeamRequest request)
         {
             string SQLQueryGeneral = String.Format("UPDATE team SET team='{1}', IdUserManager={2} WHERE Id={0}", request.Id, request.Team, request.IdManager);
             conn.Query(SQLQueryGeneral);
 
         }
+
         public async Task Delete(int Id)
         {
             string SQLQueryGeneral = String.Format("DELETE FROM team WHERE Id={0};", Id);
             conn.Query(SQLQueryGeneral);
 
+        }
+
+        public async Task<GetTeamManagerResponse> GetTeamManager(int IdTeam)
+        {
+            string SQLQueryGeneral = "SELECT U.Id, U.Name, U.Surnames, U.Email FROM team T INNER JOIN `user` AS U ON T.IdUserManager = U.Id WHERE T.Id = {0}";
+            string SQLQuery = string.Format(SQLQueryGeneral, IdTeam);
+            
+            GetTeamManagerResponse response = (await conn.QueryAsync<GetTeamManagerResponse>(SQLQuery)).FirstOrDefault();
+
+            return response;
         }
     }
 }
