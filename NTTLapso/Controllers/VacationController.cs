@@ -91,5 +91,27 @@ namespace NTTLapso.Controllers
 
             return response;
         }
+        [HttpPost]
+        [Route("Pendings")]
+        [AllowAnonymous]
+        public async Task<VacationPendingResponse> Pendings([FromQuery]int Id)
+        {
+            VacationPendingResponse response = new VacationPendingResponse();
+            List<VacationPendingsData> responseList = new List<VacationPendingsData>();
+            try
+            {
+                responseList = await _service.Pendings(Id);
+                response.IsSuccess = true;
+                response.Data = responseList;
+                response.Error = null;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+            return response;
+        }
     }
 }

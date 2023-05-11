@@ -18,5 +18,7 @@ namespace NTTLapso.Service
             //await _repo.Edit(id);
         }
         public async Task<List<VacationData>> List(ListVacationRequest request) => await _repo.List(request);
+
+        public async Task<List<VacationPendingsData>> Pendings(int Id) => await _repo.Pendings(Id);
     }
 }

@@ -3,7 +3,7 @@
     public class ListVacationRequest
     {
         public int? IdUser { get; set; }
-        public string? PetitionDate { get; set; }
+        public DateTime PetitionDate { get; set; }
         public int? IdPetitionType { get; set; }
     }
 }

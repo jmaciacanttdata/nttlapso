@@ -70,12 +70,13 @@ namespace NTTLapso.Repository
         {
             List<VacationData> response = new List<VacationData>();
 
-            string SQLQueryGeneral = "SELECT IdUserPetition, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1";
+            string SQLQueryGeneral = "SELECT U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
+                /*"SELECT IdUserPetition, user.Name, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1"*/;
             if (request != null && request.IdUser > 0)
             {
                 SQLQueryGeneral += " AND IdUserPetition={0}";
             }
-            if (request != null && request.PetitionDate != "" && request.PetitionDate != null)
+            if (request != null && request.PetitionDate.ToString() != "" && request.PetitionDate > new DateTime())
             {
                 SQLQueryGeneral += " AND PetitionDate LIKE '%{1}%'";
             }
@@ -83,12 +84,29 @@ namespace NTTLapso.Repository
             {
                 SQLQueryGeneral += " AND IdPetitionType={2}";
             }
-            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.PetitionDate.AsDateTime(), request.IdPetitionType);
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.IdPetitionType);
 
             response = conn.Query<VacationData>(SQLQuery).ToList();
             return response;
         }
 
-
+        public async Task<List<VacationPendingsData>> Pendings(int Id)
+        {
+            List<VacationPendingsData> response = new List<VacationPendingsData>();
+            string SQLQueryGeneral = "SELECT IdUserPetition AS 'IdUser', CONCAT(U.Name, ' ', U.Surnames) AS 'Employee', PT.Id AS 'IdPetitionType', PT.Value AS 'PetitionType', PetitionDate, PS.Id AS 'IdState',PS.Value AS 'State' " +
+                "FROM vacation " +
+                "INNER JOIN vacation_state_log VS ON IdVacation = Id " +
+                "INNER JOIN user U ON IdUserPetition = U.Id " +
+                "INNER JOIN petition_type PT ON IdPetitionType = PT.Id " +
+                "INNER JOIN petition_state PS ON IdState = PS.Id " +
+                "WHERE IdState = 14";
+            if(Id > 0)
+            {
+                SQLQueryGeneral += " AND IdUserPetition={0}";
+            }
+            string SQLQuery = String.Format (SQLQueryGeneral, Id);
+            response = conn.Query<VacationPendingsData>(SQLQuery).ToList(); 
+            return response;
+        }
     }
 }
