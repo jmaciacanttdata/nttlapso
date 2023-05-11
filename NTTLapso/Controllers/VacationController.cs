@@ -67,5 +67,54 @@ namespace NTTLapso.Controllers
             await _service.Edit(id);
             return response;
         }
+
+        // Get vacation state log list.
+        [HttpPost]
+        [Route("VacationStateLogList")]
+        [AllowAnonymous]
+        public async Task<VacationStateLogListResponse> VacationStateLogList(VacationStateLogListRequest? request)
+        {
+            VacationStateLogListResponse response = new VacationStateLogListResponse();
+            List<VacationStateLogDataResponse> responseList = new List<VacationStateLogDataResponse>();
+            try
+            {
+                responseList = await _service.VacationStateLogList(request);
+                response.IsSuccess = true;
+                response.Data = responseList;
+                response.Error = null;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+
+            return response;
+        }
+
+        // Delete vacation
+        [HttpGet]
+        [Route("Delete")]
+        [Authorize]
+        public async Task<VacationResponse> Delete(int IdVacation)
+        {
+            VacationResponse response = new VacationResponse();
+
+            try
+            {
+                await _service.Delete(IdVacation);
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+
+            }
+
+            return response;
+        }
     }
 }

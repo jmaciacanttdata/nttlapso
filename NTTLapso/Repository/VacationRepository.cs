@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using MySqlConnector;
+using NTTLapso.Models.General;
 using NTTLapso.Models.Vacations;
 using System;
 using System.Reflection;
@@ -65,6 +66,69 @@ namespace NTTLapso.Repository
             conn.Query(SQLQueryGeneral);
         }
 
-    }
+        // Get vacation state log list.
+        public async Task<List<VacationStateLogDataResponse>> VacationStateLogList(VacationStateLogListRequest? request)
+        {
+            List<VacationStateLogDataResponse> response = new List<VacationStateLogDataResponse>();
 
+            string SQLQueryGeneral = "SELECT U.Id AS IdUser, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', " +
+                "PT.Value AS 'ValuePetitionType', PS.Id AS 'IdPetitionState', PS.Value AS 'ValuePetitionState', V.PetitionDate AS 'PetitionDate', " +
+                "StateDate, Detail FROM vacation_state_log INNER JOIN vacation V ON IdVacation = V.Id INNER JOIN `user` U ON IdUserState = U.Id " +
+                "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id";
+            if (request != null && request.IdUser > 0)
+                SQLQueryGeneral += " AND U.Id={0}";
+            if (request != null && request.IdPetitionType > 0)
+                SQLQueryGeneral += " AND PT.Id={1}";
+            if (request != null && request.IdPetitionState > 0)
+                SQLQueryGeneral += " AND PS.Id={2}";
+            if (request != null && request.PetitionDate.ToString() != "" && request.PetitionDate > new DateTime())
+                SQLQueryGeneral += " AND V.PetitionDate='{3}'";
+            if (request != null && request.StateDate.ToString() != "" && request.StateDate > new DateTime())
+                SQLQueryGeneral += " AND StateDate='{4}'";
+
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"));
+
+            var SQLResponse = (await conn.QueryAsync(SQLQuery)).ToList();
+
+            foreach (var log in SQLResponse)
+            {
+                VacationStateLogDataResponse logResponse = new VacationStateLogDataResponse();
+                logResponse.User = new IdValue() { Id = log.IdUser, Value = log.UserName };
+                logResponse.PetitionType = new IdValue() { Id = log.IdPetitionType, Value = log.ValuePetitionType };
+                logResponse.PetitionState = new IdValue() { Id = log.IdPetitionState, Value = log.ValuePetitionState };
+                logResponse.PetitionDate = log.PetitionDate;
+                logResponse.StateDate = log.StateDate;
+                logResponse.Detail = log.Detail;
+
+                response.Add(logResponse);
+            }
+
+            return response;
+        }
+
+        // Delete vacation
+        internal async Task Delete(int IdVacation)
+        {
+            string SQLQueryGeneral = "SELECT `Id` FROM vacation WHERE `Id` = {0};";
+
+            string SQLQuery = String.Format(SQLQueryGeneral, IdVacation);
+
+            var response = await conn.QueryAsync(SQLQuery); // Check if vacation exits
+
+            if (response.Count() != 0) // If exists we delete data.
+            {
+                // Delete from table Vacation.
+                string SQLQueryDelete = String.Format("DELETE FROM vacation WHERE Id={0};", IdVacation);
+                await conn.QueryAsync(SQLQueryDelete);
+
+                // Delete from table Vacation_State_log
+                SQLQueryDelete = String.Format("DELETE FROM vacation_state_log WHERE IdVacation={0};", IdVacation);
+                await conn.QueryAsync(SQLQueryDelete);
+            }
+            else
+            {
+                throw new Exception(message: $"There is no data in the database matching the id {IdVacation}");
+            }
+        }
+    }
 }
