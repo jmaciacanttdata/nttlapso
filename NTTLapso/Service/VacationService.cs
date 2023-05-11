@@ -16,5 +16,10 @@ namespace NTTLapso.Service
         {
             await _repo.Edit(request);
         }
+
+        public async Task VacationApproved(VacationApprovedRequest request)
+        {
+            await _repo.VacationApproved(request);
+        }
     }
 }

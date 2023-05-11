@@ -94,5 +94,32 @@ namespace NTTLapso.Controllers
             }
             return response;
         }
+        [HttpPost]
+        [Route("VacationApproved")]
+        [AllowAnonymous]
+        public async Task<VacationResponse> VacationApproved(VacationApprovedRequest request)
+        {
+            VacationResponse response = new VacationResponse();
+            try
+            {
+                if (request.IdUserState != 0)
+                {
+                    
+                        await _service.VacationApproved(request);
+                        response.IsSuccess = true;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+            return response;
+        }
     }
 }

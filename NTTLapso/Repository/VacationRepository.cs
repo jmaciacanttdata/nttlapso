@@ -74,6 +74,19 @@ namespace NTTLapso.Repository
             conn.Query(SQLQuery);
 
         }
+
+        public async Task VacationApproved(VacationApprovedRequest request)
+        {
+            CreateLogRequest requestLog = new CreateLogRequest();
+            string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserState + " AND PetitionDate = '" + request.StateDate.Date.ToString("yyyy-MM-dd") + "'";
+            int IdVacation = conn.ExecuteScalar<int>(query);
+            requestLog.IdVacation = IdVacation;
+            requestLog.StateDate = request.StateDate;
+            requestLog.IdUserState = request.IdUserState;
+            requestLog.IdState = request.IdPetitionState;
+            string SQLQuery = String.Format("INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`) VALUES ({0}, {1}, {2}, '{3}')", IdVacation,requestLog.IdUserState,request.IdPetitionState, requestLog.StateDate.Date.ToString("yyyy-MM-dd"));
+            conn.Query(SQLQuery);
+        }
         public async Task CreateLog(CreateLogRequest request)
         {
             string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, '{3}', '{4}')";
