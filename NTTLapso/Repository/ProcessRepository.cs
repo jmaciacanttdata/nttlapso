@@ -90,6 +90,7 @@ namespace NTTLapso.Repository
 
             }catch(Exception ex)
             {
+                throw new Exception(message: "Couldn't send email notification");
                 return false;
             }
         }

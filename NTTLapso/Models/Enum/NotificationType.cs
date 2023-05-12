@@ -2,12 +2,9 @@
 {
     public enum NotificationType
     {
-        SendNotificationOfNewVacationRequestToUser = 1,
-        SendNotificationOfNewVacationRequestToApprover = 2,
-        SendNotificationApprovedVacationsToUser = 3,
-        SendNotificationOfNewUserRegisterToUser = 4,
-        SendNotificationOfNewUSerRegisterToApprover = 5,
-        SendNotificationOfUnsubscribeToUser = 6,
-        SendNotificationOfUnsubscribeToApprover = 7
+        SendNotificationOfNewVacationRequest = 1,
+        SendNotificationApprovedVacations = 2,
+        SendNotificationOfNewUserRegister = 3,
+        SendNotificationOfUnRegister = 4,
     }
 }

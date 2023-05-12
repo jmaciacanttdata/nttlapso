@@ -1,5 +1,4 @@
-﻿using NTTLapso.Models.General;
-using NTTLapso.Models.Users;
+﻿using NTTLapso.Models.Users;
 
 namespace NTTLapso.Models.Mail
 {

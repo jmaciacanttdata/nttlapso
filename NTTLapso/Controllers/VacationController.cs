@@ -1,9 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NTTLapso.Models.Enum;
 using NTTLapso.Models.General;
+using NTTLapso.Models.Mail;
+using NTTLapso.Models.Team;
+using NTTLapso.Models.TextNotification;
+using NTTLapso.Models.Users;
 using NTTLapso.Models.Vacations;
 using NTTLapso.Repository;
 using NTTLapso.Service;
+using System.Reflection;
 
 namespace NTTLapso.Controllers
 {
@@ -14,12 +20,16 @@ namespace NTTLapso.Controllers
         private readonly IConfiguration _config;
         private readonly ILogger<VacationController> _logger;
         private VacationService _service = new VacationService();
+        private UserService _userService = new UserService();
+        private TeamService _teamService = new TeamService();
+        private ProcessService _processService; 
+        private TextNotificationService _textNotificationService = new TextNotificationService();
         public VacationRepository _repo = new VacationRepository();
         public VacationController(ILogger<VacationController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
-
+            _processService = new ProcessService(_config);
         }
 
         [HttpPost]
@@ -28,6 +38,10 @@ namespace NTTLapso.Controllers
         public async Task<VacationResponse> Create(CreateVacationRequest request)
         {
             VacationResponse response = new VacationResponse();
+            List<TeamManagerDataResponse> managerList = await _teamService.GetTeamsManagerList(0, request.IdUserPetition);
+            MailSender sender = new MailSender();
+            List<MailReplacer> replacerList = new List<MailReplacer>();
+
             try
             {
                 if (request.IdUserPetition != 0)
@@ -35,6 +49,36 @@ namespace NTTLapso.Controllers
                     if (await _repo.CheckViability(request.IdUserPetition, request.Day))
                     {
                         await _service.Create(request);
+
+                        //Conformamos el objeto sender para el envío de la notificación (email).
+                        UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserPetition })).First();
+                        sender.Receiver.Id = (int)user.Id;
+                        sender.Receiver.Name = user.Name;
+                        sender.Receiver.Email = user.Email;
+                        foreach (var manager in managerList)
+                        {
+                            UserMail receiverCC = new UserMail()
+                            {
+                                Id = manager.Id,
+                                Name = manager.Name,
+                                Email = manager.Email,
+                            };
+                            sender.ReceiverCCList.Add(receiverCC);
+                        }
+                        List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
+                        {
+                            Id = (int)NotificationType.SendNotificationOfNewVacationRequest
+                        });
+                        sender.Content.Subject = notification[0].Subject;
+                        sender.Content.Content = notification[0].Content;
+                        sender.Content.IdNotificationType = notification[0].IdNotification;
+                        MailReplacer replacer1 = new MailReplacer();
+                        replacer1.SearchText = "{{user_name}}";
+                        replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                        replacerList.Add(replacer1);
+                        sender.Replacers = replacerList;
+
+                        await _processService.SendNotification(sender);
                         response.IsSuccess = true;
                     }
                     else
@@ -43,7 +87,6 @@ namespace NTTLapso.Controllers
                         response.IsSuccess = false;
                         response.Error = _error;
                     }
-                    //Llamar a sendAltaNotification()
                 }
                 else
                 {
@@ -125,13 +168,65 @@ namespace NTTLapso.Controllers
         public async Task<VacationResponse> VacationApproved(VacationApprovedRequest request)
         {
             VacationResponse response = new VacationResponse();
+            MailSender sender = new MailSender();
+            List<MailReplacer> replacerList = new List<MailReplacer>();
+
             try
             {
                 if (request.IdUserState != 0)
                 {
-                    
-                        await _service.VacationApproved(request);
-                        response.IsSuccess = true;
+                    await _service.VacationApproved(request);
+
+                    List<TeamManagerDataResponse> managerList = await _teamService.GetTeamsManagerList(0, request.IdUserState);
+                    UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserState })).First();
+
+                    //Conformamos el objeto sender para el envío de la notificación.
+                    sender.Receiver.Id = request.IdUserState;
+                    sender.Receiver.Name = user.Name;
+                    sender.Receiver.Email = user.Email;
+                    foreach (var manager in managerList)
+                    {
+                        UserMail receiverCC = new UserMail()
+                        {
+                            Id = manager.Id,
+                            Name = manager.Name,
+                            Email = manager.Email,
+                        };
+                        sender.ReceiverCCList.Add(receiverCC);
+                    }
+                    List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
+                    {
+                        Id = (int)NotificationType.SendNotificationApprovedVacations
+                    });
+                    sender.Content.Subject = notification[0].Subject;
+                    sender.Content.Content = notification[0].Content;
+                    sender.Content.IdNotificationType = notification[0].IdNotification;
+                    MailReplacer replacer1 = new MailReplacer();
+                    replacer1.SearchText = "{{user_name}}";
+                    replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                    MailReplacer replacer2 = new MailReplacer();
+                    replacer2.SearchText = "{{manager_name}}";
+                    replacer2.ReplaceText = managerList[0].Name;
+                    MailReplacer replacer3 = new MailReplacer();
+                    replacer3.SearchText = "{{approved}}";
+                    if (request.IdPetitionState == 2) {
+                        replacer3.ReplaceText = "Approved";
+                    } else if(request.IdPetitionState == 3)
+                    {
+                        replacer3.ReplaceText = "Denied";
+                    }
+                    MailReplacer replacer4 = new MailReplacer();
+                    replacer4.SearchText = "{{details}}";
+                    replacer4.ReplaceText = request.Detail == null ? request.Detail : "";
+                    replacerList.Add(replacer1);
+                    replacerList.Add(replacer2);
+                    replacerList.Add(replacer3);
+                    replacerList.Add(replacer4);
+                    sender.Replacers = replacerList;
+
+                    await _processService.SendNotification(sender);
+
+                    response.IsSuccess = true;
                 }
                 else
                 {
@@ -174,7 +269,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListVacationResponse> List(ListVacationRequest request)
         {
             ListVacationResponse response = new ListVacationResponse();
@@ -195,9 +290,10 @@ namespace NTTLapso.Controllers
 
             return response;
         }
+
         [HttpPost]
         [Route("Pendings")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<VacationPendingResponse> Pendings([FromQuery]int Id)
         {
             VacationPendingResponse response = new VacationPendingResponse();

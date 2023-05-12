@@ -26,7 +26,7 @@ namespace NTTLapso.Repository
 
             conn.Query(SQLQueryGeneral);
             CreateLogRequest requestLog = new CreateLogRequest();
-            requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetititonDate = '" + request.Day.ToString("yyyy-MM-dd") +"'");
+            requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetitionDate = '" + request.Day.ToString("yyyy-MM-dd") +"'");
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
             requestLog.Detail = "";
@@ -159,7 +159,7 @@ namespace NTTLapso.Repository
                 "INNER JOIN user U ON IdUserPetition = U.Id " +
                 "INNER JOIN petition_type PT ON IdPetitionType = PT.Id " +
                 "INNER JOIN petition_state PS ON IdState = PS.Id " +
-                "WHERE IdState = 14";
+                "WHERE IdState = 4";
             if(Id > 0)
             {
                 SQLQueryGeneral += " AND IdUserPetition={0}";
