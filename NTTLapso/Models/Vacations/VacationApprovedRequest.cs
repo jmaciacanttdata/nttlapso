@@ -1,10 +1,10 @@
 ﻿namespace NTTLapso.Models.Vacations
 {
-    public class CreateLogRequest
+    public class VacationApprovedRequest
     {
-        public int IdVacation { get; set; }
         public int IdUserState { get; set; }
-        public int IdState { get; set; }
+        public DateTime StateDate { get; set; }
+        public int IdPetitionState { get; set; }
         public string? Detail { get; set; }
     }
 }

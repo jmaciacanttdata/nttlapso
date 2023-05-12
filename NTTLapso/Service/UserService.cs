@@ -10,7 +10,7 @@ namespace NTTLapso.Service
         private UserRepository _repo = new UserRepository();
         public UserService() { }
 
-        public async Task<List<UserDataResponse>> List(UserDataResponse request)
+        public async Task<List<UserDataResponse>> List(UserListRequest request)
         {
             return await _repo.List(request);
         }

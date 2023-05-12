@@ -43,29 +43,5 @@ namespace NTTLapso.Controllers
 
             return response;
         }
-
-        // Method for inserting new user's vacation and compensated days at registration date.
-        [HttpPost]
-        [Route("UserCharge/SetNewUserCharge")]
-        [AllowAnonymous]
-        public async Task<UserChargeResponse> SetNewUserCharge(NewUserChargeRequest newUserChargeRequest)
-        {
-            UserChargeResponse response = new UserChargeResponse();
-
-            try
-            {
-                await _service.SetNewUserCharge(newUserChargeRequest);
-                response.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                Error _error = new Error(ex);
-                response.IsSuccess = false;
-                response.Error = _error;
-
-            }
-
-            return response;
-        }
     }
 }
