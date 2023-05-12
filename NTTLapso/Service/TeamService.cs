@@ -29,11 +29,9 @@ namespace NTTLapso.Service
             await _repo.Delete(Id);
         }
 
-        public async Task<GetTeamManagerResponse> GetTeamManager(int IdTeam)
+        public async Task<List<TeamManagerDataResponse>> GetTeamsManagerList(int IdTeam, int IdUser)
         {
-            GetTeamManagerResponse response = await _repo.GetTeamManager(IdTeam);
-
-            return response;
+            return await _repo.GetTeamsManagerList(IdTeam, IdUser);
         }
     }
 }
