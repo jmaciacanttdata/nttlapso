@@ -132,7 +132,7 @@ namespace NTTLapso.Repository
 
             string SQLQueryGeneral = "SELECT U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
                 /*"SELECT IdUserPetition, user.Name, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1"*/;
-            if (request != null && request.IdUser > 0)
+            if (request != null && request.IdUserPetition > 0)
             {
                 SQLQueryGeneral += " AND IdUserPetition={0}";
             }
@@ -144,7 +144,7 @@ namespace NTTLapso.Repository
             {
                 SQLQueryGeneral += " AND IdPetitionType={2}";
             }
-            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.IdPetitionType);
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUserPetition, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.IdPetitionType);
 
             response = conn.Query<VacationData>(SQLQuery).ToList();
             return response;
