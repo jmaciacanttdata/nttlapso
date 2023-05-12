@@ -18,17 +18,18 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<UserController> _logger;
-        private UserService _service;
+        private UserService _userService;
         private TeamService _teamService;
-        private ProcessService _serviceProcess; 
-        private TextNotificationService _serviceNotification = new TextNotificationService();
+        private ProcessService _processService; 
+        private TextNotificationService _textNotificationService;
         public UserController(ILogger<UserController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
-            _service = new UserService();
+            _userService = new UserService();
             _teamService = new TeamService();
-            _serviceProcess = new ProcessService(_config);
+            _textNotificationService = new TextNotificationService();
+            _processService = new ProcessService(_config);
         }
         [HttpPost]
         [Route("List")]
@@ -39,7 +40,7 @@ namespace NTTLapso.Controllers
             List<UserDataResponse> responseList = new List<UserDataResponse>();
             try
             {
-                responseList = await _service.List(request);
+                responseList = await _userService.List(request);
                 response.IsSuccess = true;
                 response.Data = responseList;
                 response.Error = null;
@@ -63,24 +64,25 @@ namespace NTTLapso.Controllers
             NewUserChargeRequest userCharge = new NewUserChargeRequest();
             MailSender sender = new MailSender();
             List<MailReplacer> replacerList = new List<MailReplacer>();
-            GetTeamManagerResponse manager = new GetTeamManagerResponse();
 
             try
             {
-                userCharge = await _service.Create(request);
-                manager = await _teamService.GetTeamManager(request.IdTeam);
+                userCharge = await _userService.Create(request);
+                List<TeamManagerDataResponse> managerList = await _teamService.GetTeamsManagerList(request.IdTeam, 0);
 
                 //Conformamos el objeto sender para el envío de la notificación.
                 sender.Receiver.Id = userCharge.IdUser;
                 sender.Receiver.Name = request.Name;
                 sender.Receiver.Email = request.Email;
-                UserMail receiverCC = new UserMail();
-                receiverCC.Id = manager.Id;
-                receiverCC.Name = manager.Name;
-                receiverCC.Email = manager.Email;
+                UserMail receiverCC = new UserMail()
+                {
+                    Id = managerList[0].Id,
+                    Name = managerList[0].Name,
+                    Email = managerList[0].Email,
+                };
                 sender.ReceiverCCList.Add(receiverCC);
-                List<TextNotificationData> notification = await _serviceNotification.List(new IdTextNotificationRequest() {
-                    Id = (int)NotificationType.SendNotificationOfNewUserRegisterToUser
+                List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest() {
+                    Id = (int)NotificationType.SendNotificationOfNewUserRegister
                 }); 
                 sender.Content.Subject = notification[0].Subject;
                 sender.Content.Content = notification[0].Content;
@@ -90,13 +92,13 @@ namespace NTTLapso.Controllers
                 replacer1.ReplaceText = request.Name + " " + request.Surnames;
                 MailReplacer replacer2 = new MailReplacer();
                 replacer2.SearchText = "{{manager_name}}";
-                replacer2.ReplaceText = manager.Name + " " + manager.Surnames;
+                replacer2.ReplaceText = managerList[0].Name;
                 replacerList.Add(replacer1);
                 replacerList.Add(replacer2);
                 sender.Replacers = replacerList;
 
-                await _serviceProcess.SendNotification(sender);
-                await _serviceProcess.SetNewUserCharge(userCharge);
+                await _processService.SendNotification(sender);
+                await _processService.SetNewUserCharge(userCharge);
                 response.IsSuccess = true;
             }
             catch (Exception ex)
@@ -109,6 +111,7 @@ namespace NTTLapso.Controllers
 
             return response;
         }
+
         [HttpPost]
         [Route("Edit")]
         [Authorize]
@@ -117,7 +120,7 @@ namespace NTTLapso.Controllers
             UserResponse response = new UserResponse();
             try
             {
-                await _service.Edit(request);
+                await _userService.Edit(request);
                 response.IsSuccess = true;
             }
             catch(Exception ex)
@@ -135,12 +138,48 @@ namespace NTTLapso.Controllers
         public async Task<UserResponse> ChangeUserState(ChangeUserStateRequest request)
         {
             UserResponse response = new UserResponse();
+            List<TeamManagerDataResponse> managerList = await _teamService.GetTeamsManagerList(0, request.Id);
+            MailSender sender = new MailSender();
+            List<MailReplacer> replacerList = new List<MailReplacer>();
+
             try
             {
+                await _userService.ChangeUserState(request);
 
-                await _service.ChangeUserState(request);
+                //Conformamos el objeto sender para el envío de la notificación (email).
+                UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.Id })).First();
+                sender.Receiver.Id = (int)user.Id;
+                sender.Receiver.Name = user.Name;
+                sender.Receiver.Email = user.Email;
+                foreach (var manager in managerList)
+                {
+                    UserMail receiverCC = new UserMail()
+                    {
+                        Id = manager.Id,
+                        Name = manager.Name,
+                        Email = manager.Email,
+                    };
+                    sender.ReceiverCCList.Add(receiverCC);
+                }
+                List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
+                {
+                    Id = request.Active ? (int)NotificationType.SendNotificationOfNewUserRegister : (int)NotificationType.SendNotificationOfUnRegister
+                });
+                sender.Content.Subject = notification[0].Subject;
+                sender.Content.Content = notification[0].Content;
+                sender.Content.IdNotificationType = notification[0].IdNotification;
+                MailReplacer replacer1 = new MailReplacer();
+                replacer1.SearchText = "{{user_name}}";
+                replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                MailReplacer replacer2 = new MailReplacer();
+                replacer2.SearchText = "{{manager_name}}";
+                replacer2.ReplaceText = request.NameApprover + " " + request.SurnamesApprover;
+                replacerList.Add(replacer1);
+                replacerList.Add(replacer2);
+                sender.Replacers = replacerList;
+
+                await _processService.SendNotification(sender);
                 response.IsSuccess = true;
-               
             }
             catch (Exception ex)
             {
@@ -160,7 +199,7 @@ namespace NTTLapso.Controllers
 
             try
             {
-                await _service.Delete(Id);
+                await _userService.Delete(Id);
                 response.IsSuccess = true;
             }
             catch (Exception ex)

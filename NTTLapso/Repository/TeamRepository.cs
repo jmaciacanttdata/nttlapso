@@ -58,12 +58,22 @@ namespace NTTLapso.Repository
 
         }
 
-        public async Task<GetTeamManagerResponse> GetTeamManager(int IdTeam)
+        public async Task<List<TeamManagerDataResponse>> GetTeamsManagerList(int IdTeam, int IdUser)
         {
-            string SQLQueryGeneral = "SELECT U.Id, U.Name, U.Surnames, U.Email FROM team T INNER JOIN `user` AS U ON T.IdUserManager = U.Id WHERE T.Id = {0}";
-            string SQLQuery = string.Format(SQLQueryGeneral, IdTeam);
+            string SQLQueryGeneral = "SELECT DISTINCT t.IdUserManager AS 'Id', CONCAT(user.Name, ' ', user.surnames) AS 'Name', user.Email AS 'Email' " +
+                "FROM team t JOIN `user` ON user.Id = t.IdUserManager JOIN user_team ut ON t.Id = ut.IdTeam WHERE 1=1";
+            if (IdTeam  > 0)
+            {
+                SQLQueryGeneral += " AND t.Id = {0}";
+            }
+            if (IdUser > 0)
+            {
+                SQLQueryGeneral += " AND ut.IdUser = {1}";
+            }
+
+            string SQLQuery = string.Format(SQLQueryGeneral, IdTeam, IdUser);
             
-            GetTeamManagerResponse response = (await conn.QueryAsync<GetTeamManagerResponse>(SQLQuery)).FirstOrDefault();
+            List<TeamManagerDataResponse> response = (conn.Query<TeamManagerDataResponse>(SQLQuery)).ToList();
 
             return response;
         }
