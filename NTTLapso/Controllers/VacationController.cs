@@ -174,7 +174,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("List")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ListVacationResponse> List(ListVacationRequest request)
         {
             ListVacationResponse response = new ListVacationResponse();
@@ -197,7 +197,7 @@ namespace NTTLapso.Controllers
         }
         [HttpPost]
         [Route("Pendings")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<VacationPendingResponse> Pendings([FromQuery]int Id)
         {
             VacationPendingResponse response = new VacationPendingResponse();
