@@ -118,8 +118,12 @@ namespace NTTLapso.Repository
                 string SQLQuerGetId = "SELECT Id FROM user WHERE Email = '"+ request.Email + "';";
                 int idUser = (await conn.QueryAsync<int>(SQLQuerGetId)).FirstOrDefault();
 
-                await SetUserTeam(new UserTeamRequest() { IdUser = idUser, IdTeam = request.IdTeam });
+                int IdUserTeam = await SetUserTeam(new UserTeamRequest() { IdUser = idUser, IdTeam = request.IdTeam });
 
+                if(IdUserTeam != 0)
+                {
+                    await SetUserTeamRol(new UserTeamRolRequest() { IdUserTeam = IdUserTeam, IdRol = request.IdRol });
+                } 
                 response.IdUser = idUser;
                 response.IdSchedule = request.IdUserSchedule;
                 response.RegisterDate = DateTime.Now;
@@ -180,14 +184,24 @@ namespace NTTLapso.Repository
             conn.Query(SQLQueryGeneral);
         }
 
-        internal async Task SetUserTeam(UserTeamRequest request)
+        internal async Task<int> SetUserTeam(UserTeamRequest request)
         {
+            int IdUserTeam = 0;
             if (request.IdUser != 0 && request.IdTeam != 0) 
             {
                 string SQLGeneral = "INSERT INTO user_team(`IdUser`, `IdTeam`) VALUES({0}, {1});";
                 string SQLQuery = string.Format(SQLGeneral, request.IdUser, request.IdTeam);
                 await conn.ExecuteAsync(SQLQuery);
+                IdUserTeam = conn.ExecuteScalar<int>(" SELECT Id FROM user_team WHERE IdUser = " + request.IdUser +" AND IdTeam = " + request.IdTeam);
             }
+            return IdUserTeam;
+        }
+
+        internal async Task SetUserTeamRol(UserTeamRolRequest request)
+        {
+            string SQLGeneral = "INSERT INTO user_team_rol (`IdUserTeam`, `IdRol`) VALUES  ({0}, {1})";
+            string SQLQuery = string.Format(SQLGeneral, request.IdUserTeam, request.IdRol);
+            await conn.ExecuteAsync(SQLQuery);
         }
     }
 }

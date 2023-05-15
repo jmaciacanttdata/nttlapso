@@ -27,8 +27,8 @@ namespace NTTLapso.Repository
                 string SQLQuery = "SELECT T.Id AS TeamId, P.Value, P.Registration, P.Read, P.Edit, P.Delete FROM user U INNER JOIN " +
                     "user_team UT ON UT.IdUser = U.Id INNER JOIN " +
                     "team T ON T.Id = UT.IdTeam INNER JOIN " +
-                    "user_team_rol_permission UTRP ON UTRP.IdUserTeam=UT.Id INNER JOIN " +
-                    "rol_permission RP ON RP.Id=UTRP.IdRolPermission INNER JOIN " +
+                    "user_team_rol UTR ON UTR.IdUserTeam=UT.Id INNER JOIN " +
+                    "rol_permission RP ON RP.IdRol=UTR.IdRol INNER JOIN " +
                     "rol R ON R.Id=RP.IdRol INNER JOIN " +
                     " permission P ON P.Id=RP.IdPermission WHERE " +
                     "U.Id = " + userId + " AND T.Id = " + id;
