@@ -212,5 +212,24 @@ namespace NTTLapso.Controllers
 
             return response;
         }
+        [HttpPost]
+        [Route("SetUserTeam")]
+        [Authorize]
+        public async Task<UserResponse> SetUserTeam(UserTeamRequest request)
+        {
+            UserResponse response = new UserResponse();
+            try
+            {
+                await _userService.SetUserTeam(request);
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+            return response;
+        }
     }
 }
