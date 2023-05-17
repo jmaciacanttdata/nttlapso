@@ -7,7 +7,7 @@ using NTTLapso.Service;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("UserSchedule")]
+    [Route("NTTLapso/UserSchedule")]
     public class UserScheduleController
     {
         private readonly IConfiguration _config;

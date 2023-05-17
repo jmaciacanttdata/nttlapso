@@ -14,7 +14,7 @@ using System.Reflection;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Vacation")]
+    [Route("NTTLapso/Vacation")]
     public class VacationController
     {
         private readonly IConfiguration _config;

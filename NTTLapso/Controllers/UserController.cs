@@ -13,7 +13,7 @@ using NTTLapso.Service;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("User")]
+    [Route("NTTLapso/User")]
     public class UserController
     {
         private readonly IConfiguration _config;

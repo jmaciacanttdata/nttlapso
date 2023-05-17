@@ -15,7 +15,7 @@ using System.Text;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Category")]
+    [Route("NTTLapso/Category")]
     public class CategoryController : ControllerBase
     {
         private readonly IConfiguration _config;

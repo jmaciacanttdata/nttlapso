@@ -7,7 +7,7 @@ using NTTLapso.Service;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Process")]
+    [Route("NTTLapso/Process")]
     public class ProcessController : ControllerBase
     {
         private readonly IConfiguration _config;
