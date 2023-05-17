@@ -15,7 +15,7 @@ using NTTLapso.Models.Rol;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("TextNotification")]
+    [Route("NTTLapso/TextNotification")]
     public class TextNotificationController : ControllerBase
     {
         private readonly IConfiguration _config;

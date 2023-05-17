@@ -8,7 +8,7 @@ using NTTLapso.Service;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("RolPermission")]
+    [Route("NTTLapso/RolPermission")]
     public class RolPermissionController : ControllerBase
     {
         private readonly IConfiguration _config;

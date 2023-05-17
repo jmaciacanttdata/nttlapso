@@ -11,7 +11,7 @@ using System.Text;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Auth")]
+    [Route("NTTLapso/Auth")]
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;

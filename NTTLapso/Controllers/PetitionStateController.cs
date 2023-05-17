@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("PetitionState")]
+    [Route("NTTLapso/PetitionState")]
     public class PetitionStateController : ControllerBase
     {
         private readonly IConfiguration _config;
