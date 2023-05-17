@@ -39,7 +39,13 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseCors("EnableCORS");
+app.UseCors
+(
+    builder => builder
+     .AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+);
 
 app.MapControllers();
 

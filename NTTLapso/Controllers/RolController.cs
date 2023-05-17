@@ -15,7 +15,7 @@ using System.Text;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Rol")]
+    [Route("NTTLapso/Rol")]
     public class RolController : ControllerBase
     {
         private readonly IConfiguration _config;

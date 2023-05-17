@@ -9,7 +9,7 @@ using System.Web.WebPages;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("PetitionType")]
+    [Route("NTTLapso/PetitionType")]
     public class PetitionTypeController : ControllerBase
     {
         private readonly IConfiguration _config;

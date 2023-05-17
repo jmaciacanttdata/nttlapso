@@ -8,7 +8,7 @@ using NTTLapso.Service;
 namespace NTTLapso.Controllers
 {
     [ApiController]
-    [Route("Team")]
+    [Route("NTTLapso/Team")]
     public class TeamController
     {
         private readonly IConfiguration _config;
