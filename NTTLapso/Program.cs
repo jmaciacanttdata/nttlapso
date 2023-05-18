@@ -33,12 +33,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
 app.UseCors
 (
     builder => builder
@@ -46,6 +40,12 @@ app.UseCors
      .AllowAnyMethod()
      .AllowAnyHeader()
 );
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers();
 
