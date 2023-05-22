@@ -292,6 +292,30 @@ namespace NTTLapso.Controllers
         }
 
         [HttpPost]
+        [Route("GetPercentagePetitionUserPerDayMonthList")]
+        [Authorize]
+        public async Task <PercentagePerMonthResponse> GetPercentagePetitionUserPerDayMonthList(PercentagePerMonthRequest request)
+        {
+            PercentagePerMonthResponse response = new PercentagePerMonthResponse();
+
+            try
+            {
+                
+                response.IsSuccess = true;
+                response.Data = await _service.GetPercentagePetitionUserPerDayMonthList(request);
+                response.Error = null;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+
+            return response;
+        }
+
+        [HttpPost]
         [Route("Pendings")]
         [Authorize]
         public async Task<VacationPendingResponse> Pendings([FromQuery]int Id)
