@@ -58,6 +58,14 @@ namespace NTTLapso.Repository
             return teamViability;
         }
 
+        public async Task <List<PercentagePetitionDay>> GetPercentagePetitionUserPerDayMonthList(PercentagePerMonthRequest request)
+        {
+            List<PercentagePetitionDay> response = new List<PercentagePetitionDay>();
+
+            response = (await conn.QueryAsync<PercentagePetitionDay>(string.Format("CALL SP_GET_PERCENTAGE_PETITIONS_BY_DAY_OF_MONTH({0},{1},{2})", request.Month,request.Year, request.IdUser))).ToList();
+
+            return response;
+        }
         public async Task Edit(EditVacationRequest request)
         {
             EditLogRequest requestLog = new EditLogRequest();

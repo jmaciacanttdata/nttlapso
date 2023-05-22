@@ -40,5 +40,9 @@ namespace NTTLapso.Service
         public async Task<List<VacationData>> List(ListVacationRequest request) => await _repo.List(request);
 
         public async Task<List<VacationPendingsData>> Pendings(int Id) => await _repo.Pendings(Id);
+        public async Task<List<PercentagePetitionDay>> GetPercentagePetitionUserPerDayMonthList(PercentagePerMonthRequest request)
+        {
+            return await _repo.GetPercentagePetitionUserPerDayMonthList(request);
+        }
     }
 }
