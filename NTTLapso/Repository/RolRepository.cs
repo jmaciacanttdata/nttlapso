@@ -30,7 +30,7 @@ namespace NTTLapso.Repository
 
         public async Task Create(string value)
         {
-            string SQLQueryGeneral = String.Format("INSERT INTO rol(Value) VALUES({0})", value);
+            string SQLQueryGeneral = String.Format("INSERT INTO rol(Value) VALUES('{0}')", value);
             conn.Query(SQLQueryGeneral);
 
         }

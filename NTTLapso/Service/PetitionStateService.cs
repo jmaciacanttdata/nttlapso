@@ -14,7 +14,7 @@ namespace NTTLapso.Service
         private PetitionStateRepository _repo = new PetitionStateRepository();
         public PetitionStateService() { }
 
-        public async Task<List<IdValue>> List(IdValue request) {
+        public async Task<List<PetitionStatusDataResponse>> List(IdValue request) {
             return await _repo.List(request);
         }
 

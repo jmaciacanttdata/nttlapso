@@ -54,7 +54,7 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task<RolResponse> Create(string value)
+        public async Task<RolResponse> Create([FromBody] string value)
         {
             RolResponse response = new RolResponse();
 
