@@ -20,7 +20,7 @@ namespace NTTLapso.Repository
         {
             List<TeamData> response = new List<TeamData>();
 
-            string SQLQueryGeneral = "SELECT team.Id, Team, CONCAT(user.Name,' ',user.Surnames) AS 'Manager' FROM team INNER JOIN user ON team.IdUserManager = user.Id WHERE 1=1";
+            string SQLQueryGeneral = "SELECT team.Id, Team, CONCAT(user.Name,' ',user.Surnames) AS 'Manager', team.IdUserManager AS 'IdManager' FROM team INNER JOIN user ON team.IdUserManager = user.Id WHERE 1=1";
             if (request != null && request.Id > 0)
             {
                 SQLQueryGeneral += " AND team.Id={0}";
