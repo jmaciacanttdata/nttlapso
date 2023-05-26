@@ -47,7 +47,7 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task<UserScheduleResponse> Create(string value)
+        public async Task<UserScheduleResponse> Create([FromBody] string value)
         {
             UserScheduleResponse response = new UserScheduleResponse();
 

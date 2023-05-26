@@ -25,7 +25,7 @@ namespace NTTLapso.Controllers
         [Authorize]
         public async Task<ListPetitionStatusResponse> List(IdValue? request) {
             ListPetitionStatusResponse response = new ListPetitionStatusResponse();
-            List<IdValue> responseList = new List<IdValue>();
+            List<PetitionStatusDataResponse> responseList = new List<PetitionStatusDataResponse>();
             try
             {
                 responseList = await _service.List(request);

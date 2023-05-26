@@ -21,7 +21,7 @@ namespace NTTLapso.Repository
         {
             List<TextNotificationData> response = new List<TextNotificationData>();
 
-            string SQLQueryGeneral = "SELECT Id, Subject, Content FROM text_notification WHERE 1=1";
+            string SQLQueryGeneral = "SELECT Id as IdNotification, Subject, Content FROM text_notification WHERE 1=1";
             if (request != null && request.Id > 0)
                 SQLQueryGeneral += " AND Id={0}";
             if (request != null && request.Subject != null && request.Subject != "")

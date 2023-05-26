@@ -15,18 +15,30 @@ namespace NTTLapso.Repository
             conn = new MySqlConnection(connectionString);
         }
 
-        public async Task<List<IdValue>> List(IdValue? request) {
-            List<IdValue> response = new List<IdValue>();
+        public async Task<List<PetitionStatusDataResponse>> List(IdValue? request) {
+            List<PetitionStatusDataResponse> response = new List<PetitionStatusDataResponse>();
 
-            string SQLQueryGeneral = "SELECT Id, Value FROM petition_state WHERE 1=1";
+            string SQLQueryGeneral = "SELECT PT.Id as Id, PT.Value as Value, PT.IdTextNotification as IdTextNotification, TN.Subject as Subject, TN.Content as Content FROM petition_state PT " +
+                "INNER JOIN text_notification TN ON TN.Id = PT.IdTextNotification WHERE 1=1";
             if (request != null && request.Id > 0)
-                SQLQueryGeneral += " AND Id={0}";
+                SQLQueryGeneral += " AND PT.Id={0}";
             if (request != null && request.Value != null && request.Value != "")
-                SQLQueryGeneral += " AND Value LIKE '%{1}%'";
+                SQLQueryGeneral += " AND PT.Value LIKE '%{1}%'";
 
             string SQLQuery = String.Format(SQLQueryGeneral, request.Id, request.Value);
 
-            response = conn.Query<IdValue>(SQLQuery).ToList();
+            var sqlResponse = conn.Query(SQLQuery).ToList();
+            foreach (var petition in sqlResponse)
+            {
+                PetitionStatusDataResponse petitionResponse = new PetitionStatusDataResponse();
+                petitionResponse.Id = petition.Id;
+                petitionResponse.Value = petition.Value;
+                petitionResponse.TextNotification.IdNotification = petition.IdTextNotification;
+                petitionResponse.TextNotification.Subject = petition.Subject;
+                petitionResponse.TextNotification.Content = petition.Content;
+                response.Add(petitionResponse);
+            }
+
             return response;
         }
 
