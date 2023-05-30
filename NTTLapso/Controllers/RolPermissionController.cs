@@ -124,7 +124,7 @@ namespace NTTLapso.Controllers
         [HttpGet]
         [Route("Delete")]
         [Authorize]
-        public async Task<RolPermissionResponse> Delete([FromBody] int idRol)
+        public async Task<RolPermissionResponse> Delete( int idRol)
         {
             RolPermissionResponse response = new RolPermissionResponse();
 

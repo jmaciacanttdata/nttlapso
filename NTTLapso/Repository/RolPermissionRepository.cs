@@ -112,8 +112,10 @@ namespace NTTLapso.Repository
 
             if (response.Count() != 0) // If exists we delete data.
             {
-                string sqlDelete = "DELETE FROM rol_permission WHERE `idrol` = @IdRol;";
-                var petitionType = await conn.ExecuteAsync(sqlDelete, new { IdRol = idRol });
+                //string sqlDelete = "DELETE FROM rol_permission WHERE `idrol` = @IdRol;";
+                //var petitionType = await conn.ExecuteAsync(sqlDelete, new { IdRol = idRol });
+                string sqlDelete = String.Format("DELETE FROM rol_permission WHERE `idrol` ={0};", idRol);
+                await conn.QueryAsync(sqlDelete);
             }
             else
             {
