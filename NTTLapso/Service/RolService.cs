@@ -11,8 +11,13 @@ namespace NTTLapso.Service
 {
     public class RolService
     {
-        private RolRepository _repo = new RolRepository();
-        public RolService() { }
+        private RolRepository _repo;
+        private IConfiguration _configuration;
+        public RolService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new RolRepository(_configuration);
+        }
 
         public async Task<List<IdValue>> List(IdValue request) {
             return await _repo.List(request);

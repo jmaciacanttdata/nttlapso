@@ -13,11 +13,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<TeamController> _logger;
-        private TeamService _service = new TeamService();
+        private TeamService _service;
         public TeamController(ILogger<TeamController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new TeamService(_config);
         }
 
 

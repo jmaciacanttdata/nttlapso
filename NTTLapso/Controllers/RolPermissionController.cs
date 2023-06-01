@@ -13,11 +13,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<RolPermissionController> _logger;
-        private RolPermissionService _service = new RolPermissionService();
+        private RolPermissionService _service;
         public RolPermissionController(ILogger<RolPermissionController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new RolPermissionService(_config);
         }
 
         // Get a list of rols with it's permissions.

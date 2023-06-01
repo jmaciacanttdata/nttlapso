@@ -26,9 +26,9 @@ namespace NTTLapso.Controllers
         {
             _logger = logger;
             _config = config;
-            _userService = new UserService();
-            _teamService = new TeamService();
-            _textNotificationService = new TextNotificationService();
+            _userService = new UserService(_config);
+            _teamService = new TeamService(_config);
+            _textNotificationService = new TextNotificationService(_config);
             _processService = new ProcessService(_config);
         }
         [HttpPost]

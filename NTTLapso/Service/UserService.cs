@@ -7,8 +7,13 @@ namespace NTTLapso.Service
 {
     public class UserService
     {
-        private UserRepository _repo = new UserRepository();
-        public UserService() { }
+        private UserRepository _repo;
+        private IConfiguration _configuration;
+        public UserService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new UserRepository(_configuration);
+        }
 
         public async Task<List<UserDataResponse>> List(UserListRequest request)
         {

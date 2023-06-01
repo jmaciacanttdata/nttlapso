@@ -19,17 +19,22 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<VacationController> _logger;
-        private VacationService _service = new VacationService();
-        private UserService _userService = new UserService();
-        private TeamService _teamService = new TeamService();
+        private VacationService _service;
+        private UserService _userService;
+        private TeamService _teamService;
         private ProcessService _processService; 
-        private TextNotificationService _textNotificationService = new TextNotificationService();
-        public VacationRepository _repo = new VacationRepository();
+        private TextNotificationService _textNotificationService;
+        public VacationRepository _repo;
         public VacationController(ILogger<VacationController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
             _processService = new ProcessService(_config);
+            _service = new VacationService(_config);
+            _userService = new UserService(_config);
+            _teamService = new TeamService(_config);
+            _textNotificationService = new TextNotificationService(_config);
+            _repo = new VacationRepository(_config);
         }
 
         [HttpPost]

@@ -11,8 +11,13 @@ namespace NTTLapso.Service
 {
     public class PetitionStateService
     {
-        private PetitionStateRepository _repo = new PetitionStateRepository();
-        public PetitionStateService() { }
+        private PetitionStateRepository _repo;
+        private IConfiguration _configuration;
+        public PetitionStateService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new PetitionStateRepository(config);
+        }
 
         public async Task<List<PetitionStatusDataResponse>> List(IdValue request) {
             return await _repo.List(request);

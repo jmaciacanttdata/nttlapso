@@ -9,12 +9,16 @@ namespace NTTLapso.Repository
 {
     public class UserRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
+        private IConfiguration _config;
         private SupportMethods check = new SupportMethods();
-        public UserRepository()
+        public UserRepository(IConfiguration config)
         {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+            _config = config;
         }
 
         public async Task<List<UserDataResponse>> List(UserListRequest? request)

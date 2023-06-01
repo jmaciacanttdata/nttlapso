@@ -8,10 +8,13 @@ namespace NTTLapso.Repository
 {
     public class PetitionStateRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public PetitionStateRepository() { 
+        private IConfiguration _config;
+        public PetitionStateRepository(IConfiguration config) 
+        { 
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
         }
 

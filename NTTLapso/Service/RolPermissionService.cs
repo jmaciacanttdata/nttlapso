@@ -5,8 +5,13 @@ namespace NTTLapso.Service
 {
     public class RolPermissionService
     {
-        private RolPermissionRepository _repo = new RolPermissionRepository();
-        public RolPermissionService() { }
+        private RolPermissionRepository _repo;
+        private IConfiguration _configuration;
+        public RolPermissionService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new RolPermissionRepository(_configuration);
+        }
 
         // Get a list of rols with it's permissions.
         public async Task<List<RolPermissionDataResponse>> List(int? idRol)

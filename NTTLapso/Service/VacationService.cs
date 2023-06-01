@@ -7,9 +7,13 @@ namespace NTTLapso.Service
 {
     public class VacationService
     {
-        public VacationRepository _repo = new VacationRepository();
-
-        public VacationService() { }
+        public VacationRepository _repo;
+        private IConfiguration _configuration;
+        public VacationService(IConfiguration config) 
+        {
+            _configuration = config;    
+            _repo = new VacationRepository(_configuration);
+        }
 
         public async Task Create(CreateVacationRequest request)
         {
