@@ -39,7 +39,7 @@ namespace NTTLapso.Controllers
 
         [HttpPost]
         [Route("Create")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<VacationResponse> Create(CreateVacationRequest request)
         {
             VacationResponse response = new VacationResponse();
@@ -56,34 +56,34 @@ namespace NTTLapso.Controllers
                         await _service.Create(request);
 
                         //Conformamos el objeto sender para el envío de la notificación (email).
-                        UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserPetition })).First();
-                        sender.Receiver.Id = (int)user.Id;
-                        sender.Receiver.Name = user.Name;
-                        sender.Receiver.Email = user.Email;
-                        foreach (var manager in managerList)
-                        {
-                            UserMail receiverCC = new UserMail()
-                            {
-                                Id = manager.Id,
-                                Name = manager.Name,
-                                Email = manager.Email,
-                            };
-                            sender.ReceiverCCList.Add(receiverCC);
-                        }
-                        List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
-                        {
-                            Id = (int)NotificationType.SendNotificationOfNewVacationRequest
-                        });
-                        sender.Content.Subject = notification[0].Subject;
-                        sender.Content.Content = notification[0].Content;
-                        sender.Content.IdNotificationType = notification[0].IdNotification;
-                        MailReplacer replacer1 = new MailReplacer();
-                        replacer1.SearchText = "{{user_name}}";
-                        replacer1.ReplaceText = user.Name + " " + user.Surnames;
-                        replacerList.Add(replacer1);
-                        sender.Replacers = replacerList;
+                        //UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserPetition })).First();
+                        //sender.Receiver.Id = (int)user.Id;
+                        //sender.Receiver.Name = user.Name;
+                        //sender.Receiver.Email = user.Email;
+                        //foreach (var manager in managerList)
+                        //{
+                        //    UserMail receiverCC = new UserMail()
+                        //    {
+                        //        Id = manager.Id,
+                        //        Name = manager.Name,
+                        //        Email = manager.Email,
+                        //    };
+                        //    sender.ReceiverCCList.Add(receiverCC);
+                        //}
+                        //List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
+                        //{
+                        //    Id = (int)NotificationType.SendNotificationOfNewVacationRequest
+                        //});
+                        //sender.Content.Subject = notification[0].Subject;
+                        //sender.Content.Content = notification[0].Content;
+                        //sender.Content.IdNotificationType = notification[0].IdNotification;
+                        //MailReplacer replacer1 = new MailReplacer();
+                        //replacer1.SearchText = "{{user_name}}";
+                        //replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                        //replacerList.Add(replacer1);
+                        //sender.Replacers = replacerList;
 
-                        await _processService.SendNotification(sender);
+                        //await _processService.SendNotification(sender);
                         response.IsSuccess = true;
                     }
                     else
@@ -250,7 +250,7 @@ namespace NTTLapso.Controllers
         // Get vacation state log list.
         [HttpPost]
         [Route("VacationStateLogList")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<VacationStateLogListResponse> VacationStateLogList(VacationStateLogListRequest? request)
         {
             VacationStateLogListResponse response = new VacationStateLogListResponse();

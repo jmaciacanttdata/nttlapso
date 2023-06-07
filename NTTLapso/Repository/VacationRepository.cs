@@ -29,11 +29,17 @@ namespace NTTLapso.Repository
 
             conn.Query(SQLQueryGeneral);
             CreateLogRequest requestLog = new CreateLogRequest();
-            requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetitionDate = '" + request.Day.ToString("yyyy-MM-dd") +"'");
+            requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetitionDate = '" + request.Day.ToString("yyyy-MM-dd HH:mm:ss") + "'");
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
             requestLog.Detail = "";
-            CreateLog(requestLog);
+
+            string SQLLog = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{3}')";
+            conn.Query (String.Format(SQLLog, requestLog.IdVacation, requestLog.IdUserState, requestLog.IdState, requestLog.Detail));
+
+            //var prueba = SQLQueryGeneral;
+            //conn.Query(SQLLogGeneral);
+            //CreateLog(requestLog);
         }
 
         public async Task<bool> CheckViability(int IdUserPetition, DateTime datePetition)
@@ -133,6 +139,7 @@ namespace NTTLapso.Repository
             string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{4}')";
             string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
 
+            var prueba = SQLQueryGeneral;
             conn.Query(SQLQueryGeneral);
         }
 
@@ -210,7 +217,7 @@ namespace NTTLapso.Repository
 
             string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"));
 
-            var SQLResponse = (await conn.QueryAsync(SQLQuery)).ToList();
+            var SQLResponse =  conn.Query(SQLQuery).ToList();
 
             foreach (var log in SQLResponse)
             {
