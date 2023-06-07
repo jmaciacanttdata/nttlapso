@@ -35,6 +35,10 @@ namespace NTTLapso.Service
         {
             await _repo.Delete(Id);
         }
+        public async Task<int> GetUserTeamRol(int Id, int IdTeam)
+        {
+            return await _repo.GetUserTeamRol(Id, IdTeam);
+        }
         internal async Task SetUserTeam(UserTeamRequest request)
         {
             await _repo.SetUserTeam(request);

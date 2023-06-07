@@ -182,6 +182,14 @@ namespace NTTLapso.Repository
             conn.Query(SQLQueryGeneral);
         }
 
+        public async Task<int> GetUserTeamRol(int Id, int IdTeam)
+        {
+            int response = 0;
+            string SQLQueryGeneral = string.Format("SELECT IdRol FROM user_team_rol WHERE IdUserTeam = (SELECT user_team.Id FROM user_team WHERE IdUser = {0} AND IdTeam = {1})", Id, IdTeam);
+            response = conn.ExecuteScalar<int>(SQLQueryGeneral);
+            return response;
+        }
+
         public async Task ChangeUserState(ChangeUserStateRequest request)
         {
             string SQLQueryGeneral = String.Format("UPDATE user SET `Active`={1} WHERE Id={0}", request.Id, request.Active);
