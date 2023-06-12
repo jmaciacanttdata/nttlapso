@@ -215,13 +215,13 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("GetUserTeamRol")]
         [Authorize]
-        public async Task<int> GetUserTeamRol(int Id,int IdTeam)
+        public async Task<int> GetUserTeamRol(UserRol request)
         {
             int response = 0;
             try
             {
        
-                response = await _userService.GetUserTeamRol(Id, IdTeam);
+                response = await _userService.GetUserTeamRol(request.Id, request.IdTeam);
             }
             catch (Exception ex)
             {

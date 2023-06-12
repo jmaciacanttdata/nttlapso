@@ -148,7 +148,7 @@ namespace NTTLapso.Repository
         {
             List<VacationData> response = new List<VacationData>();
 
-            string SQLQueryGeneral = "SELECT U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
+            string SQLQueryGeneral = "SELECT vacation.Id AS IdVacation, U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
                 /*"SELECT IdUserPetition, user.Name, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1"*/;
             if (request != null && request.IdUserPetition > 0)
             {
@@ -200,7 +200,7 @@ namespace NTTLapso.Repository
         {
             List<VacationStateLogDataResponse> response = new List<VacationStateLogDataResponse>();
 
-            string SQLQueryGeneral = "SELECT U.Id AS IdUser, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', " +
+            string SQLQueryGeneral = "SELECT IdVacation, U.Id AS IdUser, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', " +
                 "PT.Value AS 'ValuePetitionType', PS.Id AS 'IdPetitionState', PS.Value AS 'ValuePetitionState', V.PetitionDate AS 'PetitionDate', " +
                 "StateDate, Detail FROM vacation_state_log INNER JOIN vacation V ON IdVacation = V.Id INNER JOIN `user` U ON IdUserState = U.Id " +
                 "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id";
@@ -210,7 +210,7 @@ namespace NTTLapso.Repository
                 SQLQueryGeneral += " AND PT.Id={1}";
             if (request != null && request.IdPetitionState > 0)
                 SQLQueryGeneral += " AND PS.Id={2}";
-            if (request != null && request.PetitionDate.ToString() != "" && request.PetitionDate > new DateTime())
+            if (request != null && request.PetitionDate.Date.ToString("yyyy-MM-dd") != "" && request.PetitionDate > new DateTime())
                 SQLQueryGeneral += " AND V.PetitionDate='{3}'";
             if (request != null && request.StateDate.ToString() != "" && request.StateDate > new DateTime())
                 SQLQueryGeneral += " AND StateDate='{4}'";
