@@ -206,6 +206,8 @@ namespace NTTLapso.Repository
                 "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id";
             if (request != null && request.IdUser > 0)
                 SQLQueryGeneral += " AND U.Id={0}";
+            if (request != null && request.IdVacation > 0)
+                SQLQueryGeneral += " AND IdVacation={5}";
             if (request != null && request.IdPetitionType > 0)
                 SQLQueryGeneral += " AND PT.Id={1}";
             if (request != null && request.IdPetitionState > 0)
@@ -215,7 +217,7 @@ namespace NTTLapso.Repository
             if (request != null && request.StateDate.ToString() != "" && request.StateDate > new DateTime())
                 SQLQueryGeneral += " AND StateDate='{4}'";
 
-            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"));
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"), request.IdVacation);
 
             var SQLResponse =  conn.Query(SQLQuery).ToList();
 
