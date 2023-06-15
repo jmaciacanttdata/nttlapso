@@ -78,7 +78,7 @@ namespace NTTLapso.Repository
         public async Task Edit(EditVacationRequest request)
         {
             EditLogRequest requestLog = new EditLogRequest();
-            string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserPetition + " AND PetitionDate = '" + request.OldPetitionDate.Date.ToString("yyyy-MM-dd") + "'";
+            //string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserPetition + " AND PetitionDate = '" + request.OldPetitionDate.Date.ToString("yyyy-MM-dd") + "'";
             /*requestLog.IdVacation = conn.ExecuteScalar<int>(query);
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
@@ -88,7 +88,7 @@ namespace NTTLapso.Repository
             EditLog(requestLog);*/
 
             VacationResponse response = new VacationResponse();
-            string SQLQuery = String.Format("UPDATE vacation SET PetitionDate = '{2}', IdPetitionType = {3}  WHERE IdUserPetition = {0} AND PetitionDate = '{1}'",request.IdUserPetition, request.OldPetitionDate.Date.ToString("yyyy-MM-dd"), request.PetitionDate.Date.ToString("yyyy-MM-dd"),request.IdPetitionType);
+            string SQLQuery = String.Format("UPDATE vacation SET PetitionDate = '{2}', IdPetitionType = {3}  WHERE Id = {1} ",request.IdUserPetition, request.Id, request.PetitionDate.Date.ToString("yyyy-MM-dd"),request.IdPetitionType);
             conn.Query(SQLQuery);
 
         }
@@ -136,10 +136,19 @@ namespace NTTLapso.Repository
       
         public async Task CreateLog(CreateLogRequest request)
         {
-            string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{4}')";
-            string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
+            //string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{3}')";
+            //string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
 
-            var prueba = SQLQueryGeneral;
+            //var prueba = SQLQueryGeneral;
+            //conn.Query(SQLQueryGeneral);
+
+            string SQLQuerySet = "UPDATE vacation_state_log SET IdState = {2} , StateDate = NOW()";
+            if(request.Detail != null && request.Detail != "")
+            {
+                SQLQuerySet += ", Detail = '{3}'";
+            }
+            SQLQuerySet += " WHERE IdVacation = {0}";
+            string SQLQueryGeneral = String.Format(SQLQuerySet, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
             conn.Query(SQLQueryGeneral);
         }
 

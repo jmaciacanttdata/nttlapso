@@ -30,6 +30,10 @@ namespace NTTLapso.Service
         {
             await _repo.Delete(IdVacation);
         }
+        internal async Task CreateLog(CreateLogRequest request)
+        {
+            await _repo.CreateLog(request);
+        }
 
         public async Task VacationApproved(VacationApprovedRequest request)
         {

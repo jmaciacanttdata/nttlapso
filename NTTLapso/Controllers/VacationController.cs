@@ -342,5 +342,27 @@ namespace NTTLapso.Controllers
             }
             return response;
         }
+        [HttpPost]
+        [Route("EditLog")]
+        [Authorize]
+        public async Task<VacationResponse> CreateLog(CreateLogRequest request)
+        {
+            VacationResponse response = new VacationResponse();
+
+            try
+            {
+                await _service.CreateLog(request);
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+
+            }
+
+            return response;
+        }
     }
 }

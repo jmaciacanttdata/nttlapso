@@ -158,7 +158,7 @@ namespace NTTLapso.Repository
             if (request.UserName != null)
                 SQLSet += ", `UserName`= '{6}'";
 
-            if (request.UserPass != null)
+            if (request.UserPass != null && request.UserPass !="")
                 SQLSet += ", `UserPass`=  MD5('{7}')";
 
             if (request.Active != null)
