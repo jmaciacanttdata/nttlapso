@@ -56,34 +56,34 @@ namespace NTTLapso.Controllers
                         await _service.Create(request);
 
                         //Conformamos el objeto sender para el envío de la notificación (email).
-                        UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserPetition })).First();
-                        sender.Receiver.Id = (int)user.Id;
-                        sender.Receiver.Name = user.Name;
-                        sender.Receiver.Email = user.Email;
-                        foreach (var manager in managerList)
-                        {
-                            UserMail receiverCC = new UserMail()
-                            {
-                                Id = manager.Id,
-                                Name = manager.Name,
-                                Email = manager.Email,
-                            };
-                            sender.ReceiverCCList.Add(receiverCC);
-                        }
-                        List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
-                        {
-                            Id = (int)NotificationType.SendNotificationOfNewVacationRequest
-                        });
-                        sender.Content.Subject = notification[0].Subject;
-                        sender.Content.Content = notification[0].Content;
-                        sender.Content.IdNotificationType = notification[0].IdNotification;
-                        MailReplacer replacer1 = new MailReplacer();
-                        replacer1.SearchText = "{{user_name}}";
-                        replacer1.ReplaceText = user.Name + " " + user.Surnames;
-                        replacerList.Add(replacer1);
-                        sender.Replacers = replacerList;
+                        //UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserPetition })).First();
+                        //sender.Receiver.Id = (int)user.Id;
+                        //sender.Receiver.Name = user.Name;
+                        //sender.Receiver.Email = user.Email;
+                        //foreach (var manager in managerList)
+                        //{
+                        //    UserMail receiverCC = new UserMail()
+                        //    {
+                        //        Id = manager.Id,
+                        //        Name = manager.Name,
+                        //        Email = manager.Email,
+                        //    };
+                        //    sender.ReceiverCCList.Add(receiverCC);
+                        //}
+                        //List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
+                        //{
+                        //    Id = (int)NotificationType.SendNotificationOfNewVacationRequest
+                        //});
+                        //sender.Content.Subject = notification[0].Subject;
+                        //sender.Content.Content = notification[0].Content;
+                        //sender.Content.IdNotificationType = notification[0].IdNotification;
+                        //MailReplacer replacer1 = new MailReplacer();
+                        //replacer1.SearchText = "{{user_name}}";
+                        //replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                        //replacerList.Add(replacer1);
+                        //sender.Replacers = replacerList;
 
-                        await _processService.SendNotification(sender);
+                        //await _processService.SendNotification(sender);
                         response.IsSuccess = true;
                     }
                     else
@@ -348,6 +348,10 @@ namespace NTTLapso.Controllers
         public async Task<VacationResponse> CreateLog(CreateLogRequest request)
         {
             VacationResponse response = new VacationResponse();
+            VacationData responseData = new VacationData();
+            VacationStateLogListRequest logRequest = new VacationStateLogListRequest();
+            List<VacationStateLogDataResponse> logResponse = new List<VacationStateLogDataResponse>();
+            logRequest.IdVacation = request.IdVacation;
             MailSender sender = new MailSender();
             List<MailReplacer> replacerList = new List<MailReplacer>();
             try
@@ -357,6 +361,7 @@ namespace NTTLapso.Controllers
 
                 if(response.IsSuccess == true && (request.IdState == 4 || request.IdState == 3 || request.IdState == 2))
                 {
+                    logResponse = await _repo.VacationStateLogList(logRequest);
                     List<TeamManagerDataResponse> managerList = await _teamService.GetTeamsManagerList(0, request.IdUserState);
                     UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserState })).First();
 
@@ -388,18 +393,21 @@ namespace NTTLapso.Controllers
                     replacer2.SearchText = "{{manager_name}}";
                     replacer2.ReplaceText = managerList[0].Name;
                     MailReplacer replacer3 = new MailReplacer();
-                    replacer3.SearchText = "{{approved}}";
+                    replacer3.SearchText = "{{date}}";
+                    MailReplacer replacer5 = new MailReplacer();
+                    replacer5.SearchText = "{{type}}";
+                    replacer5.ReplaceText = "" + logResponse[0].PetitionType.Value;
                     if (request.IdState == 3)
                     {
-                        replacer3.ReplaceText = "Approved";
+                        replacer3.ReplaceText = "Aprobada";//"Approved"
                     }
                     else if (request.IdState == 4)
                     {
-                        replacer3.ReplaceText = "Denied";
+                        replacer3.ReplaceText = "Denegada";//"Denied"
                     }
                     else
                     {
-                        replacer3.ReplaceText = "Sent";
+                        replacer3.ReplaceText = " " + logResponse[0].PetitionDate;
                     }
                     MailReplacer replacer4 = new MailReplacer();
                     replacer4.SearchText = "{{details}}";
