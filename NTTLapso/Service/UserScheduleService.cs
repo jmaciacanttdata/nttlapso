@@ -5,8 +5,13 @@ namespace NTTLapso.Service
 {
     public class UserScheduleService
     {
-        private UserScheduleRepository _repo = new UserScheduleRepository();
-        public UserScheduleService() { }
+        private UserScheduleRepository _repo;
+        private IConfiguration _configuration;
+        public UserScheduleService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new UserScheduleRepository(_configuration);
+        }
 
         public async Task<List<IdValue>> List(IdValue request)
         {

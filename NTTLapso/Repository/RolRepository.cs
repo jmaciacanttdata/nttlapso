@@ -6,10 +6,12 @@ namespace NTTLapso.Repository
 {
     public class RolRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public RolRepository() { 
+        private IConfiguration _config;
+        public RolRepository(IConfiguration config) {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
         }
 
@@ -30,7 +32,7 @@ namespace NTTLapso.Repository
 
         public async Task Create(string value)
         {
-            string SQLQueryGeneral = String.Format("INSERT INTO rol(Value) VALUES({0})", value);
+            string SQLQueryGeneral = String.Format("INSERT INTO rol(Value) VALUES('{0}')", value);
             conn.Query(SQLQueryGeneral);
 
         }

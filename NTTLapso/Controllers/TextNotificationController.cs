@@ -20,11 +20,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<TextNotificationController> _logger;
-        private TextNotificationService _service = new TextNotificationService();
+        private TextNotificationService _service;
         public TextNotificationController(ILogger<TextNotificationController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new TextNotificationService(_config);
         }
 
 

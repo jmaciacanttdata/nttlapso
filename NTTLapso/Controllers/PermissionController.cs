@@ -12,11 +12,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<PermissionController> _logger;
-        private PermissionService _service = new PermissionService();
+        private PermissionService _service;
         public PermissionController(ILogger<PermissionController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new PermissionService(_config);
         }
 
         [HttpPost]

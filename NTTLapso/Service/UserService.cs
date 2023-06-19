@@ -7,8 +7,13 @@ namespace NTTLapso.Service
 {
     public class UserService
     {
-        private UserRepository _repo = new UserRepository();
-        public UserService() { }
+        private UserRepository _repo;
+        private IConfiguration _configuration;
+        public UserService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new UserRepository(_configuration);
+        }
 
         public async Task<List<UserDataResponse>> List(UserListRequest request)
         {
@@ -29,6 +34,10 @@ namespace NTTLapso.Service
         public async Task Delete(int Id)
         {
             await _repo.Delete(Id);
+        }
+        public async Task<int> GetUserTeamRol(int Id, int IdTeam)
+        {
+            return await _repo.GetUserTeamRol(Id, IdTeam);
         }
         internal async Task SetUserTeam(UserTeamRequest request)
         {

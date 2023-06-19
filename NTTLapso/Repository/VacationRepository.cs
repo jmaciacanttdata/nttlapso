@@ -10,12 +10,15 @@ namespace NTTLapso.Repository
 {
     public class VacationRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public VacationRepository()
+        private IConfiguration _config;
+        public VacationRepository(IConfiguration config)
         {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+         
         }
 
         public async Task Create(CreateVacationRequest request)
@@ -26,11 +29,17 @@ namespace NTTLapso.Repository
 
             conn.Query(SQLQueryGeneral);
             CreateLogRequest requestLog = new CreateLogRequest();
-            requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetitionDate = '" + request.Day.ToString("yyyy-MM-dd") +"'");
+            requestLog.IdVacation = conn.ExecuteScalar<int>("SELECT id FROM vacation WHERE IdUserPetition = "+ request.IdUserPetition + " AND PetitionDate = '" + request.Day.ToString("yyyy-MM-dd HH:mm:ss") + "'");
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
             requestLog.Detail = "";
-            CreateLog(requestLog);
+
+            string SQLLog = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{3}')";
+            conn.Query (String.Format(SQLLog, requestLog.IdVacation, requestLog.IdUserState, requestLog.IdState, requestLog.Detail));
+
+            //var prueba = SQLQueryGeneral;
+            //conn.Query(SQLLogGeneral);
+            //CreateLog(requestLog);
         }
 
         public async Task<bool> CheckViability(int IdUserPetition, DateTime datePetition)
@@ -69,7 +78,7 @@ namespace NTTLapso.Repository
         public async Task Edit(EditVacationRequest request)
         {
             EditLogRequest requestLog = new EditLogRequest();
-            string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserPetition + " AND PetitionDate = '" + request.OldPetitionDate.Date.ToString("yyyy-MM-dd") + "'";
+            //string query = "SELECT Id FROM vacation WHERE IdUserPetition = " + request.IdUserPetition + " AND PetitionDate = '" + request.OldPetitionDate.Date.ToString("yyyy-MM-dd") + "'";
             /*requestLog.IdVacation = conn.ExecuteScalar<int>(query);
             requestLog.IdUserState = request.IdUserPetition;
             requestLog.IdState = 1;
@@ -79,7 +88,7 @@ namespace NTTLapso.Repository
             EditLog(requestLog);*/
 
             VacationResponse response = new VacationResponse();
-            string SQLQuery = String.Format("UPDATE vacation SET PetitionDate = '{2}', IdPetitionType = {3}  WHERE IdUserPetition = {0} AND PetitionDate = '{1}'",request.IdUserPetition, request.OldPetitionDate.Date.ToString("yyyy-MM-dd"), request.PetitionDate.Date.ToString("yyyy-MM-dd"),request.IdPetitionType);
+            string SQLQuery = String.Format("UPDATE vacation SET PetitionDate = '{2}', IdPetitionType = {3}  WHERE Id = {1} ",request.IdUserPetition, request.Id, request.PetitionDate.Date.ToString("yyyy-MM-dd"),request.IdPetitionType);
             conn.Query(SQLQuery);
 
         }
@@ -127,9 +136,19 @@ namespace NTTLapso.Repository
       
         public async Task CreateLog(CreateLogRequest request)
         {
-            string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{4}')";
-            string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
+            //string SQLQuery = "INSERT INTO vacation_state_log (`IdVacation`, `IdUserState`, `IdState`, `StateDate`, `Detail`) VALUES ({0}, {1}, {2}, NOW(), '{3}')";
+            //string SQLQueryGeneral = String.Format(SQLQuery, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
 
+            //var prueba = SQLQueryGeneral;
+            //conn.Query(SQLQueryGeneral);
+
+            string SQLQuerySet = "UPDATE vacation_state_log SET IdState = {2} , StateDate = NOW()";
+            if(request.Detail != null && request.Detail != "")
+            {
+                SQLQuerySet += ", Detail = '{3}'";
+            }
+            SQLQuerySet += " WHERE IdVacation = {0}";
+            string SQLQueryGeneral = String.Format(SQLQuerySet, request.IdVacation, request.IdUserState, request.IdState, request.Detail);
             conn.Query(SQLQueryGeneral);
         }
 
@@ -138,7 +157,7 @@ namespace NTTLapso.Repository
         {
             List<VacationData> response = new List<VacationData>();
 
-            string SQLQueryGeneral = "SELECT U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
+            string SQLQueryGeneral = "SELECT vacation.Id AS IdVacation, U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
                 /*"SELECT IdUserPetition, user.Name, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1"*/;
             if (request != null && request.IdUserPetition > 0)
             {
@@ -190,24 +209,26 @@ namespace NTTLapso.Repository
         {
             List<VacationStateLogDataResponse> response = new List<VacationStateLogDataResponse>();
 
-            string SQLQueryGeneral = "SELECT U.Id AS IdUser, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', " +
+            string SQLQueryGeneral = "SELECT IdVacation, U.Id AS IdUser, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', " +
                 "PT.Value AS 'ValuePetitionType', PS.Id AS 'IdPetitionState', PS.Value AS 'ValuePetitionState', V.PetitionDate AS 'PetitionDate', " +
                 "StateDate, Detail FROM vacation_state_log INNER JOIN vacation V ON IdVacation = V.Id INNER JOIN `user` U ON IdUserState = U.Id " +
                 "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id";
             if (request != null && request.IdUser > 0)
                 SQLQueryGeneral += " AND U.Id={0}";
+            if (request != null && request.IdVacation > 0)
+                SQLQueryGeneral += " AND IdVacation={5}";
             if (request != null && request.IdPetitionType > 0)
                 SQLQueryGeneral += " AND PT.Id={1}";
             if (request != null && request.IdPetitionState > 0)
                 SQLQueryGeneral += " AND PS.Id={2}";
-            if (request != null && request.PetitionDate.ToString() != "" && request.PetitionDate > new DateTime())
+            if (request != null && request.PetitionDate.Date.ToString("yyyy-MM-dd") != "" && request.PetitionDate > new DateTime())
                 SQLQueryGeneral += " AND V.PetitionDate='{3}'";
             if (request != null && request.StateDate.ToString() != "" && request.StateDate > new DateTime())
                 SQLQueryGeneral += " AND StateDate='{4}'";
 
-            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"));
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"), request.IdVacation);
 
-            var SQLResponse = (await conn.QueryAsync(SQLQuery)).ToList();
+            var SQLResponse =  conn.Query(SQLQuery).ToList();
 
             foreach (var log in SQLResponse)
             {

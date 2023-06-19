@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Login;
 using NTTLapso.Models.PetitionStatus;
@@ -11,8 +12,13 @@ namespace NTTLapso.Service
 {
     public class CategoryService
     {
-        private CategoryRepository _repo = new CategoryRepository();
-        public CategoryService() { }
+        private CategoryRepository _repo;
+        private IConfiguration _configuration;
+        public CategoryService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new CategoryRepository(_configuration);
+        }
 
         public async Task<List<IdValue>> List(IdValue request) {
             return await _repo.List(request);

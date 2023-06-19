@@ -2,26 +2,32 @@
 using MySqlConnector;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Team;
+using NTTLapso.Support_methods;
+
 namespace NTTLapso.Repository
 {
     public class TeamRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public TeamRepository()
+        private SupportMethods check = new SupportMethods();
+        private IConfiguration _config;
+        public TeamRepository(IConfiguration config)
         {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+            _config = config;
         }
 
         public async Task<List<TeamData>> List(TeamRequest? request)
         {
             List<TeamData> response = new List<TeamData>();
 
-            string SQLQueryGeneral = "SELECT team.Id, Team, CONCAT(user.Name,' ',user.Surnames) AS 'Manager' FROM team INNER JOIN user ON team.IdUserManager = user.Id WHERE 1=1";
+            string SQLQueryGeneral = "SELECT team.Id, Team, CONCAT(user.Name,' ',user.Surnames) AS 'Manager', team.IdUserManager AS 'IdManager' FROM team INNER JOIN user ON team.IdUserManager = user.Id WHERE 1=1";
             if (request != null && request.Id > 0)
             {
-                SQLQueryGeneral += " AND Id={0}";
+                SQLQueryGeneral += " AND team.Id={0}";
             }
             if(request != null && request.Team != null && request.Team != "")
             {
@@ -46,9 +52,26 @@ namespace NTTLapso.Repository
 
         public async Task Edit(TeamRequest request)
         {
-            string SQLQueryGeneral = String.Format("UPDATE team SET team='{1}', IdUserManager={2} WHERE Id={0}", request.Id, request.Team, request.IdManager);
-            conn.Query(SQLQueryGeneral);
+            //string SQLQueryGeneral = String.Format("UPDATE team SET team='{1}', IdUserManager={2} WHERE Id={0}", request.Id, request.Team, request.IdManager);
+            //conn.Query(SQLQueryGeneral);
+            string SQLSet = "";
+            string SQLQueryPartial = "UPDATE team SET";
+            if (request.Team != null && request.Team != "")
+                SQLSet += " Team='{1}'";
 
+            if (request.IdManager != null && request.IdManager != 0)
+                SQLSet += ", `IdUserManager`= {2}";
+
+            if (SQLSet != "")
+            {
+                SQLSet = check.CheckCommas(SQLSet);
+            }
+
+            SQLQueryPartial += SQLSet;
+            SQLQueryPartial += " WHERE Id={0};";
+
+            string SQLQueryGeneral = String.Format(SQLQueryPartial, request.Id, request.Team, request.IdManager);
+            conn.Query(SQLQueryGeneral);
         }
 
         public async Task Delete(int Id)

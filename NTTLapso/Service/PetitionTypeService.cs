@@ -1,13 +1,18 @@
-﻿using NTTLapso.Models.PetitionType;
+﻿using NTTLapso.Models.PetitionStatus;
+using NTTLapso.Models.PetitionType;
 using NTTLapso.Repository;
 
 namespace NTTLapso.Service
 {
     public class PetitionTypeService
     {
-        private PetitionTypeRepository _repo = new PetitionTypeRepository();
-
-        public PetitionTypeService() { }
+        private PetitionTypeRepository _repo;
+        private IConfiguration _configuration;
+        public PetitionTypeService(IConfiguration config)
+        {
+            _configuration = config;
+            _repo = new PetitionTypeRepository(config);
+        }
 
         // Get petition type list.
         public async Task<List<PetitionTypeDataResponse>> List(PetitionTypeRequest request)
@@ -16,9 +21,9 @@ namespace NTTLapso.Service
         }
 
         // Create new petition type.
-        public async Task Create(string value, bool selectable)
+        public async Task Create(CreatePetitionTypeRequest request)
         {
-            await _repo.Create(value, selectable);
+            await _repo.Create(request);
         }
 
         // Edit a petition type.

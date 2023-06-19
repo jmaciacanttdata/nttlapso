@@ -7,12 +7,15 @@ namespace NTTLapso.Repository
 {
     public class PermissionRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public PermissionRepository()
+        private IConfiguration _config;
+        public PermissionRepository(IConfiguration config)
         {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+            _config = config;
         }
 
         public async Task<List<LoginUserPermissionResponse>> ListUserPermission(int userId)

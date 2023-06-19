@@ -2,6 +2,7 @@
 {
     public class VacationData
     {
+        public int IdVacation { get; set; }
         public int IdUserPetition { get; set; }
         public string UserName { get; set; }
         public int IdPetitionType { get; set; }

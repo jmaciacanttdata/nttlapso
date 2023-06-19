@@ -20,11 +20,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<CategoryController> _logger;
-        private CategoryService _service = new CategoryService();
+        private CategoryService _service;
         public CategoryController(ILogger<CategoryController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new CategoryService(_config);
         }
 
 

@@ -19,22 +19,27 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<VacationController> _logger;
-        private VacationService _service = new VacationService();
-        private UserService _userService = new UserService();
-        private TeamService _teamService = new TeamService();
+        private VacationService _service;
+        private UserService _userService;
+        private TeamService _teamService;
         private ProcessService _processService; 
-        private TextNotificationService _textNotificationService = new TextNotificationService();
-        public VacationRepository _repo = new VacationRepository();
+        private TextNotificationService _textNotificationService;
+        public VacationRepository _repo;
         public VacationController(ILogger<VacationController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
             _processService = new ProcessService(_config);
+            _service = new VacationService(_config);
+            _userService = new UserService(_config);
+            _teamService = new TeamService(_config);
+            _textNotificationService = new TextNotificationService(_config);
+            _repo = new VacationRepository(_config);
         }
 
         [HttpPost]
         [Route("Create")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<VacationResponse> Create(CreateVacationRequest request)
         {
             VacationResponse response = new VacationResponse();
@@ -245,7 +250,7 @@ namespace NTTLapso.Controllers
         // Get vacation state log list.
         [HttpPost]
         [Route("VacationStateLogList")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<VacationStateLogListResponse> VacationStateLogList(VacationStateLogListRequest? request)
         {
             VacationStateLogListResponse response = new VacationStateLogListResponse();
@@ -335,6 +340,86 @@ namespace NTTLapso.Controllers
                 response.IsSuccess = false;
                 response.Error = _error;
             }
+            return response;
+        }
+        [HttpPost]
+        [Route("EditLog")]
+        [Authorize]
+        public async Task<VacationResponse> CreateLog(CreateLogRequest request)
+        {
+            VacationResponse response = new VacationResponse();
+            MailSender sender = new MailSender();
+            List<MailReplacer> replacerList = new List<MailReplacer>();
+            try
+            {
+                await _service.CreateLog(request);
+                response.IsSuccess = true;
+
+                if(response.IsSuccess == true && (request.IdState == 4 || request.IdState == 3 || request.IdState == 2))
+                {
+                    List<TeamManagerDataResponse> managerList = await _teamService.GetTeamsManagerList(0, request.IdUserState);
+                    UserDataResponse user = (await _userService.List(new UserListRequest() { Id = request.IdUserState })).First();
+
+                    //Conformamos el objeto sender para el envío de la notificación.
+                    sender.Receiver.Id = request.IdUserState;
+                    sender.Receiver.Name = user.Name;
+                    sender.Receiver.Email = user.Email;
+                    foreach (var manager in managerList)
+                    {
+                        UserMail receiverCC = new UserMail()
+                        {
+                            Id = manager.Id,
+                            Name = manager.Name,
+                            Email = manager.Email,
+                        };
+                        sender.ReceiverCCList.Add(receiverCC);
+                    }
+                    List<TextNotificationData> notification = await _textNotificationService.List(new IdTextNotificationRequest()
+                    {
+                        Id = (int)NotificationType.SendNotificationApprovedVacations
+                    });
+                    sender.Content.Subject = notification[0].Subject;
+                    sender.Content.Content = notification[0].Content;
+                    sender.Content.IdNotificationType = notification[0].IdNotification;
+                    MailReplacer replacer1 = new MailReplacer();
+                    replacer1.SearchText = "{{user_name}}";
+                    replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                    MailReplacer replacer2 = new MailReplacer();
+                    replacer2.SearchText = "{{manager_name}}";
+                    replacer2.ReplaceText = managerList[0].Name;
+                    MailReplacer replacer3 = new MailReplacer();
+                    replacer3.SearchText = "{{approved}}";
+                    if (request.IdState == 3)
+                    {
+                        replacer3.ReplaceText = "Approved";
+                    }
+                    else if (request.IdState == 4)
+                    {
+                        replacer3.ReplaceText = "Denied";
+                    }
+                    else
+                    {
+                        replacer3.ReplaceText = "Sent";
+                    }
+                    MailReplacer replacer4 = new MailReplacer();
+                    replacer4.SearchText = "{{details}}";
+                    replacer4.ReplaceText = request.Detail != null ? request.Detail : "";
+                    replacerList.Add(replacer1);
+                    replacerList.Add(replacer2);
+                    replacerList.Add(replacer3);
+                    replacerList.Add(replacer4);
+                    sender.Replacers = replacerList;
+
+                    await _processService.SendNotification(sender);
+                }
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+
             return response;
         }
     }

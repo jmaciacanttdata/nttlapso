@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using MySqlConnector;
 using NTTLapso.Models.General;
+using NTTLapso.Models.PetitionStatus;
 using NTTLapso.Models.PetitionType;
 using System.Web.WebPages;
 
@@ -8,12 +9,16 @@ namespace NTTLapso.Repository
 {
     public class PetitionTypeRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public PetitionTypeRepository()
+        private IConfiguration _config;
+        public PetitionTypeRepository(IConfiguration config)
         {
+            _config = config;
+            //conn = new MySqlConnection(connectionString);
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+            //int compensatedDays = _config.GetValue<int>("UserCharge:CompensatedDays");
         }
 
         // Get petition type list.
@@ -51,19 +56,19 @@ namespace NTTLapso.Repository
         }
 
         // Create new petition type.
-        public async Task Create(string value, bool selectable)
+        public async Task Create(CreatePetitionTypeRequest request)
         {
-            string sqlSelect = String.Format("SELECT `value` FROM petition_type WHERE LOWER(`value`) = LOWER('{0}');", value);
+            string sqlSelect = String.Format("SELECT `value` FROM petition_type WHERE LOWER(`value`) = LOWER('{0}');", request.Value);
             var query = await conn.QueryAsync(sqlSelect); // Checks if the petition type already exists.
 
             if (query.Count() == 0) // If doesn´t exist we insert petition type.
             {
-                string SQLQueryGeneral = String.Format("INSERT INTO petition_type(Value, Selectable) VALUES('{0}', {1})", value, selectable);
+                string SQLQueryGeneral = String.Format("INSERT INTO petition_type(Value, Selectable) VALUES('{0}', {1})", request.Value, request.Selectable);
                 await conn.QueryAsync(SQLQueryGeneral);
             }
             else
             {
-                throw new Exception(message: $"The '{value}' type already exists in the database.");
+                throw new Exception(message: $"The '{request.Value}' type already exists in the database.");
             }
         }
 

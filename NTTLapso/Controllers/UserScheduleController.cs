@@ -12,11 +12,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<UserScheduleController> _logger;
-        private UserScheduleService _service = new UserScheduleService();
+        private UserScheduleService _service;
         public UserScheduleController(ILogger<UserScheduleController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new UserScheduleService(_config);
         }
 
 
@@ -47,7 +48,7 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task<UserScheduleResponse> Create(string value)
+        public async Task<UserScheduleResponse> Create([FromBody] string value)
         {
             UserScheduleResponse response = new UserScheduleResponse();
 

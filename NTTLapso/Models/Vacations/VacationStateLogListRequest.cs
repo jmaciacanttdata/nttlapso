@@ -2,6 +2,7 @@
 {
     public class VacationStateLogListRequest
     {
+        public int? IdVacation { get; set; }
         public int IdUser { get; set; }
 
         public int IdPetitionType { get; set; }

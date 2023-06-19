@@ -12,8 +12,13 @@ namespace NTTLapso.Service
 {
     public class TextNotificationService
     {
-        private TextNotificationRepository _repo = new TextNotificationRepository();
-        public TextNotificationService() { }
+        private TextNotificationRepository _repo;
+        private IConfiguration _configuration;
+        public TextNotificationService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new TextNotificationRepository(_configuration);
+        }
 
         public async Task<List<TextNotificationData>> List(IdTextNotificationRequest request)
         {

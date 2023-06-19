@@ -7,8 +7,13 @@ namespace NTTLapso.Service
 {
     public class TeamService
     {
-        private TeamRepository _repo = new TeamRepository();
-        public TeamService() { }
+        private TeamRepository _repo;
+        private IConfiguration _configuration;
+        public TeamService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new TeamRepository(_configuration);
+        }
         public async Task<List<TeamData>> List(TeamRequest request)
         {
             return await _repo.List(request);
