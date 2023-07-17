@@ -1,4 +1,5 @@
-﻿using NTTLapso.Models.General;
+﻿using Microsoft.Extensions.Configuration;
+using NTTLapso.Models.General;
 using NTTLapso.Models.Login;
 using NTTLapso.Models.Permissions;
 using NTTLapso.Models.PetitionStatus;
@@ -8,8 +9,13 @@ namespace NTTLapso.Service
 {
     public class PermissionService
     {
-        private PermissionRepository _repo = new PermissionRepository();
-        public PermissionService() { }
+        private IConfiguration _configuration;
+        private PermissionRepository _repo;
+        public PermissionService(IConfiguration config) 
+        {
+            _configuration = config;
+            _repo = new PermissionRepository(_configuration);
+        }
 
         //Used to send to the login token a list of permissions for each user team
         public async Task<List<LoginUserPermissionResponse>> ListUserPermission(int userId)

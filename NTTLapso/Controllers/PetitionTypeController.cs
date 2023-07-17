@@ -5,6 +5,7 @@ using NTTLapso.Service;
 using Microsoft.AspNetCore.Authorization;
 using NTTLapso.Models.PetitionType;
 using System.Web.WebPages;
+using NTTLapso.Models.PetitionStatus;
 
 namespace NTTLapso.Controllers
 {
@@ -14,11 +15,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<PetitionTypeController> _logger;
-        private PetitionTypeService _service = new PetitionTypeService();
+        private PetitionTypeService _service; 
         public PetitionTypeController(ILogger<PetitionTypeController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new PetitionTypeService(_config);
         }
 
         // Get petition type list.
@@ -50,15 +52,15 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task<PetitionTypeResponse> Create(string value, bool selectable)
+        public async Task<PetitionTypeResponse> Create( CreatePetitionTypeRequest request)
         {
             PetitionTypeResponse response = new PetitionTypeResponse();
 
             try
             {
-                if (!value.IsEmpty()) // Check if value is empty string.
+                if (request != null) // Check if value is empty string.
                 {
-                    await _service.Create(value, selectable);
+                    await _service.Create(request);
                     response.IsSuccess = true;
                 }
                 else

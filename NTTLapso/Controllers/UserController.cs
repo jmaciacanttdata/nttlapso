@@ -26,9 +26,9 @@ namespace NTTLapso.Controllers
         {
             _logger = logger;
             _config = config;
-            _userService = new UserService();
-            _teamService = new TeamService();
-            _textNotificationService = new TextNotificationService();
+            _userService = new UserService(_config);
+            _teamService = new TeamService(_config);
+            _textNotificationService = new TextNotificationService(_config);
             _processService = new ProcessService(_config);
         }
         [HttpPost]
@@ -212,6 +212,26 @@ namespace NTTLapso.Controllers
 
             return response;
         }
+        [HttpPost]
+        [Route("GetUserTeamRol")]
+        [Authorize]
+        public async Task<int> GetUserTeamRol(UserRol request)
+        {
+            int response = 0;
+            try
+            {
+       
+                response = await _userService.GetUserTeamRol(request.Id, request.IdTeam);
+            }
+            catch (Exception ex)
+            {
+     
+                response = 0;
+               
+            }
+            return response;
+        }
+
         [HttpPost]
         [Route("SetUserTeam")]
         [Authorize]

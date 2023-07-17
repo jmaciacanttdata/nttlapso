@@ -14,7 +14,7 @@ namespace NTTLapso.Service
         private IConfiguration _config;
         private ProcessRepository _repo;
         public ProcessService(IConfiguration conf) {
-            this._config = conf;
+            _config = conf;
             _repo = new ProcessRepository(_config);
         }
 
@@ -23,7 +23,7 @@ namespace NTTLapso.Service
         {
             int compensatedDays = _config.GetValue<int>("UserCharge:CompensatedDays");
             int vacationDays = _config.GetValue<int>("UserCharge:VacationDays");
-            UserRepository userRepository = new UserRepository();
+            UserRepository userRepository = new UserRepository(_config);
             List<UserDataResponse> users = userRepository.List(new UserListRequest { }).Result;
             int year = DateTime.Now.Year;
 

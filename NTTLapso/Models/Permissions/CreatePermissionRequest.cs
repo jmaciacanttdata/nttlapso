@@ -3,9 +3,9 @@
     public class CreatePermissionRequest
     {
         public string Value { get; set; }
-        public byte Registration { get; set; }
-        public byte Read { get; set; }
-        public byte Edit { get; set; }
-        public byte Delete { get; set; }
+        public bool Registration { get; set; }
+        public bool Read { get; set; }
+        public bool Edit { get; set; }
+        public bool Delete { get; set; }
     }
 }

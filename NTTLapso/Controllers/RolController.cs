@@ -20,11 +20,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<RolController> _logger;
-        private RolService _service = new RolService();
+        private RolService _service;
         public RolController(ILogger<RolController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new RolService(_config);
         }
 
 
@@ -54,7 +55,7 @@ namespace NTTLapso.Controllers
         [HttpPost]
         [Route("Create")]
         [Authorize]
-        public async Task<RolResponse> Create(string value)
+        public async Task<RolResponse> Create([FromBody] string value)
         {
             RolResponse response = new RolResponse();
 

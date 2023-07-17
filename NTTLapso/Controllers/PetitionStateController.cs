@@ -12,11 +12,12 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<PetitionStateController> _logger;
-        private PetitionStateService _service = new PetitionStateService();
+        private PetitionStateService _service;
         public PetitionStateController(ILogger<PetitionStateController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
+            _service = new PetitionStateService(config);
         }
 
 
@@ -25,7 +26,7 @@ namespace NTTLapso.Controllers
         [Authorize]
         public async Task<ListPetitionStatusResponse> List(IdValue? request) {
             ListPetitionStatusResponse response = new ListPetitionStatusResponse();
-            List<IdValue> responseList = new List<IdValue>();
+            List<PetitionStatusDataResponse> responseList = new List<PetitionStatusDataResponse>();
             try
             {
                 responseList = await _service.List(request);
