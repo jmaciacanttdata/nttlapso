@@ -4,6 +4,7 @@ namespace NTTLapso.Models.Vacations
 {
     public class VacationStateLogDataResponse
     {
+        public int IdVacation { get; set; }
         public IdValue User { get; set; } = new IdValue();
 
         public IdValue PetitionType { get; set; } = new IdValue();

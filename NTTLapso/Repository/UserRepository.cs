@@ -9,12 +9,16 @@ namespace NTTLapso.Repository
 {
     public class UserRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
+        private IConfiguration _config;
         private SupportMethods check = new SupportMethods();
-        public UserRepository()
+        public UserRepository(IConfiguration config)
         {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+            _config = config;
         }
 
         public async Task<List<UserDataResponse>> List(UserListRequest? request)
@@ -154,7 +158,7 @@ namespace NTTLapso.Repository
             if (request.UserName != null)
                 SQLSet += ", `UserName`= '{6}'";
 
-            if (request.UserPass != null)
+            if (request.UserPass != null && request.UserPass !="")
                 SQLSet += ", `UserPass`=  MD5('{7}')";
 
             if (request.Active != null)
@@ -176,6 +180,14 @@ namespace NTTLapso.Repository
         {
             string SQLQueryGeneral = String.Format("DELETE FROM user WHERE Id={0};", Id);
             conn.Query(SQLQueryGeneral);
+        }
+
+        public async Task<int> GetUserTeamRol(int Id, int IdTeam)
+        {
+            int response = 0;
+            string SQLQueryGeneral = string.Format("SELECT IdRol FROM user_team_rol WHERE IdUserTeam = (SELECT user_team.Id FROM user_team WHERE IdUser = {0} AND IdTeam = {1})", Id, IdTeam);
+            response = conn.ExecuteScalar<int>(SQLQueryGeneral);
+            return response;
         }
 
         public async Task ChangeUserState(ChangeUserStateRequest request)

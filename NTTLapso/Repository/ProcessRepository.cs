@@ -11,7 +11,7 @@ namespace NTTLapso.Repository
 {
     public class ProcessRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private IConfiguration _config;
         private MySqlConnection conn;
         private UserService _userService;
@@ -19,8 +19,9 @@ namespace NTTLapso.Repository
         public ProcessRepository(IConfiguration conf)
         {
             _config = conf;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
-            _userService = new UserService();
+            _userService = new UserService(_config);
         }
 
         // Method for inserting user's vacation and compensated days at beginning of year.
@@ -90,7 +91,7 @@ namespace NTTLapso.Repository
 
             }catch(Exception ex)
             {
-                throw new Exception(message: "Couldn't send email notification");
+                throw new Exception(message: "Couldn't send email notification " + ex);
                 return false;
             }
         }

@@ -9,19 +9,22 @@ namespace NTTLapso.Repository
 {
     public class TextNotificationRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
-
-        public TextNotificationRepository()
+        private IConfiguration _config;
+        public TextNotificationRepository(IConfiguration config)
         {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
+            _config = config;
         }
 
         public async Task<List<TextNotificationData>> List(IdTextNotificationRequest? request)
         {
             List<TextNotificationData> response = new List<TextNotificationData>();
 
-            string SQLQueryGeneral = "SELECT Id, Subject, Content FROM text_notification WHERE 1=1";
+            string SQLQueryGeneral = "SELECT Id as IdNotification, Subject, Content FROM text_notification WHERE 1=1";
             if (request != null && request.Id > 0)
                 SQLQueryGeneral += " AND Id={0}";
             if (request != null && request.Subject != null && request.Subject != "")
