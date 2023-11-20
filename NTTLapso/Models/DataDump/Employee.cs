@@ -6,7 +6,7 @@
         public string name { get; set; }
         public string office { get; set; }
         public string hub { get; set; }
-        public string? micro_Hub { get; set; }
+        public string? micro_hub { get; set; }
         public string incorporation_date { get; set; }
         public string? leave_date { get; set; }
         public string category { get; set; }
@@ -15,6 +15,9 @@
         public string? department { get; set; }
         public string? service { get; set; }
         public string? service_team { get; set; }
+        public string  asignation { get; set; }
+        public string internal_area { get; set; }
+        public string sector { get; set; }
         public string? schedule { get; set; }
         public string? workday_distribution { get; set; }
         public string? reduced_workday { get; set; }

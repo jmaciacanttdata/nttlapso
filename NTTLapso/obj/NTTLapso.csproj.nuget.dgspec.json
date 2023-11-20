@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\aherregi\\Desktop\\Proyecto Formacion\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
+    "C:\\Dev\\NTTData\\nttlapso\\NTTLapso\\NTTLapso.csproj": {}
   },
   "projects": {
-    "C:\\Users\\aherregi\\Desktop\\Proyecto Formacion\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
+    "C:\\Dev\\NTTData\\nttlapso\\NTTLapso\\NTTLapso.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\aherregi\\Desktop\\Proyecto Formacion\\nttlapso\\NTTLapso\\NTTLapso.csproj",
+        "projectUniqueName": "C:\\Dev\\NTTData\\nttlapso\\NTTLapso\\NTTLapso.csproj",
         "projectName": "NTTLapso",
-        "projectPath": "C:\\Users\\aherregi\\Desktop\\Proyecto Formacion\\nttlapso\\NTTLapso\\NTTLapso.csproj",
-        "packagesPath": "C:\\Users\\aherregi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\aherregi\\Desktop\\Proyecto Formacion\\nttlapso\\NTTLapso\\obj\\",
+        "projectPath": "C:\\Dev\\NTTData\\nttlapso\\NTTLapso\\NTTLapso.csproj",
+        "packagesPath": "C:\\Users\\cvillenc\\.nuget\\packages\\",
+        "outputPath": "C:\\Dev\\NTTData\\nttlapso\\NTTLapso\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\aherregi\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\cvillenc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -48,6 +44,10 @@
               "target": "Package",
               "version": "[2.0.123, )"
             },
+            "EPPlus": {
+              "target": "Package",
+              "version": "[7.0.1, )"
+            },
             "Microsoft.AspNet.Mvc": {
               "target": "Package",
               "version": "[5.2.9, )"
@@ -63,6 +63,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"
+            },
+            "TTCUE.NetCore.SharepointOnline.CSOM.16.1.8029.1200": {
+              "target": "Package",
+              "version": "[16.1.8029.1200, )"
             }
           },
           "imports": [
@@ -84,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.403\\RuntimeIdentifierGraph.json"
         }
       }
     }

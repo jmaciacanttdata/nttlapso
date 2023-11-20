@@ -19,12 +19,25 @@ namespace NTTLapso.Controllers
 
         [Route("NTTLapso/MonthlyDump")]
         [HttpPost]
-        public async Task<CustomResponseCharge> DumpData(bool isFirstCharge = false, string ? userId = null)
+        public async Task<ActionResult> DumpData(bool isFirstCharge = false, string ? userId = null)
         {
             if (isFirstCharge)
-                return await _service.DumpData(userId);
+            {
+                DataDumpResponse resp = await _service.DumpData(userId);
+
+                // Si no ha habido problemas cargando los usuarios en la tabla monthly_incurred_hours => cargamos los excels para volcarlos datos a la base de datos.
+                
+                if(resp.Completed == true)
+                {
+                    DataDumpResponse excelLoadResponse = await _service.LoadDataFromExcels();
+                    resp.Completed = excelLoadResponse.Completed;
+                    resp.Message += "\n"+excelLoadResponse.Message;
+                }
+                
+                return Ok(resp);
+            }
             else
-                return null;
+                return Ok(await _service.LoadDataFromExcels());
         }
     }
 }
