@@ -88,34 +88,6 @@ namespace NTTLapso.Repository
             conn.Query(sqlInsert);
         }
 
-        public async Task CloneTest()
-        {
-            if (_testStr == "") return;
-
-            try
-            {
-                string cloneQuery   = "DROP TABLE IF EXISTS " + _testStr + "employees;";
-                cloneQuery          += " CREATE TABLE " + _testStr + "employees AS SELECT * FROM employees;";
-                conn.Execute(cloneQuery);
-
-                cloneQuery          = " DROP TABLE IF EXISTS " + _testStr + "schedules;";
-                cloneQuery          += " CREATE TABLE " + _testStr + "schedules AS SELECT * FROM schedules;";
-                conn.Execute(cloneQuery);
-
-                cloneQuery          = " DROP TABLE IF EXISTS " + _testStr + "incurred;";
-                cloneQuery          += " CREATE TABLE " + _testStr + "incurred AS SELECT * FROM incurred;";
-                conn.Execute(cloneQuery);
-
-                cloneQuery          = " DROP TABLE IF EXISTS " + _testStr + "monthly_incurred_hours;";
-                cloneQuery          += " CREATE TABLE " + _testStr + "monthly_incurred_hours AS SELECT * FROM monthly_incurred_hours;";
-                conn.Execute(cloneQuery);
-            }
-            catch (Exception e)
-            {
-                throw new DataDumpException("Error: Error al clonar las tablas de test.");
-            }
-        }
-
         private void TruncateTable(string tableName)
         {
             try
@@ -147,96 +119,45 @@ namespace NTTLapso.Repository
             TruncateTable(tableName);
         }
 
-        public async Task InsertEmployees(List<Employee> employees)
-        {
-            string sqlInsert = "";
-            string sqlInsertParams = "";
-
-            try
-            {
-                sqlInsert = "INSERT INTO "+_testStr+"employees VALUES ";
-                for (int i = 0; i < 26; i++)
-                {
-                    sqlInsertParams += "'{" + i + "}',";
-                }
-
-                sqlInsertParams += "'{26}'";
-
-                for(int i = 0; i < employees.Count; i++)
-                {
-                    Employee employee = employees[i];
-
-                    string incr_date = DateTime.Parse(employee.incorporation_date).ToShortDateString();
-
-                    sqlInsert += String.Format("(" + sqlInsertParams + ")"+((i != employees.Count -1) ? ",":""),
-                        employee.id_employee, employee.name, employee.office, employee.hub, employee.micro_hub, incr_date, employee.leave_date, employee.category, employee.business_unit,
-                        employee.division, employee.department, employee.service, employee.service_team, employee.asignation, employee.internal_area, employee.sector, employee.schedule, employee.workday_distribution, employee.reduced_workday, employee.days_intensive,
-                        employee.days_remote, employee.remote_schedule, employee.email, employee.tecnologic_lane, employee.tecnology, employee.coe, employee.study);
-                }
-
-                conn.Query(sqlInsert);
-            }
-            catch (Exception e)
-            {
-                throw new DataDumpException("Error: Error a la hora de insertar los empleados del excel en la base de datos.");
-            }
-
-        }
-
-        public async Task InsertSchedules(List<Schedule> schedules)
-        {
-            try
-            {
-                List<Schedule> filtered = schedules.FindAll((schedule) => schedule.id_employee != null);
-                string sqlInsert = "INSERT INTO "+_testStr+"schedules VALUES ";
-                for(int i = 0; i < filtered.Count; i++)
-                {
-                    Schedule schedule = filtered[i];
-
-                    string date = DateTime.Parse(schedule.date).ToShortDateString();
-                    sqlInsert += String.Format("('{0}', '{1}', '{2}')" + ((i != filtered.Count - 1) ? "," : ""), schedule.id_employee, date, schedule.hours);
-                }
-
-                conn.Query(sqlInsert);
-            }
-            catch (Exception e)
-            {
-                throw new DataDumpException("Error: Error a la hora de insertar los horarios del excel en la base de datos."+ e.Message);
-            }
-
-        }
-
-        public async Task InsertIncurred(List<Incurred> incurreds)
+        public async Task InsertEmployees(string employeesInsert)
         {
             string sqlInsert = "";
 
             try
             {
-                sqlInsert = "INSERT INTO "+_testStr+"incurred VALUES ";
-                string sqlInsertParams = "";
-                for (int i = 0; i < 27; i++)
-                {
-                    sqlInsertParams += "{" + i + "},";
-                }
+                sqlInsert += "INSERT INTO "+_testStr+"employees VALUES "+employeesInsert;
+                conn.Query(sqlInsert);
+            }
+            catch (Exception e)
+            {
+                throw new DataDumpException("Error: Error a la hora de insertar los empleados del excel en la base de datos." + sqlInsert + " " + e.Message);
+            }
 
-                sqlInsertParams += "\"{27}\"";
+        }
 
-                int maxElements = 1000;
+        public async Task InsertSchedules(string schedulesInsert)
+        {
+            string sqlInsert = "";
 
-                for (int i = 0; i < maxElements; i++)
-                {
-                    Incurred incurred = incurreds[i];
-                    string date = DateTime.Parse(incurred.fecha).ToShortDateString();
-                    string taskSumm = incurred.task_summary.Replace("\'", "");
-                    string incurredComm = incurred.incurred_comment.Replace("\'", "()");
+            try
+            {
+                sqlInsert = "INSERT INTO "+_testStr+"schedules VALUES "+schedulesInsert;
+                conn.Query(sqlInsert);
+            }
+            catch (Exception e)
+            {
+                throw new DataDumpException("Error: Error a la hora de insertar los horarios del excel en la base de datos."+ sqlInsert + " " + e.Message);
+            }
 
-                    sqlInsert += String.Format("(" + sqlInsertParams + ")" + ((i != incurreds.Count - 1) ? "," : ""), 
-                        incurred.id_employee, incurred.name, incurred.situacion_actual_persona, incurred.pkey_jira, incurred.component, incurred.group, incurred.service_line, incurred.task_type, incurred.facturable, 
-                        incurred.task_id, incurred.task_summary, incurred.task_status, incurred.task_origin, incurred.internal_estimation, incurred.agile_estimation, incurred.estimation_unit, incurred.sub_task_type, incurred.typology,
-                        incurred.sub_task_id, taskSumm, incurred.sub_task_status, incurred.sub_task_origin, incurredComm, incurred.sub_task_estimation, incurred.incurred_hours, incurred.etc, date, incurred.month_date);
-              
-                }
+        }
 
+        public async Task InsertIncurred(string incurredsInsert)
+        {
+            string sqlInsert = "";
+
+            try
+            {
+                sqlInsert = "INSERT INTO "+_testStr+"incurred VALUES "+incurredsInsert;
                 conn.Query(sqlInsert);
             }
             catch (Exception e)

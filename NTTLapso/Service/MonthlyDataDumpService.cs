@@ -26,7 +26,7 @@ namespace NTTLapso.Service
 
             _sharePointDownloader = new SharePointDownloader(sharePointUrl, sharePointUser, sharePointPassword);
 
-            _saveDirectory = Path.Combine(AppContext.BaseDirectory, "Excels\\");
+            _saveDirectory = Path.Combine(AppContext.BaseDirectory, "temp\\");
 
             if (!Directory.Exists(_saveDirectory))
             {
@@ -46,82 +46,94 @@ namespace NTTLapso.Service
             await _repo.CreateCalculated(incurredUser);
         }
 
-        private Dictionary<string, Tuple<string, bool>> GetEmployeesColumns()
+        private Dictionary<string, Tuple<bool, Func<string, string>?>> GetEmployeesColumns()
         {
-            var columnas = new Dictionary<string, Tuple<string, bool>>();
+
+            var columnas = new Dictionary<string, Tuple<bool, Func<string, string>?>>
+            {
+                { "Numero Empleado", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Persona", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Oficina", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Hub", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Micro hub", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Fecha Incorporación", Tuple.Create<bool, Func<string, string>?>(true, ExcelExtractorFilters.FilterDate) },
+                { "Fecha Baja", Tuple.Create<bool, Func<string, string>?>(true, ExcelExtractorFilters.FilterDate) },
+                { "Categoria", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Bussines Unit", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Division", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Department", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Servicio", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Service Team", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "% Asignación", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Área Interna", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Sector", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Horario", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Distribución de jornada", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Reducida", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                { "Dias Intensiva", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Dias Teletrabajo", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Horario Teletrabajo", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Email", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Línea Tecnológica", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Tecnología", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "COE", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Estudio", Tuple.Create<bool, Func<string, string>?>(true, null) }
+
+            };
+
             //NombreEnTabla<propiedad - importar> 
-            columnas.Add("Numero Empleado", Tuple.Create("id_employee", true));
-            columnas.Add("Persona", Tuple.Create("name", true));
-            columnas.Add("Oficina", Tuple.Create("office", true));
-            columnas.Add("Hub", Tuple.Create("hub", true));
-            columnas.Add("Micro hub", Tuple.Create("micro_hub", true));
-            columnas.Add("Fecha Incorporación", Tuple.Create("incorporation_date", true));
-            columnas.Add("Fecha Baja", Tuple.Create("leave_date", true));
-            columnas.Add("Categoria", Tuple.Create("category", true));
-            columnas.Add("Bussines Unit", Tuple.Create("business_unit", true));
-            columnas.Add("Division", Tuple.Create("division", true));
-            columnas.Add("Department", Tuple.Create("department", true));
-            columnas.Add("Servicio", Tuple.Create("service", true));
-            columnas.Add("Service Team", Tuple.Create("service_team", true));
-            columnas.Add("% Asignación", Tuple.Create("asignation", true));
-            columnas.Add("Área Interna", Tuple.Create("internal_area", true));
-            columnas.Add("Sector", Tuple.Create("sector", true));
-            columnas.Add("Horario", Tuple.Create("schedule", true));
-            columnas.Add("Distribución de jornada", Tuple.Create("workday_distribution", true));
-            columnas.Add("Reducida", Tuple.Create("reduced_workday", true));
-            columnas.Add("Dias Intensiva", Tuple.Create("days_intensive", true));
-            columnas.Add("Dias Teletrabajo", Tuple.Create("days_remote", true));
-            columnas.Add("Horario Teletrabajo", Tuple.Create("remote_schedule", true));
-            columnas.Add("Email", Tuple.Create("email", true));
-            columnas.Add("Línea Tecnológica", Tuple.Create("tecnologic_lane", true));
-            columnas.Add("Tecnología", Tuple.Create("tecnology", true));
-            columnas.Add("COE", Tuple.Create("coe", true));
-            columnas.Add("Estudio", Tuple.Create("study", true));
+
 
             return columnas;
         }
 
-        private Dictionary<string, Tuple<string, bool>> GetSchedulesColumns()
+        private Dictionary<string, Tuple<bool, Func<string, string>?>> GetSchedulesColumns()
         {
-            var columnasSchedule = new Dictionary<string, Tuple<string, bool>>();
-            columnasSchedule.Add("numero_empleado", Tuple.Create("id_employee", true));
-            columnasSchedule.Add("fecha", Tuple.Create("date", true));
-            columnasSchedule.Add("horas", Tuple.Create("hours", true));
+            var columnasSchedule = new Dictionary<string, Tuple<bool, Func<string, string>?>>
+            {
+                {"numero_empleado", Tuple.Create<bool, Func<string, string>?>(true, null)},
+                {"fecha", Tuple.Create<bool, Func<string, string>?>(true, ExcelExtractorFilters.FilterDate)},
+                {"horas", Tuple.Create<bool, Func<string, string>?>(true, null)}
+            };
 
             return columnasSchedule;
         }
 
-        private Dictionary<string, Tuple<string, bool>> GetIncurredColumns()
+        private Dictionary<string, Tuple<bool, Func<string, string>?>> GetIncurredColumns()
         {
-            var columnasIncurred = new Dictionary<string, Tuple<string, bool>>();
-            columnasIncurred.Add("Numero Empleado", Tuple.Create("id_employee", true));
-            columnasIncurred.Add("Nombre Persona", Tuple.Create("name", true));
-            columnasIncurred.Add("Situación actual persona", Tuple.Create("situacion_actual_persona", true));
-            columnasIncurred.Add("Pkey Jira", Tuple.Create("pkey_jira", true));
-            columnasIncurred.Add("Componente", Tuple.Create("component", true));
-            columnasIncurred.Add("Agrupación", Tuple.Create("group", true));
-            columnasIncurred.Add("Service Line", Tuple.Create("service_line", true));
-            columnasIncurred.Add("Tipo Task", Tuple.Create("task_type", true));
-            columnasIncurred.Add("Facturable a cliente", Tuple.Create("facturable", true));
-            columnasIncurred.Add("Id Task", Tuple.Create("task_id", true));
-            columnasIncurred.Add("Task Summary", Tuple.Create("task_summary", true));
-            columnasIncurred.Add("Estado Task", Tuple.Create("task_status", true));
-            columnasIncurred.Add("Origen Task", Tuple.Create("task_origin", true));
-            columnasIncurred.Add("Estimación Interna", Tuple.Create("internal_estimation", true));
-            columnasIncurred.Add("Estimacion Agile", Tuple.Create("agile_estimation", true));
-            columnasIncurred.Add("Unidad Estimacion", Tuple.Create("estimation_unit", true));
-            columnasIncurred.Add("Tipo Sub Task", Tuple.Create("sub_task_type", true));
-            columnasIncurred.Add("Typology", Tuple.Create("typology", true));
-            columnasIncurred.Add("Id Sub Task", Tuple.Create("sub_task_id", true));
-            columnasIncurred.Add("Sub Task Summary", Tuple.Create("sub_task_summary", true));
-            columnasIncurred.Add("Estado Sub Task", Tuple.Create("sub_task_status", true));
-            columnasIncurred.Add("Origen Sub Task", Tuple.Create("sub_task_origin", true));
-            columnasIncurred.Add("Comentario Incurrido", Tuple.Create("incurred_comment", true));
-            columnasIncurred.Add("Estimacion Sub Task", Tuple.Create("sub_task_estimation", true));
-            columnasIncurred.Add("Horas Incurridas", Tuple.Create("incurred_hours", true));
-            columnasIncurred.Add("ETC", Tuple.Create("etc", true));
-            columnasIncurred.Add("Fecha", Tuple.Create("fecha", true));
-            columnasIncurred.Add("Fecha Mes", Tuple.Create("month_date", true));
+            var columnasIncurred = new Dictionary<string, Tuple<bool, Func<string, string>?>>
+
+            {
+                { "Numero Empleado", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Nombre Persona", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Situación actual persona", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Pkey Jira", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Componente", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Agrupación", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Service Line", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Tipo Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Facturable a cliente", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Id Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Task Summary", Tuple.Create<bool, Func<string, string>?>(true, ExcelExtractorFilters.FilterText) },
+                { "Estado Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Origen Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Estimación Interna", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Estimacion Agile", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Unidad Estimacion", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Tipo Sub Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Typology", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Id Sub Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Sub Task Summary", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Estado Sub Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Origen Sub Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Comentario Incurrido", Tuple.Create<bool, Func<string, string>?>(true, ExcelExtractorFilters.FilterText) },
+                { "Estimacion Sub Task", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Horas Incurridas", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "ETC", Tuple.Create<bool, Func<string, string>?>(true, null) },
+                { "Fecha", Tuple.Create<bool, Func<string, string>?>(true, ExcelExtractorFilters.FilterDate) },
+                { "Fecha Mes", Tuple.Create<bool, Func<string, string>?>(true, null) }
+
+            };
 
             return columnasIncurred;
         }
@@ -204,13 +216,13 @@ namespace NTTLapso.Service
                 _sharePointDownloader.Download("Documentos%20compartidos/General/Data/Headcount.xlsx", _saveDirectory);
                 ExcelPackage excelEmployeesPackage = new ExcelPackage(Path.Combine(_saveDirectory, "Headcount.xlsx"));
                 ExcelWorksheet excelSheetEmployees = excelEmployeesPackage.Workbook.Worksheets["Detalle"];
-                List<Employee> employees = _excelExtractor.GetList<Employee>(excelSheetEmployees, GetEmployeesColumns());
+                string employeesInsert = _excelExtractor.GetDataAsInsertQuery(excelSheetEmployees, GetEmployeesColumns());
 
                 // OBTENER EXCEL DE SCHEDULES.
                 _sharePointDownloader.Download("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", _saveDirectory);
                 ExcelPackage excelSchedulesPackage = new ExcelPackage(Path.Combine(_saveDirectory, "octubre_2023.xlsx"));
                 ExcelWorksheet excelSheetSchedules = excelSchedulesPackage.Workbook.Worksheets["Horarios"];
-                List<Schedule> schedules = _excelExtractor.GetList<Schedule>(excelSheetSchedules, GetSchedulesColumns());
+                string schedulesInsert = _excelExtractor.GetDataAsInsertQuery(excelSheetSchedules, GetSchedulesColumns());
 
                 // OBTENER EXCEL DE INCURRED
                 /*
@@ -218,17 +230,14 @@ namespace NTTLapso.Service
                 ExcelPackage excelIncurredPackage = new ExcelPackage(Path.Combine(_saveDirectory, "Incurridos Periodo en curso.xlsx"));
                 ExcelWorksheets worksheets = excelIncurredPackage.Workbook.Worksheets;
                 ExcelWorksheet excelSheetIncurred = worksheets["Detalle Modificado"];
-                List<Incurred> incurreds = _excelExtractor.GetList<Incurred>(excelSheetIncurred, GetIncurredColumns());
+                string incurredsInsert = _excelExtractor.GetDataAsInsertQuery(excelSheetIncurred, GetIncurredColumns());
                 */
-
-
-
 
                 try
                 {
-                    await _repo.InsertEmployees(employees);
-                    await _repo.InsertSchedules(schedules);
-                    //await _repo.InsertIncurred(incurreds);
+                    await _repo.InsertEmployees(employeesInsert);
+                    await _repo.InsertSchedules(schedulesInsert);
+                    //await _repo.InsertIncurred(incurredsInsert);
 
                     resp.Completed = true;
                     resp.Message = "Se ha completado el volcado de datos.";
