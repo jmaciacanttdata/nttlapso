@@ -1,6 +1,10 @@
 ﻿using Dapper;
+using Microsoft.SharePoint.Client.Discovery;
+using Microsoft.SharePoint.Client;
 using MySqlConnector;
 using NTTLapso.Models.DataDump;
+
+using System.Text;
 
 namespace NTTLapso.Repository
 {
@@ -119,14 +123,22 @@ namespace NTTLapso.Repository
             TruncateTable(tableName);
         }
 
-        public async Task InsertEmployees(string employeesInsert)
+        public async Task InsertIntoTryEmployees(List<Employee> employees)
         {
-            string sqlInsert = "";
+            StringBuilder sqlInsert = new StringBuilder("INSERT INTO try_employees VALUES ");
 
             try
             {
-                sqlInsert += "INSERT INTO "+_testStr+"employees VALUES "+employeesInsert;
-                conn.Query(sqlInsert);
+                TruncateTable("try_employees");
+
+                foreach (Employee employee in employees)
+                {
+                    bool isLast = employees.Last() != employee;
+                    string employeeQueryInsert = String.Format("('{0}', '{1}', '{2}')", employee.id_employee, employee.name, employee.service_team);
+                    employeeQueryInsert += isLast ? "," : "";
+                    sqlInsert.Append(employeeQueryInsert);
+                }
+                conn.Query(sqlInsert.ToString());
             }
             catch (Exception e)
             {
@@ -135,14 +147,24 @@ namespace NTTLapso.Repository
 
         }
 
-        public async Task InsertSchedules(string schedulesInsert)
+        public async Task InsertIntoTrySchedules(List<Schedule> schedules)
         {
-            string sqlInsert = "";
+
+            StringBuilder sqlInsert = new StringBuilder("INSERT INTO try_schedules VALUES ");
 
             try
             {
-                sqlInsert = "INSERT INTO "+_testStr+"schedules VALUES "+schedulesInsert;
-                conn.Query(sqlInsert);
+                TruncateTable("try_schedules");
+
+                foreach (Schedule schedule in schedules)
+                {
+                    bool isLast = schedules.Last() != schedule;
+                    string scheduleQueryInsert = String.Format("('{0}', '{1}', '{2}')", schedule.id_employee, schedule.date, schedule.hours);
+                    scheduleQueryInsert += isLast ? "," : "";
+                    sqlInsert.Append(scheduleQueryInsert);
+                }
+
+                conn.Query(sqlInsert.ToString());
             }
             catch (Exception e)
             {
@@ -151,20 +173,56 @@ namespace NTTLapso.Repository
 
         }
 
-        public async Task InsertIncurred(string incurredsInsert)
+        public async Task InsertIntoTryIncurred(List<Incurred> incurreds)
         {
-            string sqlInsert = "";
+            StringBuilder sqlInsert = new StringBuilder("INSERT INTO try_incurred VALUES ");
 
             try
             {
-                sqlInsert = "INSERT INTO "+_testStr+"incurred VALUES "+incurredsInsert;
-                conn.Query(sqlInsert);
+                TruncateTable("try_incurred");
+
+                foreach (Incurred incurred in incurreds)
+                {
+                    bool isLast = incurreds.Last() != incurred;
+                    string incurredQueryInsert = String.Format("('{0}', '{1}', '{2}')", incurred.id_employee, incurred.incurred_hours, incurred.date);
+                    incurredQueryInsert += isLast ? "," : "";
+                    sqlInsert.Append(incurredQueryInsert);
+                }
+                conn.Query(sqlInsert.ToString());
             }
             catch (Exception e)
             {
                 throw new DataDumpException("Error: Error a la hora de insertar los incurridos del excel en la base de datos. "+sqlInsert + "  " + e.Message);
             }
 
+        }
+    
+        public async Task<List<QuarantineRelationshipData>> GetQuarantineRelationship()
+        {
+            try
+            {
+                string sqlSelect = @"SELECT DISTINCT all_employees.id_employee, 
+                                    CASE
+                                        WHEN try_employees.id_employee IS NULL AND try_incurred.id_employee IS NULL THEN 'No existe en employees e incurred'
+                                        WHEN try_employees.id_employee IS NULL AND try_schedules.id_employee IS NULL THEN 'No existe en employees y schedules'
+                                        WHEN try_incurred.id_employee IS NULL AND try_schedules.id_employee IS NULL THEN 'No existe en incurred y schedules'
+                                        WHEN try_employees.id_employee IS NULL THEN 'No existe en employees'
+                                        WHEN try_incurred.id_employee IS NULL THEN 'No existe en incurred'
+                                        WHEN try_schedules.id_employee IS NULL THEN 'No existe en schedules'
+                                    END AS condicion
+                                FROM(SELECT id_employee FROM try_employees
+                                      UNION SELECT id_employee FROM try_incurred
+                                      UNION SELECT id_employee FROM try_schedules) AS all_employees
+                                LEFT JOIN try_employees ON all_employees.id_employee = try_employees.id_employee
+                                LEFT JOIN try_incurred ON all_employees.id_employee = try_incurred.id_employee
+                                LEFT JOIN try_schedules ON all_employees.id_employee = try_schedules.id_employee
+                                ";
+                return conn.Query<QuarantineRelationshipData>(sqlSelect).ToList();
+            }
+            catch(Exception e)
+            {
+                throw new DataDumpException("Error a la hora de obtener los datos de cuarentena de la base de datos." + e.Message);
+            }
         }
     }
 }
