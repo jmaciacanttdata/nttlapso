@@ -2,9 +2,8 @@
 {
     public class DataDumpResponse
     {
-        public bool? Completed { get; set; }
-        public string? Message { get; set; }
-        public List<Employee?> FailedEmployees {get;set;} = new List<Employee?>();
-
+        public bool Completed { get; set; }
+        public int NumConsolidate { get; set; }
+        public string Log { get; set; }
     }
 }

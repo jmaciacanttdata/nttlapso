@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NTTLapso.Models.DataDump;
 using NTTLapso.Service;
+using NTTLapso.Tools;
 
 namespace NTTLapso.Controllers
 {
@@ -17,27 +18,45 @@ namespace NTTLapso.Controllers
             _service = new MonthlyDataDumpService(_config);
         }
 
-        [Route("NTTLapso/MonthlyDump")]
-        [HttpPost]
-        public async Task<ActionResult> DumpData(bool isFirstCharge = false, string ? userId = null)
+        [Route("NTTLapso/GetConsolidationData")]
+        [HttpGet]
+        public async Task<ActionResult> GetConsolidatedEmployees()
         {
-            if (isFirstCharge)
-            {
-                DataDumpResponse resp = await _service.DumpData(userId);
+            ConsolidationResponse resp = await _service.GetConsolidatedEmployees();
+            return resp.Completed ? Ok(resp) : StatusCode(500, resp);
+        }
 
-                // Si no ha habido problemas cargando los usuarios en la tabla monthly_incurred_hours => cargamos los excels para volcarlos datos a la base de datos.
+        [Route("NTTLapso/DataDump")]
+        [HttpPost]
+        public async Task<ActionResult> DataDump()
+        {
+            DataDumpResponse excelLoadResponse = await _service.LoadDataFromExcels();
+
+            if (!excelLoadResponse.Completed) return StatusCode(500, excelLoadResponse);
+
+            DataDumpResponse consolidationResp = await _service.CreateConsolidation();
+            consolidationResp.Log = excelLoadResponse.Log + consolidationResp.Log;
+
+            return (consolidationResp.Completed) ? Ok(consolidationResp) : StatusCode(500, consolidationResp);
+        }
+
+        [Route("NTTLapso/MonthlyDataDump")]
+        [HttpPost]
+        public async Task<ActionResult> MonthlyDataDump()
+        {
+            CalculateHoursResponse calcResp = await _service.CalculateMonthlyHours();
                 
-                if(resp.Completed == true)
-                {
-                    DataDumpResponse excelLoadResponse = await _service.LoadDataFromExcels();
-                    resp.Completed = excelLoadResponse.Completed;
-                    resp.Message += "\n"+excelLoadResponse.Message;
-                }
-                
-                return Ok(resp);
-            }
-            else
-                return Ok(await _service.LoadDataFromExcels());
+            if(!calcResp.Completed) return StatusCode(500, calcResp);
+                  
+            DataDumpResponse excelLoadResponse = await _service.LoadDataFromExcels();
+            excelLoadResponse.Log = calcResp.Log + excelLoadResponse.Log;
+
+            if(!excelLoadResponse.Completed) return StatusCode(500, excelLoadResponse);
+
+            DataDumpResponse consolidationResp = await _service.CreateConsolidation();
+            consolidationResp.Log = excelLoadResponse.Log + consolidationResp.Log;
+
+            return (consolidationResp.Completed) ? Ok(consolidationResp) : StatusCode(500, consolidationResp);
         }
     }
 }

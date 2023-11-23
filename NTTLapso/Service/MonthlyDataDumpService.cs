@@ -16,7 +16,7 @@ namespace NTTLapso.Service
 
         public MonthlyDataDumpService(IConfiguration conf)
         {
-            _repo = new MonthlyDataDumpRepository(conf, true);
+            _repo = new MonthlyDataDumpRepository(conf);
             ExcelPackage.LicenseContext = LicenseContext.Commercial;
             _excelExtractor = new ExcelExtractor();
 
@@ -40,7 +40,7 @@ namespace NTTLapso.Service
             incurredUser.IdEmployee = userId;
             incurredUser.Year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
             incurredUser.Month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
-            incurredUser.TotalHours = await _repo.GetTotalHoras(userId);
+            incurredUser.TotalHours = await _repo.GetTotalHours(userId);
             incurredUser.TotalIncurredHours = await _repo.GetIncurred(userId, incurredUser.Month);
 
             await _repo.CreateCalculated(incurredUser);
@@ -115,129 +115,174 @@ namespace NTTLapso.Service
             return columnasIncurred;
         }
 
-        public async Task<DataDumpResponse> DumpData(string? userId = null)
+        private List<T> DownloadAndExtractExcelData<T>(string pathToFileFromServer, string downloadFilename, string worksheetName, Func<Dictionary<string, Tuple<bool, string, Func<string, string>?>>> dictionaryFunc) 
         {
-            DataDumpResponse result = new DataDumpResponse();
-            List<string> Users = new List<string>();
-            List<string> UsersFailed = new List<string>();
+            _sharePointDownloader.Download(pathToFileFromServer, _saveDirectory);
+            string employeesPath = Path.Combine(_saveDirectory, downloadFilename);
+            ExcelPackage package = new ExcelPackage(employeesPath);
+            ExcelWorksheet worksheet = package.Workbook.Worksheets[worksheetName];
+            List<T> data = _excelExtractor.GetDataAsList<T>(worksheet, dictionaryFunc());
+            File.Delete(employeesPath);
+            return data;
+        }
 
+        public async Task<ConsolidationResponse> GetConsolidatedEmployees() 
+        {
+            ConsolidationResponse resp = new ConsolidationResponse();
+            LogBuilder log = new LogBuilder();
             try
             {
-                Users = await _repo.GetUser(userId);
+                log.LogIf("Obteniendo empleados consolidados...");
+                resp.ConsolidatedEmployees = await _repo.GetConsolidatedEmployees();
+                log.LogOk("Empleados consolidados obtenidos satisfactoriamente.");
+
+                resp.Completed = true;
+                resp.Log = log.Message;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                result.Completed = false;
-                result.Message = "Error: Error al intentar obtener los usuarios.";
+                log.LogErr(e.Message);
+                resp.Completed = true;
+                resp.Log = log.Message;
             }
 
-            if (Users.Count() > 0 && result.Completed==null)
-            {
-
-                    foreach (string User in Users)
-                    {
-                        try
-                        {
-                            await DoUserCalc(User);
-                        }
-                        catch(Exception ex)
-                        {
-                            UsersFailed.Add(User);
-                        }
-                    }
-
-                    if( UsersFailed.Count()==0)
-                    {
-                        result.Completed = true;
-                        result.Message = "";
-                    }
-                    else
-                    {
-                        result.Completed = true;
-                        result.Message = "Existen calculados de usuario sin registrar (revisar listado de empleados fallidos).";
-                        foreach(string UFailed in UsersFailed)
-                        {
-                            List<Employee> e = new List<Employee>();
-                            e = await _repo.GetAllDataUser(UFailed);
-                            result.FailedEmployees.Add(e.FirstOrDefault());
-                        }
-                    }
-            }
-
-            return result;
+            return resp;
         }
-    
 
-
-        public async Task<DataDumpResponse> LoadDataFromExcels()
+        public async Task<DataDumpResponse> CreateConsolidation()
         {
+            LogBuilder log = new LogBuilder();
             DataDumpResponse resp = new DataDumpResponse();
 
             try
             {
-                try
+                log.LogIf("Creando tabla de consolidacion...");
+                int consolidatedEntries = await _repo.CreateConsolidation();
+                log.LogOk("Tabla de consolidacion creada correctamente."+ consolidatedEntries + " empleados consolidados.");
+
+                resp.Completed = true;
+                resp.NumConsolidate = consolidatedEntries;
+                resp.Log = log.Message;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.NumConsolidate = 0;
+                resp.Log = log.Message;
+            }
+
+            return resp;
+        }
+
+        public async Task<CalculateHoursResponse> CalculateMonthlyHours()
+        {
+            CalculateHoursResponse resp = new CalculateHoursResponse();
+            List<Employee> Users = new List<Employee>();
+            LogBuilder log = new LogBuilder();
+
+            log.LogIf("Iniciado proceso de cálculo de horas mensuales...");
+
+            try
+            {
+                log.LogIf("Obteniendo empleados de la base de datos...");
+                Users = await _repo.GetUsers();
+
+                if (Users.Count() > 0)
                 {
-                    /* AQUI SE REALIZA EL TRUNCADO DE DATOS */
-                    await _repo.TruncateIncurred();
-                    await _repo.TruncateSchedules();
-                    await _repo.TruncateEmployees();
-                }
-                catch (DataDumpException e)
-                {
-                    resp.Completed = false;
-                    resp.Message = e.Message;
-                    return resp;
-                }
+                    log.LogOk("Empleados obtenidos correctamente.");
+                    log.LogIf("Haciendo calculo de horas de los empleados...");
 
-                // OBTENER EXCEL DE EMPLOYEES.
-                _sharePointDownloader.Download("Documentos%20compartidos/General/Data/Headcount.xlsx", _saveDirectory);
-                string employeesPath = Path.Combine(_saveDirectory, "Headcount.xlsx");
-                ExcelPackage excelEmployeesPackage = new ExcelPackage(employeesPath);
-                ExcelWorksheet excelSheetEmployees = excelEmployeesPackage.Workbook.Worksheets["Detalle"];
-                List<Employee> employeesData = _excelExtractor.GetDataAsList<Employee>(excelSheetEmployees, GetEmployeesColumns());
-                File.Delete(employeesPath);
+                    foreach (Employee User in Users)
+                    {
+                        await DoUserCalc(User.id_employee);
+                    }
 
-                // OBTENER EXCEL DE SCHEDULES.
-                _sharePointDownloader.Download("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", _saveDirectory);
-                string schedulesPath = Path.Combine(_saveDirectory, "octubre_2023.xlsx");
-                ExcelPackage excelSchedulesPackage = new ExcelPackage(schedulesPath);
-                ExcelWorksheet excelSheetSchedules = excelSchedulesPackage.Workbook.Worksheets["Horarios"];
-                List<Schedule> schedulesData = _excelExtractor.GetDataAsList<Schedule>(excelSheetSchedules, GetSchedulesColumns());
-                File.Delete(schedulesPath);
-
-                // OBTENER EXCEL DE INCURRED
-                
-                _sharePointDownloader.Download("Documentos%20compartidos/General/Data/incurridos/Incurridos%20Periodo%20en%20curso.xlsx", _saveDirectory);
-                string incurredsPath = Path.Combine(_saveDirectory, "Incurridos Periodo en curso.xlsx");
-                ExcelPackage excelIncurredPackage = new ExcelPackage(incurredsPath);
-                ExcelWorksheets worksheets = excelIncurredPackage.Workbook.Worksheets;
-                ExcelWorksheet excelSheetIncurred = worksheets["Detalle Modificado"];
-                List<Incurred> incurredsData = _excelExtractor.GetDataAsList<Incurred>(excelSheetIncurred, GetIncurredColumns());
-                File.Delete(incurredsPath);
-                
-
-                try
-                {
-                    await _repo.InsertIntoTryEmployees(employeesData);
-                    await _repo.InsertIntoTrySchedules(schedulesData);
-                    await _repo.InsertIntoTryIncurred(incurredsData);
+                    log.LogOk("Proceso de cálculo de horas mensuales realizado correctamente.");
 
                     resp.Completed = true;
-                    resp.Message = "Se ha completado el volcado de datos.";
-                    return resp;
+                    resp.Log = log.Message;
                 }
-                catch (DataDumpException e)
+                else
                 {
+                    log.LogErr("No hay empleados en la base de datos.");
                     resp.Completed = false;
-                    resp.Message = e.Message;
-                    return resp;
+                    resp.Log = log.Message;
                 }
             }
             catch (Exception e)
             {
+                log.LogErr(e.Message);
                 resp.Completed = false;
-                resp.Message = "Error: Ha habido un error a la hora de cargar los excels."+ e.Message;
+                resp.Log = log.Message;
+            }
 
+            return resp;
+        }
+    
+        public async Task<DataDumpResponse> LoadDataFromExcels()
+        {
+            DataDumpResponse resp = new DataDumpResponse();
+            LogBuilder log = new LogBuilder();
+            
+            try
+            {
+                log.LogIf("Cargando datos de los excels...");
+
+                // TRUNCADO DE DATOS.
+                log.LogIf("Truncando tabla incurred...");
+                await _repo.TruncateIncurred();
+                log.LogOk("Tabla incurred truncada correctamente.");
+
+                log.LogIf("Truncando tabla schedules...");
+                await _repo.TruncateSchedules();
+                log.LogOk("Tabla schedules truncada correctamente.");
+                
+                log.LogIf("Truncando tabla employees...");
+                await _repo.TruncateEmployees();
+                log.LogOk("Tabla employees truncada correctamente.");
+                
+                // OBTENER DATOS DE LOS EXCELS.
+
+                log.LogIf("Leyendo datos de empleados del excel...");
+                List<Employee> employeesData = DownloadAndExtractExcelData<Employee>("Documentos%20compartidos/General/Data/Headcount.xlsx", "Headcount.xlsx", "Detalle", GetEmployeesColumns);
+                log.LogOk("Datos de empleados del excel leídos correctamente.");
+
+                log.LogIf("Leyendo datos de horarios del excel...");
+                List<Schedule> schedulesData = DownloadAndExtractExcelData<Schedule>("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", "octubre_2023.xlsx", "Horarios", GetSchedulesColumns);
+                log.LogOk("Datos de horarios del excel leídos correctamente.");
+
+                log.LogIf("Leyendo datos de incurridos del excel...");
+                List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle Modificado", GetIncurredColumns);
+                log.LogOk("Datos de incurridos del excel leídos correctamente.");
+
+                // INSERCION DE DATOS EN TABLAS.
+
+                log.LogIf("Insertando empleados del excel en la base de datos...");
+                await _repo.InsertEmployees(employeesData);
+                log.LogOk("Empleados insertados correctamente.");
+
+                log.LogIf("Insertando horarios del excel en la base de datos...");
+                await _repo.InsertSchedules(schedulesData);
+                log.LogOk("Horarios insertados correctamente.");
+
+                log.LogIf("Insertando incurridos del excel en la base de datos...");
+                await _repo.InsertIncurreds(incurredsData);
+                log.LogOk("Incurridos insertados correctamente.");
+
+
+                log.LogOk("Se ha completado el volcado de datos.");
+
+                resp.Completed = true;
+                resp.Log = log.Message;
+                return resp;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+
+                resp.Completed = false;
+                resp.Log = log.Message;
                 return resp;
             }
         }
