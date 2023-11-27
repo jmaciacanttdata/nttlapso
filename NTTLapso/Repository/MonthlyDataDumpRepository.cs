@@ -1,9 +1,6 @@
 ﻿using Dapper;
-using Microsoft.SharePoint.Client.Discovery;
-using Microsoft.SharePoint.Client;
 using MySqlConnector;
 using NTTLapso.Models.DataDump;
-using NTTLapso.Tools;
 
 using System.Text;
 
@@ -63,6 +60,19 @@ namespace NTTLapso.Repository
             {
                 return "0";
             }
+        }
+
+        public async Task<List<EmployeeMonthlyIncurredHours>> GetTotalIncurredHoursByDate(string month, string year)
+        {
+            string query =
+                String.Format(
+                @"
+                    SELECT e.id_employee, e.name, m.total_incurred_hours
+                    FROM employees e INNER JOIN monthly_incurred_hours m ON e.id_employee = m.id_employee
+                    WHERE MONTH = '{0}' AND YEAR = '{1}';
+                ", month, year);
+
+            return conn.Query<EmployeeMonthlyIncurredHours>(query).ToList();
         }
 
         public async Task CreateCalculated(MonthlyIncurredHours monthlyIncurred)

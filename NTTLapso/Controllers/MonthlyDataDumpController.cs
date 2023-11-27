@@ -18,6 +18,14 @@ namespace NTTLapso.Controllers
             _service = new MonthlyDataDumpService(_config);
         }
 
+        [Route("NTTLapso/GetIncurredHoursOfEmployees")]
+        [HttpGet]
+        public async Task<ActionResult> GetTotalIncurredHoursByLastMonth()
+        {
+            var resp = await _service.GetTotalIncurredHoursByLastMonth();
+            return resp.Completed ? Ok(resp) : StatusCode(500, resp);
+        }
+
         [Route("NTTLapso/GetConsolidationData")]
         [HttpGet]
         public async Task<ActionResult> GetConsolidatedEmployees()

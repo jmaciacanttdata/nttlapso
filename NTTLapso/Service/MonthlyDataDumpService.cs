@@ -33,19 +33,19 @@ namespace NTTLapso.Service
                 Directory.CreateDirectory(_saveDirectory);
             }
         }
-
-        private async Task DoUserCalc(string userId)
+  
+        private async Task DoUserCalc(Employee employee)
         {
             MonthlyIncurredHours incurredUser = new MonthlyIncurredHours();
-            incurredUser.IdEmployee = userId;
+            incurredUser.IdEmployee = employee.id_employee;
             incurredUser.Year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
             incurredUser.Month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
-            incurredUser.TotalHours = await _repo.GetTotalHours(userId);
-            incurredUser.TotalIncurredHours = await _repo.GetIncurred(userId, incurredUser.Month);
+            incurredUser.TotalHours = await _repo.GetTotalHours(employee.id_employee);
+            incurredUser.TotalIncurredHours = await _repo.GetIncurred(employee.id_employee, incurredUser.Month);
 
             await _repo.CreateCalculated(incurredUser);
         }
-
+        
         private Dictionary<string, Tuple<bool, string, Func<string, string>?>> GetEmployeesColumns()
         {
 
@@ -126,10 +126,37 @@ namespace NTTLapso.Service
             return data;
         }
 
+        public async Task<EmployeeMonthlyIncurredHoursResponse> GetTotalIncurredHoursByLastMonth()
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new EmployeeMonthlyIncurredHoursResponse();
+
+            try
+            {
+                string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
+                string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
+
+                log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
+                resp.EmployeesList = await _repo.GetTotalIncurredHoursByDate(month, year);
+                log.LogOk("Lista de empleados obtenida satisfactoriamente.");
+
+                resp.Completed = true;
+                resp.Log = log.Message;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+            }
+
+            return resp;
+        }
+
         public async Task<ConsolidationResponse> GetConsolidatedEmployees() 
         {
             ConsolidationResponse resp = new ConsolidationResponse();
             LogBuilder log = new LogBuilder();
+
             try
             {
                 log.LogIf("Obteniendo empleados consolidados...");
@@ -158,7 +185,7 @@ namespace NTTLapso.Service
             {
                 log.LogIf("Creando tabla de consolidacion...");
                 int consolidatedEntries = await _repo.CreateConsolidation();
-                log.LogOk("Tabla de consolidacion creada correctamente."+ consolidatedEntries + " empleados consolidados.");
+                log.LogOk("Tabla de consolidacion creada correctamente. "+ consolidatedEntries + " empleados consolidados.");
 
                 resp.Completed = true;
                 resp.NumConsolidate = consolidatedEntries;
@@ -187,17 +214,14 @@ namespace NTTLapso.Service
             {
                 log.LogIf("Obteniendo empleados de la base de datos...");
                 Users = await _repo.GetUsers();
-
                 if (Users.Count() > 0)
                 {
                     log.LogOk("Empleados obtenidos correctamente.");
-                    log.LogIf("Haciendo calculo de horas de los empleados...");
-
-                    foreach (Employee User in Users)
+                    log.LogIf("Haciendo calculo de horas de los empleados e insertandolos en la tabla histórica...");
+                    foreach (Employee user in Users)
                     {
-                        await DoUserCalc(User.id_employee);
+                        await DoUserCalc(user);
                     }
-
                     log.LogOk("Proceso de cálculo de horas mensuales realizado correctamente.");
 
                     resp.Completed = true;
@@ -241,20 +265,19 @@ namespace NTTLapso.Service
                 log.LogIf("Truncando tabla employees...");
                 await _repo.TruncateEmployees();
                 log.LogOk("Tabla employees truncada correctamente.");
-                
-                // OBTENER DATOS DE LOS EXCELS.
 
+                // OBTENER DATOS DE LOS EXCELS.
                 log.LogIf("Leyendo datos de empleados del excel...");
                 List<Employee> employeesData = DownloadAndExtractExcelData<Employee>("Documentos%20compartidos/General/Data/Headcount.xlsx", "Headcount.xlsx", "Detalle", GetEmployeesColumns);
-                log.LogOk("Datos de empleados del excel leídos correctamente.");
+                log.LogOk("Datos de empleados del excel leídos correctamente.  ");
 
                 log.LogIf("Leyendo datos de horarios del excel...");
                 List<Schedule> schedulesData = DownloadAndExtractExcelData<Schedule>("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", "octubre_2023.xlsx", "Horarios", GetSchedulesColumns);
-                log.LogOk("Datos de horarios del excel leídos correctamente.");
+                log.LogOk("Datos de horarios del excel leídos correctamente.  ");
 
                 log.LogIf("Leyendo datos de incurridos del excel...");
-                List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle Modificado", GetIncurredColumns);
-                log.LogOk("Datos de incurridos del excel leídos correctamente.");
+                List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle", GetIncurredColumns);
+                log.LogOk("Datos de incurridos del excel leídos correctamente.  ");
 
                 // INSERCION DE DATOS EN TABLAS.
 

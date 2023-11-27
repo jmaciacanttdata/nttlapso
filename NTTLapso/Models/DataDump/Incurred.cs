@@ -3,6 +3,7 @@
     public class Incurred
     {
         public string id_employee { get; set; }
+        public string service_team { get; set; }
         public string task_id { get; set; }
         public string task_summary { get; set; }
         public string incurred_hours { get; set; }
