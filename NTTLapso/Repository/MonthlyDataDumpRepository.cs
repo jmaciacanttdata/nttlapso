@@ -62,6 +62,51 @@ namespace NTTLapso.Repository
             }
         }
 
+        public async Task<List<EmployeeRemainingHours>>? GetRemainingIncurredHours(string month, string year, string? userId = null)
+        {
+            StringBuilder queryBuilder = new StringBuilder
+                (
+                    String.Format(
+                        @"
+                        SELECT DISTINCT
+	                    e.id_employee, 
+	                    e.name, 
+	                    gi.service_team,
+	                    (
+		                    SELECT 
+			                    CASE
+				                    WHEN ROUND(SUM(REPLACE(i.incurred_hours, ',', '.')), 4) IS NULL THEN 0
+				                    ELSE ROUND(SUM(REPLACE(i.incurred_hours, ',', '.')), 4)
+			                    END
+		                    FROM incurred i
+		                    WHERE e.id_employee = i.id_employee 
+			                    AND gi.service_team = i.service_team 
+			                    AND MONTH(STR_TO_DATE(i.date, '%d/%m/%Y')) = '{0}'
+                                AND YEAR(STR_TO_DATE(i.date, '%d/%m/%Y')) = '{1}'
+	                    ) AS incurred_hours_by_team,
+	                    (m.total_hours - m.total_incurred_hours) AS remaining_incurred_hours
+	                    FROM employees e 
+		                    INNER JOIN monthly_incurred_hours m ON e.id_employee = m.id_employee
+		                    LEFT JOIN incurred gi ON e.id_employee = gi.id_employee
+	                    WHERE m.month = '{0}' AND m.year = '{1}'",
+                    month, year)
+                );
+
+            if (userId != null)
+            {
+                string userExistsQuery = String.Format("SELECT id_employee FROM employees WHERE id_employee = '{0}'", userId);
+                string? user = conn.Query<string>(userExistsQuery).FirstOrDefault();
+                if(user == null)
+                {
+                    return null;
+                }
+
+                queryBuilder.Append(String.Format(" AND e.id_employee = '{0}'", userId));
+            }
+
+            return conn.Query<EmployeeRemainingHours>(queryBuilder.ToString()).ToList();
+        }
+
         public async Task<List<EmployeeMonthlyIncurredHours>> GetTotalIncurredHoursByDate(string month, string year)
         {
             string query =
@@ -154,11 +199,11 @@ namespace NTTLapso.Repository
             StringBuilder sqlInsert = new StringBuilder("SET FOREIGN_KEY_CHECKS = 0; ");
             sqlInsert.Append("INSERT INTO incurred VALUES ");
 
-            string insertParams = "('{0}','{1}','{2}','{3}','{4}','{5}')";
+            string insertParams = "('{0}','{1}','{2}','{3}','{4}','{5}','{6}')";
 
             foreach (Incurred incurred in incurreds)
             {
-                string insert = String.Format(insertParams + ((incurreds.Last() != incurred) ? "," : ""), incurred.id_employee, incurred.task_id, incurred.task_summary, incurred.incurred_hours, incurred.date, incurred.month_date);
+                string insert = String.Format(insertParams + ((incurreds.Last() != incurred) ? "," : ""), incurred.id_employee, incurred.service_team, incurred.task_id, incurred.task_summary, incurred.incurred_hours, incurred.date, incurred.month_date);
                 sqlInsert.Append(insert);
             }
 

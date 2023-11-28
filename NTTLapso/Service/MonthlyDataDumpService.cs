@@ -63,7 +63,7 @@ namespace NTTLapso.Service
                 { "Division",                   Tuple.Create<bool, string, Func<string, string>?>(true, "division", null) },
                 { "Department",                 Tuple.Create<bool, string, Func<string, string>?>(true, "department", null) },
                 { "Servicio",                   Tuple.Create<bool, string, Func<string, string>?>(true, "service", null) },
-                { "Service Team",               Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", null) },
+                { "Service Team",               Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "SIN EQUIPO" : data; }) },
                 { "% Asignación",               Tuple.Create<bool, string, Func<string, string>?>(true, "asignation", null) },
                 { "Área Interna",               Tuple.Create<bool, string, Func<string, string>?>(true, "internal_area", null) },
                 { "Sector",                     Tuple.Create<bool, string, Func<string, string>?>(true, "sector", null) },
@@ -104,6 +104,7 @@ namespace NTTLapso.Service
             var columnasIncurred = new Dictionary<string, Tuple<bool, string, Func<string, string>?>>
             {
                 { "Numero Empleado", Tuple.Create<bool, string, Func<string, string>?>(true, "id_employee", null) },
+                { "Service Team",    Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "SIN EQUIPO" : data; }) },
                 { "Id Task",         Tuple.Create<bool, string, Func<string, string>?>(true, "task_id", null) },
                 { "Task Summary",    Tuple.Create<bool, string, Func<string, string>?>(true, "task_summary", ExcelExtractorFilters.FilterText) },
                 { "Horas Incurridas",Tuple.Create<bool, string, Func<string, string>?>(true, "incurred_hours", null) },
@@ -126,16 +127,55 @@ namespace NTTLapso.Service
             return data;
         }
 
-        public async Task<EmployeeMonthlyIncurredHoursResponse> GetTotalIncurredHoursByLastMonth()
+        public async Task<EmployeeRemainingHoursResponse> GetEmployeeRemainingHours(string month, string year, string? userId = null)
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new EmployeeRemainingHoursResponse();
+
+            try
+            {
+                log.LogIf("Obteniendo lista de horas por incurrir de los empleados...");
+                resp.EmployeesList = await _repo.GetRemainingIncurredHours(month, year, userId);
+
+
+                if (resp.EmployeesList == null)
+                {
+                    resp.Completed = false;
+                    resp.StatusCode = 400;
+                    log.LogErr("El usuario solicitado no existe.");
+                }
+                else if (resp.EmployeesList != null && resp.EmployeesList.Count == 0)
+                {
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                    log.LogKo("Lista obtenida satisfactoriamente pero no hay empleados.");
+                }
+                else
+                {
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                    log.LogOk("Lista obtenida satisfactoriamente.");
+                }
+
+                resp.Log = log.Message;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.Log = log.Message;
+            }
+
+            return resp;
+        }
+
+        public async Task<EmployeeMonthlyIncurredHoursResponse> GetTotalIncurredHours(string month, string year)
         {
             LogBuilder log = new LogBuilder();
             var resp = new EmployeeMonthlyIncurredHoursResponse();
 
             try
             {
-                string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
-                string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
-
                 log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
                 resp.EmployeesList = await _repo.GetTotalIncurredHoursByDate(month, year);
                 log.LogOk("Lista de empleados obtenida satisfactoriamente.");
