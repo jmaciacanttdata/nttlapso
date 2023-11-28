@@ -10,6 +10,7 @@
     public class EmployeeMonthlyIncurredHoursResponse 
     {
         public bool Completed { get; set; }
+        public int StatusCode {  get; set; }
         public string Log {  get; set; }
         public List<EmployeeMonthlyIncurredHours> EmployeesList { get; set; } = new List<EmployeeMonthlyIncurredHours>();
     }

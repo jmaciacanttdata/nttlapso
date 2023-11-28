@@ -29,15 +29,15 @@ namespace NTTLapso.Controllers
             return StatusCode(resp.StatusCode, resp);
         }
 
-        [Route("NTTLapso/GetIncurredHoursOfEmployees")]
+        [Route("NTTLapso/GetIncurredHours")]
         [HttpGet]
-        public async Task<ActionResult> GetTotalIncurredHoursByLastMonth()
+        public async Task<ActionResult> GetTotalIncurredHours(string? userId)
         {
             string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
             string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
 
-            var resp = await _service.GetTotalIncurredHours(month, year);
-            return resp.Completed ? Ok(resp) : StatusCode(500, resp);
+            var resp = await _service.GetTotalIncurredHours(month, year, userId);
+            return StatusCode(resp.StatusCode, resp);
         }
 
         [Route("NTTLapso/GetConsolidationData")]

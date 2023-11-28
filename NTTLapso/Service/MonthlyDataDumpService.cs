@@ -157,19 +157,19 @@ namespace NTTLapso.Service
                     log.LogOk("Lista obtenida satisfactoriamente.");
                 }
 
-                resp.Log = log.Message;
             }
             catch (Exception e)
             {
                 log.LogErr(e.Message);
                 resp.Completed = false;
-                resp.Log = log.Message;
+                resp.StatusCode = 500;
             }
 
+            resp.Log = log.Message;
             return resp;
         }
 
-        public async Task<EmployeeMonthlyIncurredHoursResponse> GetTotalIncurredHours(string month, string year)
+        public async Task<EmployeeMonthlyIncurredHoursResponse> GetTotalIncurredHours(string month, string year, string? userId)
         {
             LogBuilder log = new LogBuilder();
             var resp = new EmployeeMonthlyIncurredHoursResponse();
@@ -177,18 +177,36 @@ namespace NTTLapso.Service
             try
             {
                 log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
-                resp.EmployeesList = await _repo.GetTotalIncurredHoursByDate(month, year);
-                log.LogOk("Lista de empleados obtenida satisfactoriamente.");
+                resp.EmployeesList = await _repo.GetTotalIncurredHoursByDate(month, year, userId);
 
-                resp.Completed = true;
-                resp.Log = log.Message;
+                // If employeesList == null -> The user passed doesn't exists.
+                if(resp.EmployeesList == null)
+                {
+                    log.LogErr("El empleado seleccionado no existe.");
+                    resp.Completed = false;
+                    resp.StatusCode = 400; //BadRequest
+                }
+                else if(resp.EmployeesList.Count == 0)
+                {
+                    log.LogKo("La peticion se resolivio correctamente pero no hay empleados.");
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                }
+                else
+                {
+                    log.LogOk("Lista de empleados obtenida satisfactoriamente.");
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                }  
             }
             catch (Exception e)
             {
                 log.LogErr(e.Message);
                 resp.Completed = false;
+                resp.StatusCode = 500;
             }
 
+            resp.Log = log.Message;
             return resp;
         }
 

@@ -107,17 +107,33 @@ namespace NTTLapso.Repository
             return conn.Query<EmployeeRemainingHours>(queryBuilder.ToString()).ToList();
         }
 
-        public async Task<List<EmployeeMonthlyIncurredHours>> GetTotalIncurredHoursByDate(string month, string year)
+        public async Task<List<EmployeeMonthlyIncurredHours>> GetTotalIncurredHoursByDate(string month, string year, string? userId)
         {
-            string query =
+            StringBuilder query = new StringBuilder(
+
                 String.Format(
                 @"
                     SELECT e.id_employee, e.name, m.total_incurred_hours
                     FROM employees e INNER JOIN monthly_incurred_hours m ON e.id_employee = m.id_employee
-                    WHERE MONTH = '{0}' AND YEAR = '{1}';
-                ", month, year);
+                    WHERE m.month = '{0}' AND m.year = '{1}'
+                ", month, year)
+            );
 
-            return conn.Query<EmployeeMonthlyIncurredHours>(query).ToList();
+            if(userId != null)
+            {
+                string userExistsQuery = String.Format("SELECT id_employee FROM employees WHERE id_employee = '{0}'", userId);
+                string? user = conn.Query<string>(userExistsQuery).FirstOrDefault();
+                if (user == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    query.Append(String.Format(" AND e.id_employee = '{0}'", userId));
+                }
+            }
+
+            return conn.Query<EmployeeMonthlyIncurredHours>(query.ToString()).ToList();
         }
 
         public async Task CreateCalculated(MonthlyIncurredHours monthlyIncurred)
