@@ -31,5 +31,10 @@ namespace NTTLapso.Tools
             DateTime current = DateTime.Now;
             builder.AppendLine( "[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [ER] - " + bodyMsg + " ");
         }
+
+        public void Append(string other)
+        {
+            builder.Append(other);
+        }
     }
 }

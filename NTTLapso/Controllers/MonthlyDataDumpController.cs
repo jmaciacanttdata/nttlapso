@@ -18,6 +18,17 @@ namespace NTTLapso.Controllers
             _service = new MonthlyDataDumpService(_config);
         }
 
+        [Route("NTTLapso/GetIncurredHoursByService")]
+        [HttpGet]
+        public async Task<ActionResult> GetIncurredHoursByService(string? leaderId, string? employeeId, string? service)
+        {
+            string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
+            string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
+
+            var resp = await _service.GetIncurredHoursByService(leaderId, employeeId, service);
+            return StatusCode(resp.StatusCode, resp);
+        }
+
         [Route("NTTLapso/GetRemainingIncurredHours")]
         [HttpGet]
         public async Task<ActionResult> GetRemainingIncurredHours(string? userId)

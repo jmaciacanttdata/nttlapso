@@ -63,7 +63,7 @@ namespace NTTLapso.Service
                 { "Division",                   Tuple.Create<bool, string, Func<string, string>?>(true, "division", null) },
                 { "Department",                 Tuple.Create<bool, string, Func<string, string>?>(true, "department", null) },
                 { "Servicio",                   Tuple.Create<bool, string, Func<string, string>?>(true, "service", null) },
-                { "Service Team",               Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "SIN EQUIPO" : data; }) },
+                { "Service Team",               Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }) },
                 { "% Asignación",               Tuple.Create<bool, string, Func<string, string>?>(true, "asignation", null) },
                 { "Área Interna",               Tuple.Create<bool, string, Func<string, string>?>(true, "internal_area", null) },
                 { "Sector",                     Tuple.Create<bool, string, Func<string, string>?>(true, "sector", null) },
@@ -104,7 +104,7 @@ namespace NTTLapso.Service
             var columnasIncurred = new Dictionary<string, Tuple<bool, string, Func<string, string>?>>
             {
                 { "Numero Empleado", Tuple.Create<bool, string, Func<string, string>?>(true, "id_employee", null) },
-                { "Service Team",    Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "SIN EQUIPO" : data; }) },
+                { "Service Team",    Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }) },
                 { "Id Task",         Tuple.Create<bool, string, Func<string, string>?>(true, "task_id", null) },
                 { "Task Summary",    Tuple.Create<bool, string, Func<string, string>?>(true, "task_summary", ExcelExtractorFilters.FilterText) },
                 { "Horas Incurridas",Tuple.Create<bool, string, Func<string, string>?>(true, "incurred_hours", null) },
@@ -127,24 +127,95 @@ namespace NTTLapso.Service
             return data;
         }
 
+        private async Task<EmployeeExistsResponse> EmployeeExists(string? userId)
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new EmployeeExistsResponse();
+
+            log.LogIf("Comprobando si el empleado " + userId + " existe.");
+            resp.Completed = await _repo.EmployeeExists(userId);
+            if (!resp.Completed)
+            {
+                log.LogErr("El empleado solicitado no existe.");
+            }
+            else
+            {
+                log.LogOk("Empleado encontrado.");
+            }
+            resp.Log = log.Message;
+            
+
+            return resp;
+        }
+
+        public async Task<IncurredHoursByServiceResponse> GetIncurredHoursByService(string? leader_id, string? employee_id, string? service)
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new IncurredHoursByServiceResponse();
+
+            try
+            {
+                var respExists = await EmployeeExists(leader_id);
+                if (leader_id != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log.Message;
+                    return resp;
+                }
+
+                respExists = await EmployeeExists(employee_id);
+                if (employee_id != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log.Message;
+                    return resp;
+                }
+
+                log.LogIf("Obteniendo listado de empleados por equipos...");
+                resp.DataList = await _repo.GetIncurredHoursByService(leader_id, employee_id, service);
+                log.LogOk("Lista de empleados por equipos obtenida.");
+
+                resp.DataList.ForEach(x => { resp.TotalRemainingHours += x.remaining_hours > 0 ? x.remaining_hours : 0; });
+
+                resp.Completed = true;
+                resp.StatusCode = 200;
+                resp.Log = log.Message;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.StatusCode = 500;
+                resp.Log = log.Message;
+            }
+
+            return resp;
+        } 
+
         public async Task<EmployeeRemainingHoursResponse> GetEmployeeRemainingHours(string month, string year, string? userId = null)
         {
             LogBuilder log = new LogBuilder();
             var resp = new EmployeeRemainingHoursResponse();
-
             try
             {
+                var respExists = await EmployeeExists(userId);
+                if(userId != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log.Message;
+                }
+                
                 log.LogIf("Obteniendo lista de horas por incurrir de los empleados...");
                 resp.EmployeesList = await _repo.GetRemainingIncurredHours(month, year, userId);
 
 
-                if (resp.EmployeesList == null)
-                {
-                    resp.Completed = false;
-                    resp.StatusCode = 400;
-                    log.LogErr("El usuario solicitado no existe.");
-                }
-                else if (resp.EmployeesList != null && resp.EmployeesList.Count == 0)
+                if (resp.EmployeesList.Count == 0)
                 {
                     resp.Completed = true;
                     resp.StatusCode = 200;
@@ -176,17 +247,19 @@ namespace NTTLapso.Service
 
             try
             {
+                var respExists = await EmployeeExists(userId);
+                if (userId != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log.Message;
+                }
+
                 log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
                 resp.EmployeesList = await _repo.GetTotalIncurredHoursByDate(month, year, userId);
 
-                // If employeesList == null -> The user passed doesn't exists.
-                if(resp.EmployeesList == null)
-                {
-                    log.LogErr("El empleado seleccionado no existe.");
-                    resp.Completed = false;
-                    resp.StatusCode = 400; //BadRequest
-                }
-                else if(resp.EmployeesList.Count == 0)
+                if(resp.EmployeesList.Count == 0)
                 {
                     log.LogKo("La peticion se resolivio correctamente pero no hay empleados.");
                     resp.Completed = true;
@@ -330,7 +403,7 @@ namespace NTTLapso.Service
                 log.LogOk("Datos de empleados del excel leídos correctamente.  ");
 
                 log.LogIf("Leyendo datos de horarios del excel...");
-                List<Schedule> schedulesData = DownloadAndExtractExcelData<Schedule>("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", "octubre_2023.xlsx", "Horarios", GetSchedulesColumns);
+                List<Schedule> schedulesData = DownloadAndExtractExcelData<Schedule>("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", "octubre_2023.xlsx", "Employees Schedules", GetSchedulesColumns);
                 log.LogOk("Datos de horarios del excel leídos correctamente.  ");
 
                 log.LogIf("Leyendo datos de incurridos del excel...");

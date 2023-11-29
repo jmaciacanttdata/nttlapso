@@ -19,6 +19,15 @@ namespace NTTLapso.Repository
             conn = new MySqlConnection(connectionString);
         }
 
+        public async Task<bool> EmployeeExists(string? userId)
+        {
+            if (userId == null) return false;
+            else
+            {
+                return conn.Query<string>(String.Format("SELECT id_employee FROM employees WHERE id_employee = '{0}'", userId)).FirstOrDefault() != null;
+            }
+        }
+
         public async Task<List<Employee>> GetUsers()
         {
             string sql = "SELECT id_employee FROM employees WHERE LENGTH(id_employee)>0 GROUP BY id_employee";
@@ -62,7 +71,64 @@ namespace NTTLapso.Repository
             }
         }
 
-        public async Task<List<EmployeeRemainingHours>>? GetRemainingIncurredHours(string month, string year, string? userId = null)
+        public async Task<List<IncurredHoursByService>> GetIncurredHoursByService(string? leader_id, string? employee_id, string? service)
+        {
+            StringBuilder queryBuilder = new StringBuilder
+                (
+                @"
+                SELECT 
+	                leaders.id_employee AS id_leader,
+	                not_leaders.id_employee, 
+	                not_leaders.name AS employee_name,
+	                hours_diff.total_diff AS remaining_hours
+                FROM 
+	                (
+		                SELECT * 
+		                FROM employees 
+		                WHERE category LIKE '%Leader%' OR category LIKE '%Manager%' OR category LIKE '%Director%'
+	                ) AS leaders 
+	                INNER JOIN
+	                (
+		                SELECT * 
+		                FROM employees 
+		                WHERE category NOT LIKE '%Leader%' AND category NOT LIKE '%Manager%' AND category NOT LIKE '%Director%'
+	                ) AS not_leaders
+	                ON leaders.service_team = not_leaders.service_team AND leaders.service = not_leaders.service
+	                INNER JOIN 
+	                (
+		                SELECT id_employee, ROUND((ROUND(SUM(REPLACE(total_hours, ',', '.')), 4) - ROUND(SUM(REPLACE(total_incurred_hours, ',', '.')), 4)), 4) AS total_diff
+		                FROM monthly_incurred_hours
+		                GROUP BY id_employee
+	                ) AS hours_diff
+	                ON not_leaders.id_employee = hours_diff.id_employee
+                    WHERE hours_diff.total_diff > 0
+                "
+                );
+            if(leader_id != null || employee_id != null || service != null)
+            {
+                StringBuilder paramsBuilder = new StringBuilder();
+                if(leader_id != null)
+                {
+                    paramsBuilder.Append(String.Format( " AND leaders.id_employee = '{0}'", leader_id));
+                }
+
+                if(employee_id != null)
+                {
+                    paramsBuilder.Append(String.Format(" AND not_leaders.id_employee = '{0}'", employee_id));
+                }
+
+                if (service != null)
+                {
+                    paramsBuilder.Append(String.Format(" AND not_leaders.service = '{0}'", service));
+                }
+
+                queryBuilder.Append(paramsBuilder.ToString());
+            }
+
+            return conn.Query<IncurredHoursByService>(queryBuilder.ToString()).ToList();
+        }
+
+        public async Task<List<EmployeeRemainingHours>> GetRemainingIncurredHours(string month, string year, string? userId = null)
         {
             StringBuilder queryBuilder = new StringBuilder
                 (
@@ -84,7 +150,7 @@ namespace NTTLapso.Repository
 			                    AND MONTH(STR_TO_DATE(i.date, '%d/%m/%Y')) = '{0}'
                                 AND YEAR(STR_TO_DATE(i.date, '%d/%m/%Y')) = '{1}'
 	                    ) AS incurred_hours_by_team,
-	                    (m.total_hours - m.total_incurred_hours) AS remaining_incurred_hours
+	                    ROUND((m.total_hours - m.total_incurred_hours), 4) AS remaining_incurred_hours
 	                    FROM employees e 
 		                    INNER JOIN monthly_incurred_hours m ON e.id_employee = m.id_employee
 		                    LEFT JOIN incurred gi ON e.id_employee = gi.id_employee
@@ -92,18 +158,9 @@ namespace NTTLapso.Repository
                     month, year)
                 );
 
-            if (userId != null)
-            {
-                string userExistsQuery = String.Format("SELECT id_employee FROM employees WHERE id_employee = '{0}'", userId);
-                string? user = conn.Query<string>(userExistsQuery).FirstOrDefault();
-                if(user == null)
-                {
-                    return null;
-                }
-
+            if (userId != null) 
                 queryBuilder.Append(String.Format(" AND e.id_employee = '{0}'", userId));
-            }
-
+            
             return conn.Query<EmployeeRemainingHours>(queryBuilder.ToString()).ToList();
         }
 
@@ -120,19 +177,8 @@ namespace NTTLapso.Repository
             );
 
             if(userId != null)
-            {
-                string userExistsQuery = String.Format("SELECT id_employee FROM employees WHERE id_employee = '{0}'", userId);
-                string? user = conn.Query<string>(userExistsQuery).FirstOrDefault();
-                if (user == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    query.Append(String.Format(" AND e.id_employee = '{0}'", userId));
-                }
-            }
-
+                query.Append(String.Format(" AND e.id_employee = '{0}'", userId));
+                
             return conn.Query<EmployeeMonthlyIncurredHours>(query.ToString()).ToList();
         }
 
