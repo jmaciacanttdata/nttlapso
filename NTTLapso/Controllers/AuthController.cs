@@ -16,13 +16,14 @@ namespace NTTLapso.Controllers
     {
         private readonly IConfiguration _config;
         private readonly ILogger<AuthController> _logger;
-        private AuthService _service = new AuthService();
+        private AuthService _service;
         private PermissionService _permissionService;
         public AuthController(ILogger<AuthController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
             _permissionService = new PermissionService(_config);
+            _service = new AuthService(_config);
         }
 
 

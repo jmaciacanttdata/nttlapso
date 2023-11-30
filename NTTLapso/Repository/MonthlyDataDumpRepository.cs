@@ -35,7 +35,7 @@ namespace NTTLapso.Repository
             return (conn.Query<Employee>(sql)).ToList();
         }
 
-        public async Task<string> GetTotalHours(string? userId)
+        public async Task<float> GetTotalHours(string? userId)
         {
             try
             {
@@ -43,17 +43,17 @@ namespace NTTLapso.Repository
 
                 sql += string.Format("WHERE s.id_employee = {0}", userId);
 
-                string sum = (conn.Query<string>(sql)).FirstOrDefault();
+                float sum = (conn.Query<float>(sql)).FirstOrDefault();
 
-                return (sum != null && sum != "") ? sum : "0";
+                return sum;
             }
             catch(Exception ex)
             {
-                return "0";
+                return 0;
             }
         }
 
-        public async Task<string> GetIncurred(string? userId, string month)
+        public async Task<float> GetIncurred(string? userId, string month)
         {
             try
             {
@@ -61,71 +61,56 @@ namespace NTTLapso.Repository
 
                 sql += string.Format("WHERE i.id_employee = {0} AND MONTH(STR_TO_DATE(date, '%d/%m/%Y')) = {1}", userId, month);
 
-                string sum = (conn.Query<string>(sql)).FirstOrDefault();
+                float sum = (conn.Query<float>(sql)).FirstOrDefault();
 
-                return (sum != null && sum != "") ? sum : "0";
+                return sum;
             }
             catch (Exception ex)
             {
-                return "0";
+                return 0;
             }
         }
 
-        public async Task<List<IncurredHoursByService>> GetIncurredHoursByService(string? leader_id, string? employee_id, string? service)
+        public async Task CreateLeaderRemainingHours()
+        {
+            conn.Execute("CALL SP_CREATE_LEADER_REMAINING_HOURS();");
+        }
+
+        public async Task<List<LeaderIncurredHours>> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             StringBuilder queryBuilder = new StringBuilder
                 (
                 @"
-                SELECT 
-	                leaders.id_employee AS id_leader,
-	                not_leaders.id_employee, 
-	                not_leaders.name AS employee_name,
-	                hours_diff.total_diff AS remaining_hours
-                FROM 
-	                (
-		                SELECT * 
-		                FROM employees 
-		                WHERE category LIKE '%Leader%' OR category LIKE '%Manager%' OR category LIKE '%Director%'
-	                ) AS leaders 
-	                INNER JOIN
-	                (
-		                SELECT * 
-		                FROM employees 
-		                WHERE category NOT LIKE '%Leader%' AND category NOT LIKE '%Manager%' AND category NOT LIKE '%Director%'
-	                ) AS not_leaders
-	                ON leaders.service_team = not_leaders.service_team AND leaders.service = not_leaders.service
-	                INNER JOIN 
-	                (
-		                SELECT id_employee, ROUND((ROUND(SUM(REPLACE(total_hours, ',', '.')), 4) - ROUND(SUM(REPLACE(total_incurred_hours, ',', '.')), 4)), 4) AS total_diff
-		                FROM monthly_incurred_hours
-		                GROUP BY id_employee
-	                ) AS hours_diff
-	                ON not_leaders.id_employee = hours_diff.id_employee
-                    WHERE hours_diff.total_diff > 0
+                    SELECT id_supervisor, id_employee, employee_name, remaining_hours
+                    FROM leader_remaining_hours
                 "
                 );
             if(leader_id != null || employee_id != null || service != null)
             {
-                StringBuilder paramsBuilder = new StringBuilder();
+                StringBuilder paramsBuilder = new StringBuilder(" WHERE ");
+                int num_params = 0;
                 if(leader_id != null)
                 {
-                    paramsBuilder.Append(String.Format( " AND leaders.id_employee = '{0}'", leader_id));
+                    paramsBuilder.Append(String.Format( ((num_params > 0)? " AND ":"") + "id_supervisor = '{0}'", leader_id));
+                    num_params++;
                 }
 
                 if(employee_id != null)
                 {
-                    paramsBuilder.Append(String.Format(" AND not_leaders.id_employee = '{0}'", employee_id));
+                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "id_employee = '{0}'", employee_id));
+                    num_params++;
                 }
 
                 if (service != null)
                 {
-                    paramsBuilder.Append(String.Format(" AND not_leaders.service = '{0}'", service));
+                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "service = '{0}'", service));
+                    num_params++;
                 }
 
                 queryBuilder.Append(paramsBuilder.ToString());
             }
 
-            return conn.Query<IncurredHoursByService>(queryBuilder.ToString()).ToList();
+            return conn.Query<LeaderIncurredHours>(queryBuilder.ToString()).ToList();
         }
 
         public async Task<List<EmployeeRemainingHours>> GetRemainingIncurredHours(string month, string year, string? userId = null)
@@ -182,14 +167,27 @@ namespace NTTLapso.Repository
             return conn.Query<EmployeeMonthlyIncurredHours>(query.ToString()).ToList();
         }
 
+        public async Task<List<IncurredHoursByDate>> GetIncurredHoursByDate(string month, string year, string? userId)
+        {
+            string monthDate = year + month;
+            StringBuilder query = new StringBuilder(
+                String.Format(
+                @"
+                    SELECT id_employee, date, incurred_hours
+                    FROM incurred WHERE month_date = '{0}' AND id_employee = '{1}'
+                ", monthDate, userId)
+            );
+            return conn.Query<IncurredHoursByDate>(query.ToString()).ToList();
+        }
+
         public async Task CreateCalculated(MonthlyIncurredHours monthlyIncurred)
         {
             string sqlInsert = String.Format(
                 @"
                     INSERT INTO monthly_incurred_hours 
-                    VALUES ('{0}','{1}','{2}','{3}','{4}')
+                    VALUES ('{0}','{1}','{2}','{3}','{4}','{5}')
                 ", 
-                monthlyIncurred.IdEmployee, monthlyIncurred.Year, monthlyIncurred.Month, monthlyIncurred.TotalHours, monthlyIncurred.TotalIncurredHours);
+                monthlyIncurred.IdEmployee, monthlyIncurred.Year, monthlyIncurred.Month, monthlyIncurred.TotalHours, monthlyIncurred.TotalIncurredHours, monthlyIncurred.HoursDiff);
             conn.Query(sqlInsert);
         }
 
@@ -272,10 +270,10 @@ namespace NTTLapso.Repository
             sqlInsert.Append("; SET FOREIGN_KEY_CHECKS = 1;");
             conn.Query(sqlInsert.ToString());
         }
-    
+
         public async Task<int> CreateConsolidation()
         {
-            conn.Execute("CALL createConsolidation;");
+            conn.Execute("CALL SP_CREATE_CONSOLIDATION;");
 
             string query =
                 @"

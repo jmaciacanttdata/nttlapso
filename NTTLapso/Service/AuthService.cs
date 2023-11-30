@@ -9,8 +9,14 @@ namespace NTTLapso.Service
 {
     public class AuthService
     {
-        private AuthRepository _repo = new AuthRepository();
-        public AuthService() { }
+        private IConfiguration _config;
+        private AuthRepository _repo;
+
+        public AuthService(IConfiguration config) 
+        {
+            _config = config;
+            _repo = new AuthRepository(_config);
+        }
 
         public async Task<LoginResponse> Login(LoginRequest loginRequest) { 
             return await _repo.Login(loginRequest);

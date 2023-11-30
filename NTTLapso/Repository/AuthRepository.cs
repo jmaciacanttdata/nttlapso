@@ -6,10 +6,13 @@ namespace NTTLapso.Repository
 {
     public class AuthRepository
     {
-        private static string connectionString = "Server=POAPMYSQL143.dns-servicio.com;User ID=nttlapso;Password=kP0?8u50a;Database=8649628_nttlapso";
+        private static string connectionString;
         private MySqlConnection conn;
+        private IConfiguration _config;
 
-        public AuthRepository() { 
+        public AuthRepository(IConfiguration config) {
+            _config = config;
+            connectionString = _config.GetValue<string>("ConnectionStrings:Develop");
             conn = new MySqlConnection(connectionString);
         }
 

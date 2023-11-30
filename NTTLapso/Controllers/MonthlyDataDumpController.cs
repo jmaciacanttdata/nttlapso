@@ -6,6 +6,7 @@ using NTTLapso.Tools;
 namespace NTTLapso.Controllers
 {
     [ApiController]
+    [Route("NTTLapso/MonthlyDataDump")]
     public class MonthlyDataDumpController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -18,18 +19,23 @@ namespace NTTLapso.Controllers
             _service = new MonthlyDataDumpService(_config);
         }
 
-        [Route("NTTLapso/GetIncurredHoursByService")]
-        [HttpGet]
-        public async Task<ActionResult> GetIncurredHoursByService(string? leaderId, string? employeeId, string? service)
+        [Route("CreateLeaderIncurredHours")]
+        [HttpPost]
+        public async Task<ActionResult> CreateLeaderIncurredHours()
         {
-            string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
-            string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
-
-            var resp = await _service.GetIncurredHoursByService(leaderId, employeeId, service);
+            var resp = await _service.CreateLeaderRemainingHours();
+            return (resp.Completed) ? Ok(resp) : StatusCode(500, resp);
+        }
+ 
+        [Route("GetLeaderIncurredHours")]
+        [HttpGet]
+        public async Task<ActionResult> GetLeaderRemainingHours(string? leaderId, string? employeeId, string? service)
+        {
+            var resp = await _service.GetLeaderRemainingHours(leaderId, employeeId, service);
             return StatusCode(resp.StatusCode, resp);
         }
 
-        [Route("NTTLapso/GetRemainingIncurredHours")]
+        [Route("GetRemainingIncurredHours")]
         [HttpGet]
         public async Task<ActionResult> GetRemainingIncurredHours(string? userId)
         {
@@ -40,7 +46,7 @@ namespace NTTLapso.Controllers
             return StatusCode(resp.StatusCode, resp);
         }
 
-        [Route("NTTLapso/GetIncurredHours")]
+        [Route("GetTotalIncurredHours")]
         [HttpGet]
         public async Task<ActionResult> GetTotalIncurredHours(string? userId)
         {
@@ -51,7 +57,18 @@ namespace NTTLapso.Controllers
             return StatusCode(resp.StatusCode, resp);
         }
 
-        [Route("NTTLapso/GetConsolidationData")]
+        [Route("GetIncurredHours")]
+        [HttpGet]
+        public async Task<ActionResult> GetIncurredHours(string? userId)
+        {
+            string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
+            string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
+
+            var resp = await _service.GetIncurredHours(month, year, userId);
+            return StatusCode(resp.StatusCode, resp);
+        }
+
+        [Route("GetConsolidationData")]
         [HttpGet]
         public async Task<ActionResult> GetConsolidatedEmployees()
         {
@@ -59,7 +76,15 @@ namespace NTTLapso.Controllers
             return resp.Completed ? Ok(resp) : StatusCode(500, resp);
         }
 
-        [Route("NTTLapso/DataDump")]
+        [Route("CalculateMonthlyIncurredHours")]
+        [HttpPost]
+        public async Task<ActionResult> CalculateMonthlyIncurredHours()
+        {
+            CalculateHoursResponse calcResp = await _service.CalculateMonthlyHours();
+            return (calcResp.Completed) ? Ok(calcResp) : StatusCode(500, calcResp);
+        }
+
+        [Route("DataDump")]
         [HttpPost]
         public async Task<ActionResult> DataDump()
         {
@@ -70,10 +95,16 @@ namespace NTTLapso.Controllers
             DataDumpResponse consolidationResp = await _service.CreateConsolidation();
             consolidationResp.Log = excelLoadResponse.Log + consolidationResp.Log;
 
-            return (consolidationResp.Completed) ? Ok(consolidationResp) : StatusCode(500, consolidationResp);
+            if (!consolidationResp.Completed) return StatusCode(500, consolidationResp);
+
+            DataDumpResponse leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
+            leaderRemainingHoursResp.Log = consolidationResp.Log + leaderRemainingHoursResp.Log;
+            leaderRemainingHoursResp.NumConsolidate = consolidationResp.NumConsolidate;
+
+            return (leaderRemainingHoursResp.Completed) ? Ok(leaderRemainingHoursResp) : StatusCode(500, leaderRemainingHoursResp);
         }
 
-        [Route("NTTLapso/MonthlyDataDump")]
+        [Route("MonthlyDataDump")]
         [HttpPost]
         public async Task<ActionResult> MonthlyDataDump()
         {
@@ -89,7 +120,13 @@ namespace NTTLapso.Controllers
             DataDumpResponse consolidationResp = await _service.CreateConsolidation();
             consolidationResp.Log = excelLoadResponse.Log + consolidationResp.Log;
 
-            return (consolidationResp.Completed) ? Ok(consolidationResp) : StatusCode(500, consolidationResp);
+            if (!consolidationResp.Completed) return StatusCode(500, consolidationResp);
+
+            DataDumpResponse leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
+            leaderRemainingHoursResp.Log = consolidationResp.Log + leaderRemainingHoursResp.Log;
+            leaderRemainingHoursResp.NumConsolidate = consolidationResp.NumConsolidate;
+
+            return (leaderRemainingHoursResp.Completed) ? Ok(leaderRemainingHoursResp) : StatusCode(500, leaderRemainingHoursResp);
         }
     }
 }

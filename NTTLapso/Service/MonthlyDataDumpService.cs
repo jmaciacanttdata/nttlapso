@@ -42,6 +42,7 @@ namespace NTTLapso.Service
             incurredUser.Month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
             incurredUser.TotalHours = await _repo.GetTotalHours(employee.id_employee);
             incurredUser.TotalIncurredHours = await _repo.GetIncurred(employee.id_employee, incurredUser.Month);
+            incurredUser.HoursDiff = MathF.Round(incurredUser.TotalHours - incurredUser.TotalIncurredHours, 4);
 
             await _repo.CreateCalculated(incurredUser);
         }
@@ -148,10 +149,10 @@ namespace NTTLapso.Service
             return resp;
         }
 
-        public async Task<IncurredHoursByServiceResponse> GetIncurredHoursByService(string? leader_id, string? employee_id, string? service)
+        public async Task<LeaderIncurredHoursResponse> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             LogBuilder log = new LogBuilder();
-            var resp = new IncurredHoursByServiceResponse();
+            var resp = new LeaderIncurredHoursResponse();
 
             try
             {
@@ -176,7 +177,7 @@ namespace NTTLapso.Service
                 }
 
                 log.LogIf("Obteniendo listado de empleados por equipos...");
-                resp.DataList = await _repo.GetIncurredHoursByService(leader_id, employee_id, service);
+                resp.DataList = await _repo.GetLeaderRemainingHours(leader_id, employee_id, service);
                 log.LogOk("Lista de empleados por equipos obtenida.");
 
                 resp.DataList.ForEach(x => { resp.TotalRemainingHours += x.remaining_hours > 0 ? x.remaining_hours : 0; });
@@ -283,6 +284,49 @@ namespace NTTLapso.Service
             return resp;
         }
 
+        public async Task<IncurredHoursByDateResponse> GetIncurredHours(string month, string year, string? userId)
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new IncurredHoursByDateResponse();
+
+            try
+            {
+                var respExists = await EmployeeExists(userId);
+                if (userId != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log.Message;
+                }
+
+                log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
+                resp.IncurredList = await _repo.GetIncurredHoursByDate(month, year, userId);
+
+                if (resp.IncurredList.Count == 0)
+                {
+                    log.LogKo("La peticion se resolivio correctamente pero no hay empleados.");
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                }
+                else
+                {
+                    log.LogOk("Lista de empleados obtenida satisfactoriamente.");
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                }
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.StatusCode = 500;
+            }
+
+            resp.Log = log.Message;
+            return resp;
+        }
+
         public async Task<ConsolidationResponse> GetConsolidatedEmployees() 
         {
             ConsolidationResponse resp = new ConsolidationResponse();
@@ -330,6 +374,28 @@ namespace NTTLapso.Service
                 resp.Log = log.Message;
             }
 
+            return resp;
+        }
+
+        public async Task<DataDumpResponse> CreateLeaderRemainingHours()
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new DataDumpResponse();
+
+            try
+            {
+                log.LogIf("Creando tabla de horas incurridas por empleados supervisados por lideres...");
+                await _repo.CreateLeaderRemainingHours();
+                log.LogOk("Tabla creada correctamente.");
+                resp.Completed = true;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+            }
+
+            resp.Log = log.Message;
             return resp;
         }
 
@@ -423,7 +489,6 @@ namespace NTTLapso.Service
                 log.LogIf("Insertando incurridos del excel en la base de datos...");
                 await _repo.InsertIncurreds(incurredsData);
                 log.LogOk("Incurridos insertados correctamente.");
-
 
                 log.LogOk("Se ha completado el volcado de datos.");
 
