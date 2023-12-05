@@ -7,11 +7,8 @@
         public string incurred_hours { get; set; }
     }
 
-    public class IncurredHoursByDateResponse
+    public class IncurredHoursByDateResponse : SimpleResponse
     {
-        public bool Completed { get; set; }
-        public int StatusCode { get; set; } = 200;
-        public string Log { get; set; }
         public List<IncurredHoursByDate> IncurredList { get; set; } = new List<IncurredHoursByDate>();
     }
 }

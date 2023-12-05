@@ -8,11 +8,8 @@
         public float remaining_hours {  get; set; }
     }
 
-    public class LeaderIncurredHoursResponse
+    public class LeaderIncurredHoursResponse : SimpleResponse
     {
-        public bool Completed { get; set; }
-        public int StatusCode { get; set; } = 200;
-        public string Log { get; set; }
         public float TotalRemainingHours { get; set; } = 0;
         public List<LeaderIncurredHours> DataList { get; set; } = new List<LeaderIncurredHours>();
     }

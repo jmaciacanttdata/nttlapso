@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NTTLapso.Models.DataDump;
 using NTTLapso.Service;
 using NTTLapso.Tools;
@@ -24,9 +25,82 @@ namespace NTTLapso.Controllers
         public async Task<ActionResult> CreateLeaderIncurredHours()
         {
             var resp = await _service.CreateLeaderRemainingHours();
-            return (resp.Completed) ? Ok(resp) : StatusCode(500, resp);
+            return (resp.Completed) ? Ok(resp) : StatusCode(resp.StatusCode, resp);
         }
- 
+
+        [Route("CalculateMonthlyIncurredHours")]
+        [HttpPost]
+        public async Task<ActionResult> CalculateMonthlyIncurredHours()
+        {
+            var calcResp = await _service.CalculateMonthlyHours();
+            return (calcResp.Completed) ? Ok(calcResp) : StatusCode(calcResp.StatusCode, calcResp);
+        }
+
+        [Route("DataDump")]
+        [HttpPost]
+        public async Task<ActionResult> DataDump()
+        {
+            var finalResp = new NumConsolidationResponse();
+
+            var excelLoadResponse = await _service.LoadDataFromExcels();
+
+            if (!excelLoadResponse.Completed) return StatusCode(excelLoadResponse.StatusCode, excelLoadResponse);
+
+            var consolidationResp = await _service.CreateConsolidation();
+            consolidationResp.Log.Append(excelLoadResponse.Log, true);
+
+            if (!consolidationResp.Completed) return StatusCode(consolidationResp.StatusCode, consolidationResp);
+
+            var leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
+            leaderRemainingHoursResp.Log.Append(consolidationResp.Log, true);
+
+            finalResp.Completed = leaderRemainingHoursResp.Completed;
+            finalResp.StatusCode = leaderRemainingHoursResp.StatusCode;
+            finalResp.Log = leaderRemainingHoursResp.Log;
+            finalResp.NumConsolidate = consolidationResp.NumConsolidate;
+
+            return (finalResp.Completed) ? Ok(finalResp) : StatusCode(finalResp.StatusCode, finalResp);
+        }
+
+        [Route("MonthlyDataDump")]
+        [HttpPost]
+        public async Task<ActionResult> MonthlyDataDump()
+        {
+            var finalResp = new NumConsolidationResponse();
+
+            var calcResp = await _service.CalculateMonthlyHours();
+
+            if (!calcResp.Completed) return StatusCode(calcResp.StatusCode, calcResp);
+
+            var excelLoadResponse = await _service.LoadDataFromExcels();
+            excelLoadResponse.Log.Append(calcResp.Log);
+
+            if (!excelLoadResponse.Completed) return StatusCode(excelLoadResponse.StatusCode, excelLoadResponse);
+
+            var consolidationResp = await _service.CreateConsolidation();
+            consolidationResp.Log.Append(excelLoadResponse.Log);
+
+            if (!consolidationResp.Completed) return StatusCode(consolidationResp.StatusCode, consolidationResp);
+
+            var leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
+            leaderRemainingHoursResp.Log.Append(consolidationResp.Log);
+
+            finalResp.Completed = leaderRemainingHoursResp.Completed;
+            finalResp.StatusCode = leaderRemainingHoursResp.StatusCode;
+            finalResp.Log = leaderRemainingHoursResp.Log;
+            finalResp.NumConsolidate = consolidationResp.NumConsolidate;
+
+            return (finalResp.Completed) ? Ok(finalResp) : StatusCode(finalResp.StatusCode, finalResp);
+        }
+
+        [Route("DumpEmployeesIntoUsers")]
+        [HttpPost]
+        public async Task<ActionResult> DumpEmployeesIntoUsers()
+        {
+            var resp = await _service.DumpEmployeesIntoUsers();
+            return StatusCode(resp.StatusCode, resp);
+        }
+
         [Route("GetLeaderIncurredHours")]
         [HttpGet]
         public async Task<ActionResult> GetLeaderRemainingHours(string? leaderId, string? employeeId, string? service)
@@ -72,61 +146,9 @@ namespace NTTLapso.Controllers
         [HttpGet]
         public async Task<ActionResult> GetConsolidatedEmployees()
         {
-            ConsolidationResponse resp = await _service.GetConsolidatedEmployees();
-            return resp.Completed ? Ok(resp) : StatusCode(500, resp);
+            var resp = await _service.GetConsolidatedEmployees();
+            return resp.Completed ? Ok(resp) : StatusCode(resp.StatusCode, resp);
         }
 
-        [Route("CalculateMonthlyIncurredHours")]
-        [HttpPost]
-        public async Task<ActionResult> CalculateMonthlyIncurredHours()
-        {
-            CalculateHoursResponse calcResp = await _service.CalculateMonthlyHours();
-            return (calcResp.Completed) ? Ok(calcResp) : StatusCode(500, calcResp);
-        }
-
-        [Route("DataDump")]
-        [HttpPost]
-        public async Task<ActionResult> DataDump()
-        {
-            DataDumpResponse excelLoadResponse = await _service.LoadDataFromExcels();
-
-            if (!excelLoadResponse.Completed) return StatusCode(500, excelLoadResponse);
-
-            DataDumpResponse consolidationResp = await _service.CreateConsolidation();
-            consolidationResp.Log = excelLoadResponse.Log + consolidationResp.Log;
-
-            if (!consolidationResp.Completed) return StatusCode(500, consolidationResp);
-
-            DataDumpResponse leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
-            leaderRemainingHoursResp.Log = consolidationResp.Log + leaderRemainingHoursResp.Log;
-            leaderRemainingHoursResp.NumConsolidate = consolidationResp.NumConsolidate;
-
-            return (leaderRemainingHoursResp.Completed) ? Ok(leaderRemainingHoursResp) : StatusCode(500, leaderRemainingHoursResp);
-        }
-
-        [Route("MonthlyDataDump")]
-        [HttpPost]
-        public async Task<ActionResult> MonthlyDataDump()
-        {
-            CalculateHoursResponse calcResp = await _service.CalculateMonthlyHours();
-                
-            if(!calcResp.Completed) return StatusCode(500, calcResp);
-                  
-            DataDumpResponse excelLoadResponse = await _service.LoadDataFromExcels();
-            excelLoadResponse.Log = calcResp.Log + excelLoadResponse.Log;
-
-            if(!excelLoadResponse.Completed) return StatusCode(500, excelLoadResponse);
-
-            DataDumpResponse consolidationResp = await _service.CreateConsolidation();
-            consolidationResp.Log = excelLoadResponse.Log + consolidationResp.Log;
-
-            if (!consolidationResp.Completed) return StatusCode(500, consolidationResp);
-
-            DataDumpResponse leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
-            leaderRemainingHoursResp.Log = consolidationResp.Log + leaderRemainingHoursResp.Log;
-            leaderRemainingHoursResp.NumConsolidate = consolidationResp.NumConsolidate;
-
-            return (leaderRemainingHoursResp.Completed) ? Ok(leaderRemainingHoursResp) : StatusCode(500, leaderRemainingHoursResp);
-        }
     }
 }

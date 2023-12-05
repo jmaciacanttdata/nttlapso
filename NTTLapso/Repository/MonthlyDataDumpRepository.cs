@@ -121,7 +121,7 @@ namespace NTTLapso.Repository
                         @"
                         SELECT DISTINCT
 	                    e.id_employee, 
-	                    e.name, 
+	                    e.name,
 	                    gi.service_team,
 	                    (
 		                    SELECT 
@@ -155,7 +155,7 @@ namespace NTTLapso.Repository
 
                 String.Format(
                 @"
-                    SELECT e.id_employee, e.name, m.total_incurred_hours
+                    SELECT DISTINCT e.id_employee, e.name, m.total_incurred_hours
                     FROM employees e INNER JOIN monthly_incurred_hours m ON e.id_employee = m.id_employee
                     WHERE m.month = '{0}' AND m.year = '{1}'
                 ", month, year)
@@ -269,6 +269,11 @@ namespace NTTLapso.Repository
 
             sqlInsert.Append("; SET FOREIGN_KEY_CHECKS = 1;");
             conn.Query(sqlInsert.ToString());
+        }
+
+        public async Task DumpEmployeesIntoUsers()
+        {
+            conn.Execute("CALL SP_DUMP_EMPLOYEES_INTO_USERS;");
         }
 
         public async Task<int> CreateConsolidation()

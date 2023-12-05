@@ -7,11 +7,8 @@
         public string total_incurred_hours { get; set; }
     }
 
-    public class EmployeeMonthlyIncurredHoursResponse 
+    public class EmployeeMonthlyIncurredHoursResponse : SimpleResponse
     {
-        public bool Completed { get; set; }
-        public int StatusCode { get; set; } = 200;
-        public string Log {  get; set; }
         public List<EmployeeMonthlyIncurredHours> EmployeesList { get; set; } = new List<EmployeeMonthlyIncurredHours>();
     }
 }

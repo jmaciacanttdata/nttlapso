@@ -4,37 +4,50 @@ namespace NTTLapso.Tools
 {
     public class LogBuilder
     {
-        private StringBuilder builder = new StringBuilder();
+        private List<string> _logList = new List<string>();
 
-        public string Message { get { return builder.ToString(); } } 
+        public List<string> LogList { get { return _logList; } }
 
         public void LogIf(string bodyMsg)
         {
             DateTime current = DateTime.Now;
-            builder.AppendLine("[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [IF] - " + bodyMsg + " ");
+            _logList.Add("[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [IF] - " + bodyMsg + " ");
         }
 
         public void LogOk(string bodyMsg)
         {
             DateTime current = DateTime.Now;
-            builder.AppendLine("[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [OK] - " + bodyMsg + " ");
+            _logList.Add("[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [OK] - " + bodyMsg + " ");
         }
 
         public void LogKo(string bodyMsg)
         {
             DateTime current = DateTime.Now;
-            builder.AppendLine("[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [KO] - " + bodyMsg + " ");
+            _logList.Add("[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [KO] - " + bodyMsg + " ");
         }
 
         public void LogErr(string bodyMsg) 
         {
             DateTime current = DateTime.Now;
-            builder.AppendLine( "[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [ER] - " + bodyMsg + " ");
+            _logList.Add( "[" + current.ToShortDateString() + "] [" + current.ToShortTimeString() + "] [ER] - " + bodyMsg + " ");
         }
 
-        public void Append(string other)
+        public void Append(LogBuilder other, bool toBeginning = false)
         {
-            builder.Append(other);
+            if (other == null) return;
+
+            List<string> temp;
+
+            if (!toBeginning)
+            {
+                temp = Enumerable.Concat(_logList, other._logList).ToList();
+            }
+            else
+            {
+                temp = Enumerable.Concat(other._logList, _logList).ToList();
+            }
+
+            _logList = temp;
         }
     }
 }

@@ -11,11 +11,13 @@ namespace Tools
         private string Username { get; set; } = string.Empty;
         private string Password { get; set; } = string.Empty;
 
-        public SharePointDownloader(string serverUrl, string username, string password)
+        public SharePointDownloader(IConfiguration conf)
         {
-            this.Url = serverUrl;
-            this.Username = username;
-            this.Password = password;
+            var confSection = conf.GetSection("SharePointDownloader");
+
+            this.Url        = confSection.GetValue<string>("Url");
+            this.Username   = confSection.GetSection("Credentials").GetValue<string>("Username");
+            this.Password   = confSection.GetSection("Credentials").GetValue<string>("Password");
         }
 
         public void Download(string pathToFile, string saveTo)

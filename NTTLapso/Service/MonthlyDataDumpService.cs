@@ -20,11 +20,7 @@ namespace NTTLapso.Service
             ExcelPackage.LicenseContext = LicenseContext.Commercial;
             _excelExtractor = new ExcelExtractor();
 
-            string sharePointUrl = "https://everisgroup.sharepoint.com/sites/NTTLapsoTeam";
-            string sharePointUser = "";
-            string sharePointPassword = "";
-
-            _sharePointDownloader = new SharePointDownloader(sharePointUrl, sharePointUser, sharePointPassword);
+            _sharePointDownloader = new SharePointDownloader(conf);
 
             _saveDirectory = Path.Combine(AppContext.BaseDirectory, "temp\\");
 
@@ -47,38 +43,39 @@ namespace NTTLapso.Service
             await _repo.CreateCalculated(incurredUser);
         }
         
-        private Dictionary<string, Tuple<bool, string, Func<string, string>?>> GetEmployeesColumns()
+        private List<Tuple<bool, string, string, Func<string, string>?>> GetEmployeesColumns()
         {
+            var CreateTuple = Tuple.Create<bool, string, string, Func<string, string>?>;
 
-            var columnas = new Dictionary<string, Tuple<bool, string, Func<string, string>?>>
+            var columnas = new List<Tuple<bool, string, string, Func<string, string>?>>()
             {
-                { "Numero Empleado",            Tuple.Create<bool, string, Func<string, string>?>(true, "id_employee", null) },
-                { "Persona",                    Tuple.Create<bool, string, Func<string, string>?>(true, "name", null) },
-                { "Oficina",                    Tuple.Create<bool, string, Func<string, string>?>(true, "office", null) },
-                { "Hub",                        Tuple.Create<bool, string, Func<string, string>?>(true, "hub", null) },
-                { "Micro hub",                  Tuple.Create<bool, string, Func<string, string>?>(true, "micro_hub", null) },
-                { "Fecha Incorporación",        Tuple.Create<bool, string, Func<string, string>?>(true, "incorporation_date", ExcelExtractorFilters.FilterDate) },
-                { "Fecha Baja",                 Tuple.Create<bool, string, Func<string, string>?>(true, "leave_date", ExcelExtractorFilters.FilterDate) },
-                { "Categoria",                  Tuple.Create<bool, string, Func<string, string>?>(true, "category", null) },
-                { "Bussines Unit",              Tuple.Create<bool, string, Func<string, string>?>(true, "business_unit", null) },
-                { "Division",                   Tuple.Create<bool, string, Func<string, string>?>(true, "division", null) },
-                { "Department",                 Tuple.Create<bool, string, Func<string, string>?>(true, "department", null) },
-                { "Servicio",                   Tuple.Create<bool, string, Func<string, string>?>(true, "service", null) },
-                { "Service Team",               Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }) },
-                { "% Asignación",               Tuple.Create<bool, string, Func<string, string>?>(true, "asignation", null) },
-                { "Área Interna",               Tuple.Create<bool, string, Func<string, string>?>(true, "internal_area", null) },
-                { "Sector",                     Tuple.Create<bool, string, Func<string, string>?>(true, "sector", null) },
-                { "Horario",                    Tuple.Create<bool, string, Func<string, string>?>(true, "schedule", null) },
-                { "Distribución de jornada",    Tuple.Create<bool, string, Func<string, string>?>(true, "workday_distribution", null) },
-                { "Reducida",                   Tuple.Create<bool, string, Func<string, string>?>(true, "reduced_workday", null) },
-                { "Dias Intensiva",             Tuple.Create<bool, string, Func<string, string>?>(true, "days_intensive", null) },
-                { "Dias Teletrabajo",           Tuple.Create<bool, string, Func<string, string>?>(true, "days_remote", null) },
-                { "Horario Teletrabajo",        Tuple.Create<bool, string, Func<string, string>?>(true, "remote_schedule", null) },
-                { "Email",                      Tuple.Create<bool, string, Func<string, string>?>(true, "email", null) },
-                { "Línea Tecnológica",          Tuple.Create<bool, string, Func<string, string>?>(true, "tecnologic_lane", null) },
-                { "Tecnología",                 Tuple.Create<bool, string, Func<string, string>?>(true, "tecnology", null) },
-                { "COE",                        Tuple.Create<bool, string, Func<string, string>?>(true, "coe", null) },
-                { "Estudio",                    Tuple.Create<bool, string, Func<string, string>?>(true, "study", null) }
+                CreateTuple(true, "Numero Empleado", "id_employee", null),
+                CreateTuple(true, "Persona", "name", null),
+                CreateTuple(true, "Oficina", "office", null),
+                CreateTuple(true, "Hub", "hub", null),
+                CreateTuple(true, "Micro hub", "micro_hub", null),
+                CreateTuple(true, "Fecha Incorporación", "incorporation_date", ExcelExtractorParsers.FilterDate),
+                CreateTuple(true, "Fecha Baja", "leave_date", ExcelExtractorParsers.FilterDate),
+                CreateTuple(true, "Categoria", "category", null),
+                CreateTuple(true, "Bussines Unit", "business_unit", null),
+                CreateTuple(true, "Division", "division", null),
+                CreateTuple(true, "Department", "department", null),
+                CreateTuple(true, "Servicio", "service", (data)=>{return data == "" ? "SIN SERVICIO" : data; }),
+                CreateTuple(true, "Service Team", "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }),
+                CreateTuple(true, "% Asignación", "asignation", null),
+                CreateTuple(true, "Área Interna", "internal_area", null),
+                CreateTuple(true, "Sector", "sector", null),
+                CreateTuple(true, "Horario", "schedule", null),
+                CreateTuple(true, "Distribución de jornada", "workday_distribution", null),
+                CreateTuple(true, "Reducida", "reduced_workday", null),
+                CreateTuple(true, "Dias Intensiva", "days_intensive", null),
+                CreateTuple(true, "Dias Teletrabajo", "days_remote", null),
+                CreateTuple(true, "Horario Teletrabajo", "remote_schedule", null),
+                CreateTuple(true, "Email", "email", null),
+                CreateTuple(true, "Línea Tecnológica", "tecnologic_lane", null),
+                CreateTuple(true, "Tecnología", "tecnology", null),
+                CreateTuple(true, "COE", "coe", null),
+                CreateTuple(true, "Estudio", "study", null)
 
             };
 
@@ -88,36 +85,40 @@ namespace NTTLapso.Service
             return columnas;
         }
 
-        private Dictionary<string, Tuple<bool, string, Func<string, string>?>> GetSchedulesColumns()
+        private List<Tuple<bool, string, string, Func<string, string>?>> GetSchedulesColumns()
         {
-            var columnasSchedule = new Dictionary<string, Tuple<bool, string, Func<string, string>?>>
+            var CreateTuple = Tuple.Create<bool, string, string, Func<string, string>?>;
+
+            var columnasSchedule = new List<Tuple<bool, string, string, Func<string, string>?>>
             {
-                {"numero_empleado", Tuple.Create<bool, string, Func<string, string>?>(true, "id_employee", null)},
-                {"fecha",           Tuple.Create<bool, string, Func<string, string>?>(true, "date", ExcelExtractorFilters.FilterDate)},
-                {"horas",           Tuple.Create<bool, string, Func<string, string>?>(true, "hours", null)}
+                CreateTuple(true, "numero_empleado", "id_employee", null),
+                CreateTuple(true, "fecha", "date", ExcelExtractorParsers.FilterDate),
+                CreateTuple(true, "horas", "hours", null)
             };
 
             return columnasSchedule;
         }
 
-        private Dictionary<string, Tuple<bool, string, Func<string, string>?>> GetIncurredColumns()
+        private List<Tuple<bool, string, string, Func<string, string>?>> GetIncurredColumns()
         {
-            var columnasIncurred = new Dictionary<string, Tuple<bool, string, Func<string, string>?>>
+            var CreateTuple = Tuple.Create<bool, string, string, Func<string, string>?>;
+
+            var columnasIncurred = new List<Tuple<bool, string, string, Func<string, string>?>>
             {
-                { "Numero Empleado", Tuple.Create<bool, string, Func<string, string>?>(true, "id_employee", null) },
-                { "Service Team",    Tuple.Create<bool, string, Func<string, string>?>(true, "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }) },
-                { "Id Task",         Tuple.Create<bool, string, Func<string, string>?>(true, "task_id", null) },
-                { "Task Summary",    Tuple.Create<bool, string, Func<string, string>?>(true, "task_summary", ExcelExtractorFilters.FilterText) },
-                { "Horas Incurridas",Tuple.Create<bool, string, Func<string, string>?>(true, "incurred_hours", null) },
-                { "Fecha",           Tuple.Create<bool, string, Func<string, string>?>(true, "date", ExcelExtractorFilters.FilterDate) },
-                { "Fecha Mes",       Tuple.Create<bool, string, Func<string, string>?>(true, "month_date", null) }
+                CreateTuple(true, "Numero Empleado", "id_employee", null),
+                CreateTuple(true, "Service Team",    "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }),
+                CreateTuple(true, "Id Task",         "task_id", null),
+                CreateTuple(true, "Task Summary",    "task_summary", ExcelExtractorParsers.FilterText),
+                CreateTuple(true, "Horas Incurridas", "incurred_hours", null),
+                CreateTuple(true,  "Fecha",          "date", ExcelExtractorParsers.FilterDate),
+                CreateTuple(true, "Fecha Mes",      "month_date", null)
 
             };
 
             return columnasIncurred;
         }
 
-        private List<T> DownloadAndExtractExcelData<T>(string pathToFileFromServer, string downloadFilename, string worksheetName, Func<Dictionary<string, Tuple<bool, string, Func<string, string>?>>> dictionaryFunc) 
+        private List<T> DownloadAndExtractExcelData<T>(string pathToFileFromServer, string downloadFilename, string worksheetName, Func<List<Tuple<bool, string, string, Func<string, string>?>>> dictionaryFunc) 
         {
             _sharePointDownloader.Download(pathToFileFromServer, _saveDirectory);
             string employeesPath = Path.Combine(_saveDirectory, downloadFilename);
@@ -128,28 +129,38 @@ namespace NTTLapso.Service
             return data;
         }
 
-        private async Task<EmployeeExistsResponse> EmployeeExists(string? userId)
+        private async Task<SimpleResponse> EmployeeExists(string? userId)
         {
             LogBuilder log = new LogBuilder();
-            var resp = new EmployeeExistsResponse();
+            var resp = new SimpleResponse();
 
-            log.LogIf("Comprobando si el empleado " + userId + " existe.");
-            resp.Completed = await _repo.EmployeeExists(userId);
-            if (!resp.Completed)
+            try
             {
-                log.LogErr("El empleado solicitado no existe.");
+                log.LogIf("Comprobando si el empleado " + userId + " existe.");
+                resp.Completed = await _repo.EmployeeExists(userId);
+                if (!resp.Completed)
+                {
+                    log.LogErr("El empleado solicitado no existe.");
+                    resp.StatusCode = 400;
+                }
+                else
+                {
+                    log.LogOk("Empleado encontrado.");
+                }
             }
-            else
+            catch (Exception e)
             {
-                log.LogOk("Empleado encontrado.");
+                log.LogErr(e.Message);
+                resp.StatusCode = 500;
+                
             }
-            resp.Log = log.Message;
-            
+
+            resp.Log = log;
 
             return resp;
         }
 
-        public async Task<LeaderIncurredHoursResponse> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
+        public async Task<SimpleResponse> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             LogBuilder log = new LogBuilder();
             var resp = new LeaderIncurredHoursResponse();
@@ -162,7 +173,7 @@ namespace NTTLapso.Service
                     log.Append(respExists.Log);
                     resp.Completed = respExists.Completed;
                     resp.StatusCode = 400;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                     return resp;
                 }
 
@@ -172,7 +183,7 @@ namespace NTTLapso.Service
                     log.Append(respExists.Log);
                     resp.Completed = respExists.Completed;
                     resp.StatusCode = 400;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                     return resp;
                 }
 
@@ -184,20 +195,20 @@ namespace NTTLapso.Service
 
                 resp.Completed = true;
                 resp.StatusCode = 200;
-                resp.Log = log.Message;
+                resp.Log = log;
             }
             catch (Exception e)
             {
                 log.LogErr(e.Message);
                 resp.Completed = false;
                 resp.StatusCode = 500;
-                resp.Log = log.Message;
+                resp.Log = log;
             }
 
             return resp;
         } 
 
-        public async Task<EmployeeRemainingHoursResponse> GetEmployeeRemainingHours(string month, string year, string? userId = null)
+        public async Task<SimpleResponse> GetEmployeeRemainingHours(string month, string year, string? userId = null)
         {
             LogBuilder log = new LogBuilder();
             var resp = new EmployeeRemainingHoursResponse();
@@ -209,7 +220,7 @@ namespace NTTLapso.Service
                     log.Append(respExists.Log);
                     resp.Completed = respExists.Completed;
                     resp.StatusCode = 400;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                 }
                 
                 log.LogIf("Obteniendo lista de horas por incurrir de los empleados...");
@@ -237,11 +248,11 @@ namespace NTTLapso.Service
                 resp.StatusCode = 500;
             }
 
-            resp.Log = log.Message;
+            resp.Log = log;
             return resp;
         }
 
-        public async Task<EmployeeMonthlyIncurredHoursResponse> GetTotalIncurredHours(string month, string year, string? userId)
+        public async Task<SimpleResponse> GetTotalIncurredHours(string month, string year, string? userId)
         {
             LogBuilder log = new LogBuilder();
             var resp = new EmployeeMonthlyIncurredHoursResponse();
@@ -254,7 +265,7 @@ namespace NTTLapso.Service
                     log.Append(respExists.Log);
                     resp.Completed = respExists.Completed;
                     resp.StatusCode = 400;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                 }
 
                 log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
@@ -280,11 +291,11 @@ namespace NTTLapso.Service
                 resp.StatusCode = 500;
             }
 
-            resp.Log = log.Message;
+            resp.Log = log;
             return resp;
         }
 
-        public async Task<IncurredHoursByDateResponse> GetIncurredHours(string month, string year, string? userId)
+        public async Task<SimpleResponse> GetIncurredHours(string month, string year, string? userId)
         {
             LogBuilder log = new LogBuilder();
             var resp = new IncurredHoursByDateResponse();
@@ -297,7 +308,7 @@ namespace NTTLapso.Service
                     log.Append(respExists.Log);
                     resp.Completed = respExists.Completed;
                     resp.StatusCode = 400;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                 }
 
                 log.LogIf("Obteniendo lista de empleados con sus horas incurridas en el último mes...");
@@ -323,13 +334,13 @@ namespace NTTLapso.Service
                 resp.StatusCode = 500;
             }
 
-            resp.Log = log.Message;
+            resp.Log = log;
             return resp;
         }
 
-        public async Task<ConsolidationResponse> GetConsolidatedEmployees() 
+        public async Task<SimpleResponse> GetConsolidatedEmployees() 
         {
-            ConsolidationResponse resp = new ConsolidationResponse();
+            var resp = new ConsolidationResponse();
             LogBuilder log = new LogBuilder();
 
             try
@@ -339,22 +350,23 @@ namespace NTTLapso.Service
                 log.LogOk("Empleados consolidados obtenidos satisfactoriamente.");
 
                 resp.Completed = true;
-                resp.Log = log.Message;
+                resp.Log = log;
             }
             catch (Exception e)
             {
                 log.LogErr(e.Message);
                 resp.Completed = true;
-                resp.Log = log.Message;
+                resp.StatusCode = 500;
+                resp.Log = log;
             }
 
             return resp;
         }
 
-        public async Task<DataDumpResponse> CreateConsolidation()
+        public async Task<NumConsolidationResponse> CreateConsolidation()
         {
             LogBuilder log = new LogBuilder();
-            DataDumpResponse resp = new DataDumpResponse();
+            var resp = new NumConsolidationResponse();
 
             try
             {
@@ -364,23 +376,50 @@ namespace NTTLapso.Service
 
                 resp.Completed = true;
                 resp.NumConsolidate = consolidatedEntries;
-                resp.Log = log.Message;
+                resp.Log = log;
             }
             catch (Exception e)
             {
                 log.LogErr(e.Message);
                 resp.Completed = false;
+                resp.StatusCode = 500;
                 resp.NumConsolidate = 0;
-                resp.Log = log.Message;
+                resp.Log = log;
             }
 
             return resp;
         }
 
-        public async Task<DataDumpResponse> CreateLeaderRemainingHours()
+        public async Task<SimpleResponse> DumpEmployeesIntoUsers()
         {
             LogBuilder log = new LogBuilder();
-            var resp = new DataDumpResponse();
+            var resp = new SimpleResponse();
+
+            try
+            {
+                log.LogIf("Volcando empleados nuevos en usuarios...");
+                await _repo.DumpEmployeesIntoUsers();
+                log.LogOk("Se han volcado los empleados en usuarios correctamente.");
+
+                resp.Completed = true;
+                resp.StatusCode = 200;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.StatusCode = 500;
+            }
+
+            resp.Log = log;
+
+            return resp;
+        }
+
+        public async Task<SimpleResponse> CreateLeaderRemainingHours()
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new SimpleResponse();
 
             try
             {
@@ -393,15 +432,16 @@ namespace NTTLapso.Service
             {
                 log.LogErr(e.Message);
                 resp.Completed = false;
+                resp.StatusCode = 500;
             }
 
-            resp.Log = log.Message;
+            resp.Log = log;
             return resp;
         }
 
-        public async Task<CalculateHoursResponse> CalculateMonthlyHours()
+        public async Task<SimpleResponse> CalculateMonthlyHours()
         {
-            CalculateHoursResponse resp = new CalculateHoursResponse();
+            var resp = new SimpleResponse();
             List<Employee> Users = new List<Employee>();
             LogBuilder log = new LogBuilder();
 
@@ -422,28 +462,29 @@ namespace NTTLapso.Service
                     log.LogOk("Proceso de cálculo de horas mensuales realizado correctamente.");
 
                     resp.Completed = true;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                 }
                 else
                 {
                     log.LogErr("No hay empleados en la base de datos.");
                     resp.Completed = false;
-                    resp.Log = log.Message;
+                    resp.Log = log;
                 }
             }
             catch (Exception e)
             {
                 log.LogErr(e.Message);
                 resp.Completed = false;
-                resp.Log = log.Message;
+                resp.Log = log;
+                resp.StatusCode = 500;
             }
 
             return resp;
         }
     
-        public async Task<DataDumpResponse> LoadDataFromExcels()
+        public async Task<NumConsolidationResponse> LoadDataFromExcels()
         {
-            DataDumpResponse resp = new DataDumpResponse();
+            var resp = new NumConsolidationResponse();
             LogBuilder log = new LogBuilder();
             
             try
@@ -469,11 +510,11 @@ namespace NTTLapso.Service
                 log.LogOk("Datos de empleados del excel leídos correctamente.  ");
 
                 log.LogIf("Leyendo datos de horarios del excel...");
-                List<Schedule> schedulesData = DownloadAndExtractExcelData<Schedule>("Documentos%20compartidos/General/Data/horarios/octubre_2023.xlsx", "octubre_2023.xlsx", "Employees Schedules", GetSchedulesColumns);
+                List<Schedule> schedulesData = DownloadAndExtractExcelData<Schedule>("Documentos%20compartidos/General/Data/Horarios/noviembre_2023.xlsx", "noviembre_2023.xlsx", "Employees Schedules", GetSchedulesColumns);
                 log.LogOk("Datos de horarios del excel leídos correctamente.  ");
 
                 log.LogIf("Leyendo datos de incurridos del excel...");
-                List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle", GetIncurredColumns);
+                List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/Incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle", GetIncurredColumns);
                 log.LogOk("Datos de incurridos del excel leídos correctamente.  ");
 
                 // INSERCION DE DATOS EN TABLAS.
@@ -493,7 +534,7 @@ namespace NTTLapso.Service
                 log.LogOk("Se ha completado el volcado de datos.");
 
                 resp.Completed = true;
-                resp.Log = log.Message;
+                resp.Log = log;
                 return resp;
             }
             catch (Exception e)
@@ -501,7 +542,8 @@ namespace NTTLapso.Service
                 log.LogErr(e.Message);
 
                 resp.Completed = false;
-                resp.Log = log.Message;
+                resp.StatusCode = 500;
+                resp.Log = log;
                 return resp;
             }
         }
