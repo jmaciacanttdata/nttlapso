@@ -8,6 +8,5 @@ namespace NTTLapso.Models.Users
         public bool Active { get; set; }
         public int IdApprover { get; set; }
         public string NameApprover { get; set; }
-        public string SurnamesApprover { get; set; }
     }
 }

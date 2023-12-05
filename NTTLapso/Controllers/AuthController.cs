@@ -61,8 +61,6 @@ namespace NTTLapso.Controllers
             LoginResponse Data = await _service.GetCurrentUser(identity);
             String response = "";
             response = Data.Nombre;
-            if (Data.Apellidos != null)
-                response += " " + Data.Apellidos;
 
             return response;
         }

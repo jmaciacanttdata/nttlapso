@@ -25,7 +25,7 @@ namespace NTTLapso.Repository
         {
             List<UserDataResponse> response = new List<UserDataResponse>();
             string SQLQueryAux =
-                "SELECT user.Id, `Name`, `Surnames`, `Email`, category.Id 'CategoryId', category.Value 'CategoryValue', user_schedule.Id 'ScheduleId', " +
+                "SELECT user.Id, `Name`,`Email`, category.Id 'CategoryId', category.Value 'CategoryValue', user_schedule.Id 'ScheduleId', " +
                 "user_schedule.Value 'ScheduleValue', team.Id 'TeamId', team.Team 'TeamValue', `UserName`, `UserPass`, `Active` ";
             string SQLQueryGeneral = 
                 "FROM `user` " +
@@ -38,34 +38,32 @@ namespace NTTLapso.Repository
                 SQLQueryGeneral += " AND user.Id={0}";
             if (request != null && request.Name != null && request.Name != "")
                 SQLQueryGeneral += " AND Name LIKE '%{1}%'";
-            if (request != null && request.Surnames != null && request.Surnames != "")
-                SQLQueryGeneral += " AND Surnames LIKE '%{2}%'";
             if (request != null && request.Email != null && request.Email != "")
-                SQLQueryGeneral += " AND Email LIKE '%{3}%'";
+                SQLQueryGeneral += " AND Email LIKE '%{2}%'";
             if (request != null && request.IdCategory  > 0)
-                SQLQueryGeneral += " AND category.Id = {4}";
+                SQLQueryGeneral += " AND category.Id = {3}";
             if (request != null && request.IdSchedule > 0)
-                SQLQueryGeneral += " AND user_schedule.Id = {5}";
+                SQLQueryGeneral += " AND user_schedule.Id = {4}";
 
             if (request != null && request.IdTeam > 0) // If we filter by team
             {
-                SQLQueryGeneral += " AND team.Id = {6}";
+                SQLQueryGeneral += " AND team.Id = {5}";
             }
             else
             {
                 SQLQueryAux =
-                "SELECT DISTINCT user.Id, `Name`, `Surnames`, `Email`, category.Id 'CategoryId', category.Value 'CategoryValue', user_schedule.Id 'ScheduleId', " +
+                "SELECT DISTINCT user.Id, `Name`, `Email`, category.Id 'CategoryId', category.Value 'CategoryValue', user_schedule.Id 'ScheduleId', " +
                 "user_schedule.Value 'ScheduleValue', `UserName`, `UserPass`, `Active` ";
             }
 
             if (request != null && request.UserName != null && request.UserName != "")
-                SQLQueryGeneral += " AND UserName LIKE '%{7}%'";
+                SQLQueryGeneral += " AND UserName LIKE '%{6}%'";
             if (request != null && request.UserPass != null && request.UserPass != "")
-                SQLQueryGeneral += " AND UserPass LIKE '%{8}%'";
+                SQLQueryGeneral += " AND UserPass LIKE '%{7}%'";
             if (request != null && request.Active != null)
-                SQLQueryGeneral += " AND Name = {9}";
+                SQLQueryGeneral += " AND Name = {8}";
 
-            string SQLQuery = String.Format(SQLQueryAux + SQLQueryGeneral, request.Id, request.Name, request.Surnames, request.Email, request.IdCategory, request.IdSchedule, request.IdTeam, request.UserName, request.UserPass, request.Active);
+            string SQLQuery = String.Format(SQLQueryAux + SQLQueryGeneral, request.Id, request.Name, request.Email, request.IdCategory, request.IdSchedule, request.IdTeam, request.UserName, request.UserPass, request.Active);
 
             var userQuery = (await conn.QueryAsync(SQLQuery)).ToList();
 
@@ -77,7 +75,6 @@ namespace NTTLapso.Repository
                     UserDataResponse userDataResponse = new UserDataResponse();
                     userDataResponse.Id = user.Id;
                     userDataResponse.Name = user.Name;
-                    userDataResponse.Surnames = user.Surnames;
                     userDataResponse.Email = user.Email;
                     userDataResponse.Category = new IdValue() { Id = user.CategoryId, Value = user.CategoryValue };
                     userDataResponse.Schedule = new IdValue() { Id = user.ScheduleId, Value = user.ScheduleValue };
@@ -111,10 +108,10 @@ namespace NTTLapso.Repository
         public async Task<NewUserChargeRequest> Create(CreateUserRequest request)
         {
             NewUserChargeRequest response = new NewUserChargeRequest();
-            string SQLQueryHeaders = "INSERT INTO user(`Name`, `Surnames`, `Email`, `IdCategory`, `IdUserSchedule`, `UserName`, `UserPass`, `Active`) ";
-            string SQLQueryValues = "VALUES('{0}', '{1}', '{2}', {3}, {4}, '{5}', MD5('{6}'), {7})";
+            string SQLQueryHeaders = "INSERT INTO user(`Name`, `Email`, `IdCategory`, `IdUserSchedule`, `UserName`, `UserPass`, `Active`) ";
+            string SQLQueryValues = "VALUES('{0}', '{1}', {2}, {3}, '{4}', MD5('{5}'), {6})";
 
-            string SQLQueryGeneral = String.Format((SQLQueryHeaders + SQLQueryValues), request.Name, request.Surnames, request.Email, request.IdCategory, request.IdUserSchedule, request.UserName, request.UserPass, request.Active);
+            string SQLQueryGeneral = String.Format((SQLQueryHeaders + SQLQueryValues), request.Name, request.Email, request.IdCategory, request.IdUserSchedule, request.UserName, request.UserPass, request.Active);
             var rows = await conn.ExecuteAsync(SQLQueryGeneral);
 
             if (rows != 0) // If user is created
@@ -143,26 +140,23 @@ namespace NTTLapso.Repository
             if (request.Name != null && request.Name != "")
                 SQLSet += " Name='{1}'";
 
-            if (request.Surnames != null)
-                SQLSet += ", `Surnames`= '{2}'";
-
             if (request.Email != null)
-                SQLSet += ", `Email`= '{3}'";
+                SQLSet += ", `Email`= '{2}'";
 
             if (request.IdCategory != null)
-                SQLSet += ", `IdCategory`={4}";
+                SQLSet += ", `IdCategory`={3}";
 
             if (request.IdUserSchedule != null)
-                SQLSet += ", `IdUserSchedule`={5}";
+                SQLSet += ", `IdUserSchedule`={4}";
 
             if (request.UserName != null)
-                SQLSet += ", `UserName`= '{6}'";
+                SQLSet += ", `UserName`= '{5}'";
 
             if (request.UserPass != null && request.UserPass !="")
-                SQLSet += ", `UserPass`=  MD5('{7}')";
+                SQLSet += ", `UserPass`=  MD5('{6}')";
 
             if (request.Active != null)
-                SQLSet += ", `Active`={8}";
+                SQLSet += ", `Active`={7}";
 
             if (SQLSet != "")
             {
@@ -172,7 +166,7 @@ namespace NTTLapso.Repository
             SQLQueryPartial += SQLSet;
             SQLQueryPartial += " WHERE Id={0};";
 
-            string SQLQueryGeneral = String.Format(SQLQueryPartial, request.Id, request.Name, request.Surnames, request.Email, request.IdCategory, request.IdUserSchedule, request.UserName, request.UserPass, request.Active);
+            string SQLQueryGeneral = String.Format(SQLQueryPartial, request.Id, request.Name, request.Email, request.IdCategory, request.IdUserSchedule, request.UserName, request.UserPass, request.Active);
             conn.Query(SQLQueryGeneral);
         }
 
