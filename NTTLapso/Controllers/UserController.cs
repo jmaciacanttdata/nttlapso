@@ -89,7 +89,7 @@ namespace NTTLapso.Controllers
                 sender.Content.IdNotificationType = notification[0].IdNotification;
                 MailReplacer replacer1 = new MailReplacer();
                 replacer1.SearchText = "{{user_name}}";
-                replacer1.ReplaceText = request.Name + " " + request.Surnames;
+                replacer1.ReplaceText = request.Name;
                 MailReplacer replacer2 = new MailReplacer();
                 replacer2.SearchText = "{{manager_name}}";
                 replacer2.ReplaceText = managerList[0].Name;
@@ -170,10 +170,10 @@ namespace NTTLapso.Controllers
                 sender.Content.IdNotificationType = notification[0].IdNotification;
                 MailReplacer replacer1 = new MailReplacer();
                 replacer1.SearchText = "{{user_name}}";
-                replacer1.ReplaceText = user.Name + " " + user.Surnames;
+                replacer1.ReplaceText = user.Name;
                 MailReplacer replacer2 = new MailReplacer();
                 replacer2.SearchText = "{{manager_name}}";
-                replacer2.ReplaceText = request.NameApprover + " " + request.SurnamesApprover;
+                replacer2.ReplaceText = request.NameApprover;
                 replacerList.Add(replacer1);
                 replacerList.Add(replacer2);
                 sender.Replacers = replacerList;

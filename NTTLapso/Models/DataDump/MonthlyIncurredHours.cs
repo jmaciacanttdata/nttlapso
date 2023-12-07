@@ -2,10 +2,11 @@
 {
     public class MonthlyIncurredHours
     {
-        public string NumEmpleado { get; set; } = string.Empty;
-        public int Anyo { get; set; }
-        public int Mes { get; set; }
-        public float HorasIncurrir { get; set; }
-        public float HorasIncurridas { get; set; }
+        public string IdEmployee { get; set; } = string.Empty;
+        public string Year { get; set; } = string.Empty;
+        public string Month { get; set; } = string.Empty;
+        public float TotalHours { get; set; }
+        public float TotalIncurredHours { get; set; }
+        public float HoursDiff { get; set; }
     }
 }

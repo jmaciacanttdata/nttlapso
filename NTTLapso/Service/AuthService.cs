@@ -9,8 +9,14 @@ namespace NTTLapso.Service
 {
     public class AuthService
     {
-        private AuthRepository _repo = new AuthRepository();
-        public AuthService() { }
+        private IConfiguration _config;
+        private AuthRepository _repo;
+
+        public AuthService(IConfiguration config) 
+        {
+            _config = config;
+            _repo = new AuthRepository(_config);
+        }
 
         public async Task<LoginResponse> Login(LoginRequest loginRequest) { 
             return await _repo.Login(loginRequest);
@@ -24,7 +30,6 @@ namespace NTTLapso.Service
             {
                 new Claim(ClaimTypes.PrimarySid,user.IdUsuario.ToString()),
                 new Claim(ClaimTypes.Name,user.Nombre),
-                new Claim(ClaimTypes.Surname,user.Apellidos),
                 new Claim(ClaimTypes.Email,user.Email),
                 new Claim(ClaimTypes.Role,user.IdCategoria.ToString()),
                 new Claim(ClaimTypes.PrimaryGroupSid,user.IdUsuarioHorario.ToString())
@@ -49,7 +54,6 @@ namespace NTTLapso.Service
                 {
                     IdUsuario = System.Convert.ToInt32(userClaims.FirstOrDefault(x => x.Type == ClaimTypes.PrimarySid)?.Value),
                     Nombre = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value,
-                    Apellidos = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value,
                     Email = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value,
                     IdCategoria = System.Convert.ToInt32(userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value),
                     IdUsuarioHorario = System.Convert.ToInt32(userClaims.FirstOrDefault(x => x.Type == ClaimTypes.PrimaryGroupSid)?.Value)

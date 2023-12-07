@@ -1,34 +1,35 @@
-﻿namespace NTTLapso.Models.DataDump
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace NTTLapso.Models.DataDump
 {
     public class Incurred
     {
-        public string id_employee { get; set; }
-        public string nombre_persona { get; set; }
-        public string situacion_actual_persona { get; set; }
-        public string pkey_jira { get; set; }
-        public string component { get; set; }
-        public string group { get; set; }
-        public string service_line { get; set; }
-        public string task_type { get; set; }
-        public bool facturable { get; set; }
-        public string task_id { get; set; }
-        public string task_summary { get; set; }
-        public string task_status { get; set; }
-        public string task_origin { get; set; }
-        public float internal_estimation { get; set; }
-        public int agile_estimation { get; set; }
-        public string estimation_unit { get; set; }
-        public string sub_task_type { get; set; }
-        public string typology { get; set; }
-        public string sub_task_id { get; set; }
-        public string sub_task_summary { get; set; }
-        public string sub_task_status { get; set; }
-        public string sub_task_origin { get; set; }
-        public string incurred_comment { get; set; }
-        public double sub_task_estimation { get; set; }
-        public float incurred_hours { get; set; }
-        public double etc { get; set; }
-        public DateTime fecha { get; set; }
-        public double month_date { get; set; }
+        public string id_employee { get; set; } = string.Empty;
+        public string service_name { get; set; } = string.Empty;
+        public string service_team { get; set; } = string.Empty;
+        public string pkey_jira { get; set; } = string.Empty;
+        public string component { get; set; } = string.Empty;
+        public string grouping { get; set; } = string.Empty;
+        public string service_line { get; set; } = string.Empty;
+        public string task_type { get; set; } = string.Empty;
+        public string billable_to_customer { get; set; } = string.Empty;
+        public string task_id { get; set; } = string.Empty;
+        public string task_summary { get; set; } = string.Empty;
+        public string task_state { get; set; } = string.Empty;
+        public string task_origin { get; set; } = string.Empty;
+        public string intern_estimation { get; set; } = string.Empty;
+        public string agile_estimation { get; set; } = string.Empty;
+        public string estimation_unit { get; set; } = string.Empty;
+        public string subtask_type { get; set; } = string.Empty;
+        public string typology { get; set; } = string.Empty;
+        public string subtask_id { get; set; } = string.Empty;
+        public string subtask_summary { get; set; } = string.Empty;
+        public string subtask_state { get; set; } = string.Empty;
+        public string subtask_origin { get; set; } = string.Empty;
+        public string incurred_comment { get; set; } = string.Empty;
+        public string subtask_estimation { get; set; } = string.Empty;
+        public string incurred_hours { get; set; } = string.Empty;
+        public string date { get; set; } = string.Empty;
     }
 }
