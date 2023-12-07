@@ -4,7 +4,6 @@
     {
         public string id_employee {  get; set; }
         public string name { get; set; }
-        public string surnames { get; set; }
         public string service_team {  get; set; }
 
         public string incurred_hours_by_team {  get; set; }

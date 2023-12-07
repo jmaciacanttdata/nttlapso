@@ -36,15 +36,17 @@ namespace NTTLapso.Tools
         {
             if (other == null) return;
 
-            List<string> temp;
+            List<string> temp = new List<string>(_logList.Count + other._logList.Count);
 
             if (!toBeginning)
             {
-                temp = Enumerable.Concat(_logList, other._logList).ToList();
+                _logList.ForEach((msg) => { temp.Add(msg); });
+                other._logList.ForEach((msg) => { temp.Add(msg); });
             }
             else
             {
-                temp = Enumerable.Concat(other._logList, _logList).ToList();
+                other._logList.ForEach((msg) => { temp.Add(msg); });
+                _logList.ForEach((msg) => { temp.Add(msg); });
             }
 
             _logList = temp;

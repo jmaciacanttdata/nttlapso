@@ -39,7 +39,7 @@ namespace NTTLapso.Repository
         {
             try
             {
-                string sql ="SELECT ROUND(SUM(REPLACE(hours, ',', '.')), 4) FROM schedules s ";
+                string sql ="SELECT SUM(REPLACE(hours, ',', '.')) FROM schedules s ";
 
                 sql += string.Format("WHERE s.id_employee = {0}", userId);
 
@@ -57,7 +57,7 @@ namespace NTTLapso.Repository
         {
             try
             {
-                string sql = "SELECT ROUND(SUM(REPLACE(incurred_hours, ',', '.')), 4) FROM incurred i ";
+                string sql = "SELECT SUM(REPLACE(incurred_hours, ',', '.')) FROM incurred i ";
 
                 sql += string.Format("WHERE i.id_employee = {0} AND MONTH(STR_TO_DATE(date, '%d/%m/%Y')) = {1}", userId, month);
 
@@ -259,16 +259,44 @@ namespace NTTLapso.Repository
             StringBuilder sqlInsert = new StringBuilder("SET FOREIGN_KEY_CHECKS = 0; ");
             sqlInsert.Append("INSERT INTO incurred VALUES ");
 
-            string insertParams = "('{0}','{1}','{2}','{3}','{4}','{5}','{6}')";
+            string insertParams = "('{0}','{1}','{2}','{3}','{4}','{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}', '{14}', '{15}', '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}')";
 
             foreach (Incurred incurred in incurreds)
             {
-                string insert = String.Format(insertParams + ((incurreds.Last() != incurred) ? "," : ""), incurred.id_employee, incurred.service_team, incurred.task_id, incurred.task_summary, incurred.incurred_hours, incurred.date, incurred.month_date);
+                string insert = String.Format(insertParams + ((incurreds.Last() != incurred) ? "," : ""), 
+                    incurred.id_employee,
+                    incurred.service_name,
+                    incurred.service_team,
+                    incurred.pkey_jira,
+                    incurred.component,
+                    incurred.grouping,
+                    incurred.service_line,
+                    incurred.task_type,
+                    incurred.billable_to_customer,
+                    incurred.task_id, 
+                    incurred.task_summary,
+                    incurred.task_state,
+                    incurred.task_origin,
+                    incurred.intern_estimation,
+                    incurred.agile_estimation,
+                    incurred.estimation_unit,
+                    incurred.subtask_type,
+                    incurred.typology,
+                    incurred.subtask_id,
+                    incurred.subtask_summary,
+                    incurred.subtask_state,
+                    incurred.subtask_origin,
+                    incurred.incurred_comment,
+                    incurred.subtask_estimation,
+                    incurred.incurred_hours, 
+                    incurred.date
+                );
                 sqlInsert.Append(insert);
             }
 
             sqlInsert.Append("; SET FOREIGN_KEY_CHECKS = 1;");
-            conn.Query(sqlInsert.ToString());
+
+            conn.Execute(sqlInsert.ToString());
         }
 
         public async Task DumpEmployeesIntoUsers()

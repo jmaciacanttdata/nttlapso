@@ -10,6 +10,6 @@ namespace NTTLapso.Models.DataDump
         [JsonPropertyOrder(-2)]
         public int StatusCode { get; set; } = 200;
         [JsonPropertyOrder(-1)]
-        public LogBuilder Log {  get; set; }
+        public LogBuilder Log { get; set; } = new LogBuilder();
     }
 }

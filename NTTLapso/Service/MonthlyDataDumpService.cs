@@ -38,7 +38,17 @@ namespace NTTLapso.Service
             incurredUser.Month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
             incurredUser.TotalHours = await _repo.GetTotalHours(employee.id_employee);
             incurredUser.TotalIncurredHours = await _repo.GetIncurred(employee.id_employee, incurredUser.Month);
-            incurredUser.HoursDiff = MathF.Round(incurredUser.TotalHours - incurredUser.TotalIncurredHours, 4);
+
+            double truncated_incurred = Math.Truncate(incurredUser.TotalIncurredHours);
+            double incurred_decimal = incurredUser.TotalIncurredHours - truncated_incurred;
+
+            float total_incurred = 0;
+
+            if (incurred_decimal <= .4) total_incurred = (float)truncated_incurred;
+            else if (1 - incurred_decimal <= .4) total_incurred = 1 + (float)truncated_incurred;
+            else total_incurred = (float)truncated_incurred + .5f;
+
+            incurredUser.HoursDiff = incurredUser.TotalHours - total_incurred;
 
             await _repo.CreateCalculated(incurredUser);
         }
@@ -105,14 +115,32 @@ namespace NTTLapso.Service
 
             var columnasIncurred = new List<Tuple<bool, string, string, Func<string, string>?>>
             {
-                CreateTuple(true, "Numero Empleado", "id_employee", null),
-                CreateTuple(true, "Service Team",    "service_team", (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }),
-                CreateTuple(true, "Id Task",         "task_id", null),
-                CreateTuple(true, "Task Summary",    "task_summary", ExcelExtractorParsers.FilterText),
-                CreateTuple(true, "Horas Incurridas", "incurred_hours", null),
-                CreateTuple(true,  "Fecha",          "date", ExcelExtractorParsers.FilterDate),
-                CreateTuple(true, "Fecha Mes",      "month_date", null)
-
+                CreateTuple(true, "Numero Empleado",        "id_employee",              null),
+                CreateTuple(true, "Nombre Servicio",        "service_name",             (data)=>{return data=="" ? "SEVICIOS SIN NOMBRE" : data; }),
+                CreateTuple(true, "Service Team",           "service_team",             (data)=>{return data=="" ? "EQUIPOS SIN NOMBRE" : data; }),
+                CreateTuple(true, "Pkey Jira",              "pkey_jira",                null),
+                CreateTuple(true, "Componente",             "component",                null),
+                CreateTuple(true, "Agrupación",             "grouping",                 null),
+                CreateTuple(true, "Service Line",           "service_line",             null),
+                CreateTuple(true, "Tipo Task",              "task_type",                null),
+                CreateTuple(true, "Facturable a cliente",   "billable_to_customer",     null),
+                CreateTuple(true, "Id Task",                "task_id",                  null),
+                CreateTuple(true, "Task Summary",           "task_summary",             ExcelExtractorParsers.FilterText),
+                CreateTuple(true, "Estado Task",            "task_state",               null),
+                CreateTuple(true, "Origen Task",            "task_origin",              null),
+                CreateTuple(true, "Estimación Interna",     "intern_estimation",        null),
+                CreateTuple(true, "Estimacion Agile",       "agile_estimation",         null),
+                CreateTuple(true, "Unidad Estimacion",      "estimation_unit",          null),
+                CreateTuple(true, "Tipo Sub Task",          "subtask_type",             null),
+                CreateTuple(true, "Typology",               "typology",                 null),
+                CreateTuple(true, "Id Sub Task",            "subtask_id",               null),
+                CreateTuple(true, "Sub Task Summary",        "subtask_summary",          ExcelExtractorParsers.FilterText),
+                CreateTuple(true, "Estado Sub Task",        "subtask_state",            null),
+                CreateTuple(true, "Origen Sub Task",        "subtask_origin",           null),
+                CreateTuple(true, "Comentario Incurrido",   "incurred_comment",         ExcelExtractorParsers.FilterText),
+                CreateTuple(true, "Estimacion Sub Task",    "subtask_estimation",       null),
+                CreateTuple(true, "Horas Incurridas",       "incurred_hours",           null),
+                CreateTuple(true, "Fecha",                  "date",                     ExcelExtractorParsers.FilterDate)
             };
 
             return columnasIncurred;

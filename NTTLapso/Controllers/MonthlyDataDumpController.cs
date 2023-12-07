@@ -42,21 +42,18 @@ namespace NTTLapso.Controllers
         {
             var finalResp = new NumConsolidationResponse();
 
+            // LEER DATOS DE LOS EXCELS
             var excelLoadResponse = await _service.LoadDataFromExcels();
-
             if (!excelLoadResponse.Completed) return StatusCode(excelLoadResponse.StatusCode, excelLoadResponse);
 
+            finalResp.Log.Append(excelLoadResponse.Log);
+
+            // CREAR TABLA DE CONSOLIDACIÓN
             var consolidationResp = await _service.CreateConsolidation();
-            consolidationResp.Log.Append(excelLoadResponse.Log, true);
 
-            if (!consolidationResp.Completed) return StatusCode(consolidationResp.StatusCode, consolidationResp);
-
-            var leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
-            leaderRemainingHoursResp.Log.Append(consolidationResp.Log, true);
-
-            finalResp.Completed = leaderRemainingHoursResp.Completed;
-            finalResp.StatusCode = leaderRemainingHoursResp.StatusCode;
-            finalResp.Log = leaderRemainingHoursResp.Log;
+            finalResp.Completed = consolidationResp.Completed;
+            finalResp.StatusCode = consolidationResp.StatusCode;
+            finalResp.Log.Append(consolidationResp.Log);
             finalResp.NumConsolidate = consolidationResp.NumConsolidate;
 
             return (finalResp.Completed) ? Ok(finalResp) : StatusCode(finalResp.StatusCode, finalResp);
@@ -68,26 +65,33 @@ namespace NTTLapso.Controllers
         {
             var finalResp = new NumConsolidationResponse();
 
-            var calcResp = await _service.CalculateMonthlyHours();
-
-            if (!calcResp.Completed) return StatusCode(calcResp.StatusCode, calcResp);
-
+            // LEER DATOS DE LOS EXCELS
             var excelLoadResponse = await _service.LoadDataFromExcels();
-            excelLoadResponse.Log.Append(calcResp.Log);
-
             if (!excelLoadResponse.Completed) return StatusCode(excelLoadResponse.StatusCode, excelLoadResponse);
+            
+            finalResp.Log.Append(excelLoadResponse.Log);
 
+
+            // CREAR TABLA DE CONSOLIDACION
             var consolidationResp = await _service.CreateConsolidation();
-            consolidationResp.Log.Append(excelLoadResponse.Log);
-
             if (!consolidationResp.Completed) return StatusCode(consolidationResp.StatusCode, consolidationResp);
 
+            finalResp.Log.Append(consolidationResp.Log);
+
+
+            // CALCULAR HORAS MENSUALES
+            var calcResp = await _service.CalculateMonthlyHours();
+            if (!calcResp.Completed) return StatusCode(calcResp.StatusCode, calcResp);
+
+            finalResp.Log.Append(calcResp.Log);
+            
+
+            // CREAR TABLA DE HORAS INCURRIDAS POR LIDERES
             var leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
-            leaderRemainingHoursResp.Log.Append(consolidationResp.Log);
 
             finalResp.Completed = leaderRemainingHoursResp.Completed;
             finalResp.StatusCode = leaderRemainingHoursResp.StatusCode;
-            finalResp.Log = leaderRemainingHoursResp.Log;
+            finalResp.Log.Append(leaderRemainingHoursResp.Log);
             finalResp.NumConsolidate = consolidationResp.NumConsolidate;
 
             return (finalResp.Completed) ? Ok(finalResp) : StatusCode(finalResp.StatusCode, finalResp);
