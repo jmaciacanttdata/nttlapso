@@ -169,19 +169,21 @@ namespace NTTLapso.Repository
 
         public async Task<List<IncurredHoursByDate>> GetIncurredHoursByDate(string month, string year, string? userId)
         {
-            string monthDate = year + month;
             StringBuilder query = new StringBuilder(
                 String.Format(
                 @"
                     SELECT id_employee, date, incurred_hours
-                    FROM incurred WHERE month_date = '{0}' AND id_employee = '{1}'
-                ", monthDate, userId)
+                    FROM incurred 
+                    WHERE MONTH(STR_TO_DATE(date, '%d/%m/%Y')) = '{0}' 
+                        AND YEAR(STR_TO_DATE(date, '%d/%m/%Y')) = '{1}' 
+                        AND id_employee = '{2}'
+                ", month, year, userId)
             );
             return conn.Query<IncurredHoursByDate>(query.ToString()).ToList();
         }
 
         public async Task CreateCalculated(MonthlyIncurredHours monthlyIncurred)
-        {
+        {                
             string sqlInsert = String.Format(
                 @"
                     INSERT INTO monthly_incurred_hours 
