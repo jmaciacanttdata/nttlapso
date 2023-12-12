@@ -18,7 +18,27 @@ namespace NTTLapso.Repository
             conn = new MySqlConnection(connectionString);
         }
 
-        public async Task<List<PetitionStatusDataResponse>> List(IdValue? request) {
+        public async Task<List<PetitionStatusDataResponse>> List()
+        {
+            List<PetitionStatusDataResponse> response = new List<PetitionStatusDataResponse>();
+
+            string query = "SELECT * FROM petition_state";
+
+            var queryResponse = conn.Query(query).ToList();
+
+            queryResponse.ForEach(row =>
+            {
+                PetitionStatusDataResponse petitionResponse = new PetitionStatusDataResponse();
+                petitionResponse.Id = row.Id;
+                petitionResponse.Value = row.Value;
+                petitionResponse.IdTextNotification = row.IdTextNotification;
+                response.Add(petitionResponse);
+            });
+
+            return response;
+        }
+
+        /*public async Task<List<PetitionStatusDataResponse>> List(IdValue? request) {
             List<PetitionStatusDataResponse> response = new List<PetitionStatusDataResponse>();
 
             string SQLQueryGeneral = "SELECT PT.Id as Id, PT.Value as Value, PT.IdTextNotification as IdTextNotification, TN.Subject as Subject, TN.Content as Content FROM petition_state PT " +
@@ -43,7 +63,7 @@ namespace NTTLapso.Repository
             }
 
             return response;
-        }
+        }*/
 
         public async Task Create(CreatePetitionStatusRequest request)
         {

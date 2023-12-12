@@ -21,15 +21,16 @@ namespace NTTLapso.Controllers
         }
 
 
-        [HttpPost]
+        [HttpGet]
         [Route("List")]
         [Authorize]
-        public async Task<ListPetitionStatusResponse> List(IdValue? request) {
+        public async Task<ListPetitionStatusResponse> List()
+        {
             ListPetitionStatusResponse response = new ListPetitionStatusResponse();
             List<PetitionStatusDataResponse> responseList = new List<PetitionStatusDataResponse>();
             try
             {
-                responseList = await _service.List(request);
+                responseList = await _service.List();
                 response.IsSuccess = true;
                 response.Data = responseList;
                 response.Error = null;

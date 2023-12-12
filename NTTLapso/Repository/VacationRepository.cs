@@ -157,7 +157,7 @@ namespace NTTLapso.Repository
         {
             List<VacationData> response = new List<VacationData>();
 
-            string SQLQueryGeneral = "SELECT vacation.Id AS IdVacation, U.Id AS IdUserPetition, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
+            string SQLQueryGeneral = "SELECT vacation.Id AS IdVacation, U.Id AS IdUserPetition, U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
                 /*"SELECT IdUserPetition, user.Name, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1"*/;
             if (request != null && request.IdUserPetition > 0)
             {
@@ -209,7 +209,7 @@ namespace NTTLapso.Repository
         {
             List<VacationStateLogDataResponse> response = new List<VacationStateLogDataResponse>();
 
-            string SQLQueryGeneral = "SELECT IdVacation, U.Id AS IdUser, CONCAT(U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', " +
+            string SQLQueryGeneral = "SELECT IdVacation, U.Id AS IdUser, U.Name AS 'UserName', PT.Id AS 'IdPetitionType', " +
                 "PT.Value AS 'ValuePetitionType', PS.Id AS 'IdPetitionState', PS.Value AS 'ValuePetitionState', V.PetitionDate AS 'PetitionDate', " +
                 "StateDate, Detail FROM vacation_state_log INNER JOIN vacation V ON IdVacation = V.Id INNER JOIN `user` U ON IdUserState = U.Id " +
                 "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id";
@@ -233,6 +233,7 @@ namespace NTTLapso.Repository
             foreach (var log in SQLResponse)
             {
                 VacationStateLogDataResponse logResponse = new VacationStateLogDataResponse();
+                logResponse.IdVacation = log.IdVacation;
                 logResponse.User = new IdValue() { Id = log.IdUser, Value = log.UserName };
                 logResponse.PetitionType = new IdValue() { Id = log.IdPetitionType, Value = log.ValuePetitionType };
                 logResponse.PetitionState = new IdValue() { Id = log.IdPetitionState, Value = log.ValuePetitionState };
