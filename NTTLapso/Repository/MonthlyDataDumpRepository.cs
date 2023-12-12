@@ -173,7 +173,7 @@ namespace NTTLapso.Repository
             StringBuilder query = new StringBuilder(
                 String.Format(
                 @"
-                    SELECT id_employee, date, incurred_hours
+                    SELECT id_employee, date, incurred_hours, task_id, task_summary
                     FROM incurred WHERE month_date = '{0}' AND id_employee = '{1}'
                 ", monthDate, userId)
             );
