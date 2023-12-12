@@ -233,6 +233,7 @@ namespace NTTLapso.Repository
             foreach (var log in SQLResponse)
             {
                 VacationStateLogDataResponse logResponse = new VacationStateLogDataResponse();
+                logResponse.IdVacation = log.IdVacation;
                 logResponse.User = new IdValue() { Id = log.IdUser, Value = log.UserName };
                 logResponse.PetitionType = new IdValue() { Id = log.IdPetitionType, Value = log.ValuePetitionType };
                 logResponse.PetitionState = new IdValue() { Id = log.IdPetitionState, Value = log.ValuePetitionState };
