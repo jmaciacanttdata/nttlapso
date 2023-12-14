@@ -35,6 +35,18 @@ namespace NTTLapso.Repository
             return (conn.Query<Employee>(sql)).ToList();
         }
 
+        public async Task<List<EmployeeBySupervisor>> GetEmployeesBySupervisorId(string? supervisorId)
+        {
+            var result = conn.Query(String.Format("SELECT id_employee from leader_remaining_hours where id_supervisor = {0}", supervisorId));
+            return result.Select(emp => new EmployeeBySupervisor { Id = Convert.ToInt32(emp.id_employee) }).ToList();
+        }
+
+        public async Task<List<EmployeeRemainingHours>> GetServiceOfEmployeeById(string employeeId)
+        {
+            var result = conn.Query(String.Format("SELECT service from leader_remaining_hours where id_supervisor = {0}", employeeId));
+            return result.Select(emp => new EmployeeRemainingHours { service_team = emp.service }).ToList();
+        }
+
         public async Task<float> GetTotalHours(string? userId)
         {
             try
