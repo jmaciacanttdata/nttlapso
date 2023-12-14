@@ -76,7 +76,7 @@ namespace NTTLapso.Repository
             conn.Execute("CALL SP_CREATE_LEADER_REMAINING_HOURS();");
         }
 
-        public async Task<List<LeaderIncurredHours>> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
+        public async Task<List<LeaderRemainingHours>> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             StringBuilder queryBuilder = new StringBuilder
                 (
@@ -85,6 +85,7 @@ namespace NTTLapso.Repository
                     FROM leader_remaining_hours
                 "
                 );
+
             if(leader_id != null || employee_id != null || service != null)
             {
                 StringBuilder paramsBuilder = new StringBuilder(" WHERE ");
@@ -109,6 +110,43 @@ namespace NTTLapso.Repository
 
                 queryBuilder.Append(paramsBuilder.ToString());
             }
+
+            return conn.Query<LeaderRemainingHours>(queryBuilder.ToString()).ToList();
+        }
+
+        public async Task<List<LeaderIncurredHours>> GetLeaderIncurredHours(string? leader_id, string? employee_id, string? service)
+        {
+            StringBuilder queryBuilder = new StringBuilder(
+                @"
+                    SELECT l.id_employee, l.employee_name, l.service, i.task_id, i.date, SUM(REPLACE(i.incurred_hours, ',', '.')) AS incurred_hours
+                    FROM leader_remaining_hours l
+	                    INNER JOIN incurred i ON l.id_employee = i.id_employee AND l.service = i.service_name
+                    WHERE 1=1
+                "
+            );
+
+            if (leader_id != null || employee_id != null || service != null)
+            {
+                StringBuilder paramsBuilder = new StringBuilder();
+                if (leader_id != null)
+                {
+                    paramsBuilder.Append(String.Format(" AND l.id_supervisor = '{0}'", leader_id));
+                }
+
+                if (employee_id != null)
+                {
+                    paramsBuilder.Append(String.Format(" AND l.id_employee = '{0}'", employee_id));
+                }
+
+                if (service != null)
+                {
+                    paramsBuilder.Append(String.Format(" AND l.service = '{0}'", service));
+                }
+
+                queryBuilder.Append(paramsBuilder.ToString());
+            }
+
+            queryBuilder.Append(" GROUP BY l.id_employee, l.service, i.task_id, i.date");
 
             return conn.Query<LeaderIncurredHours>(queryBuilder.ToString()).ToList();
         }
