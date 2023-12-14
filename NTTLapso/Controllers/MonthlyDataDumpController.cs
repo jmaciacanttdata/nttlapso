@@ -20,9 +20,9 @@ namespace NTTLapso.Controllers
             _service = new MonthlyDataDumpService(_config);
         }
 
-        [Route("CreateLeaderIncurredHours")]
+        [Route("CreateLeaderRemainingHours")]
         [HttpPost]
-        public async Task<ActionResult> CreateLeaderIncurredHours()
+        public async Task<ActionResult> CreateLeaderRemaininghHours()
         {
             var resp = await _service.CreateLeaderRemainingHours();
             return (resp.Completed) ? Ok(resp) : StatusCode(resp.StatusCode, resp);
@@ -105,11 +105,19 @@ namespace NTTLapso.Controllers
             return StatusCode(resp.StatusCode, resp);
         }
 
-        [Route("GetLeaderIncurredHours")]
+        [Route("GetLeaderRemainingHours")]
         [HttpGet]
         public async Task<ActionResult> GetLeaderRemainingHours(string? leaderId, string? employeeId, string? service)
         {
             var resp = await _service.GetLeaderRemainingHours(leaderId, employeeId, service);
+            return StatusCode(resp.StatusCode, resp);
+        }
+
+        [Route("GetLeaderIncurredHours")]
+        [HttpGet]
+        public async Task<ActionResult> GetLeaderIncurredHours(string? leaderId, string? employeeId, string? service)
+        {
+            var resp = await _service.GetLeaderIncurredHours(leaderId, employeeId, service);
             return StatusCode(resp.StatusCode, resp);
         }
 

@@ -191,7 +191,7 @@ namespace NTTLapso.Service
         public async Task<SimpleResponse> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             LogBuilder log = new LogBuilder();
-            var resp = new LeaderIncurredHoursResponse();
+            var resp = new LeaderRemainingHoursResponse();
 
             try
             {
@@ -235,6 +235,52 @@ namespace NTTLapso.Service
 
             return resp;
         } 
+
+        public async Task<SimpleResponse> GetLeaderIncurredHours(string? leader_id, string? employee_id, string? service)
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new LeaderIncurredHoursResponse();
+
+            try
+            {
+                var respExists = await EmployeeExists(leader_id);
+                if (leader_id != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log;
+                    return resp;
+                }
+
+                respExists = await EmployeeExists(employee_id);
+                if (employee_id != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log;
+                    return resp;
+                }
+
+                log.LogIf("Obteniendo listado de horas incurridas de empleados por equipos supervisados por un supervisor...");
+                resp.DataList = await _repo.GetLeaderIncurredHours(leader_id, employee_id, service);
+                log.LogOk("Lista de empleados por equipos obtenida.");
+
+                resp.Completed = true;
+                resp.StatusCode = 200;
+                resp.Log = log;
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.StatusCode = 500;
+                resp.Log = log;
+            }
+
+            return resp;
+        }
 
         public async Task<SimpleResponse> GetEmployeeRemainingHours(string month, string year, string? userId = null)
         {
