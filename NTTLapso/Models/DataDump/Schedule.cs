@@ -8,4 +8,9 @@ namespace NTTLapso.Models.DataDump
         public string hours { get; set; }
 
     }
+
+    public class ScheduleResponse: SimpleResponse
+    {
+        public List<Schedule> ScheduleList { get; set; } = new List<Schedule>();
+    }
 }

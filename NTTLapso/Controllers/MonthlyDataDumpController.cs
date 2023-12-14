@@ -162,6 +162,16 @@ namespace NTTLapso.Controllers
             return StatusCode(resp.StatusCode, resp);
         }
 
+        [Route("GetScheduledHours")]
+        [HttpGet]
+        public async Task<ActionResult> GetScheduledHours(string? userId)
+        {
+            string year = ((DateTime.Now.Month == 1) ? DateTime.Now.Year - 1 : DateTime.Now.Year).ToString();
+            string month = ((DateTime.Now.Month == 1) ? 12 : DateTime.Now.Month - 1).ToString();
+            var resp = await _service.GetScheduledHours(month, year, userId);
+            return StatusCode(resp.StatusCode, resp);
+        }
+
         [Route("GetConsolidationData")]
         [HttpGet]
         public async Task<ActionResult> GetConsolidatedEmployees()

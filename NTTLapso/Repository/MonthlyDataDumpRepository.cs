@@ -232,6 +232,21 @@ namespace NTTLapso.Repository
             return conn.Query<IncurredHoursByDate>(query.ToString()).ToList();
         }
 
+        public async Task<List<Schedule>> GetScheduledHoursByDate(string month, string year, string? userId)
+        {
+            StringBuilder query = new StringBuilder(
+                String.Format(
+                @"
+                    SELECT id_employee, SUM(hours) as hours
+                    FROM schedules 
+                    WHERE MONTH(STR_TO_DATE(date, '%d/%m/%Y')) = '{0}' 
+                        AND YEAR(STR_TO_DATE(date, '%d/%m/%Y')) = '{1}' 
+                        AND id_employee = '{2}'
+                ", month, year, userId)
+            );
+            return conn.Query<Schedule>(query.ToString()).ToList();
+        }
+
         public async Task CreateCalculated(MonthlyIncurredHours monthlyIncurred)
         {                
             string sqlInsert = String.Format(

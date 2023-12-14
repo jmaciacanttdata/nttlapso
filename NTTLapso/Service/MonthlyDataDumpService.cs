@@ -448,6 +448,49 @@ namespace NTTLapso.Service
             return resp;
         }
 
+        public async Task<SimpleResponse> GetScheduledHours(string month, string year, string? userId)
+        {
+            LogBuilder log = new LogBuilder();
+            var resp = new ScheduleResponse();
+
+            try
+            {
+                var respExists = await EmployeeExists(userId);
+                if (userId != null && !respExists.Completed)
+                {
+                    log.Append(respExists.Log);
+                    resp.Completed = respExists.Completed;
+                    resp.StatusCode = 400;
+                    resp.Log = log;
+                }
+
+                log.LogIf("Obteniendo lista de empleados con el total de sus horas por incurrir en el último mes...");
+                resp.ScheduleList = await _repo.GetScheduledHoursByDate(month, year, userId);
+                resp.ScheduleList = await _repo.GetScheduledHoursByDate(month, year, userId);
+                if (resp.ScheduleList.Count == 0)
+                {
+                    log.LogKo("La peticion se resolivio correctamente pero no hay empleados.");
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                }
+                else
+                {
+                    log.LogOk("Lista de empleados obtenida satisfactoriamente.");
+                    resp.Completed = true;
+                    resp.StatusCode = 200;
+                }
+            }
+            catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                resp.Completed = false;
+                resp.StatusCode = 500;
+            }
+
+            resp.Log = log;
+            return resp;
+        }
+
         public async Task<SimpleResponse> GetConsolidatedEmployees() 
         {
             var resp = new ConsolidationResponse();
