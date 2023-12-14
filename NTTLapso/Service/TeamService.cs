@@ -38,5 +38,6 @@ namespace NTTLapso.Service
         {
             return await _repo.GetTeamsManagerList(IdTeam, IdUser);
         }
+
     }
 }

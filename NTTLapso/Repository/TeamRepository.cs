@@ -24,18 +24,26 @@ namespace NTTLapso.Repository
         {
             List<TeamData> response = new List<TeamData>();
 
-            string SQLQueryGeneral = "SELECT team.Id, Team, CONCAT(user.Name,' ',user.Surnames) AS 'Manager', team.IdUserManager AS 'IdManager' FROM team INNER JOIN user ON team.IdUserManager = user.Id WHERE 1=1";
+            string SQLQueryGeneral =
+                @"
+                    SELECT t.Id, t.Team, tsb.Id_Leader, u.name
+                    FROM team_supervised_by tsb 
+	                    INNER JOIN team t ON tsb.Id_Team = t.Id 
+	                    INNER JOIN user u ON tsb.Id_Leader = u.Id
+                    WHERE 1=1
+                ";
+
             if (request != null && request.Id > 0)
             {
-                SQLQueryGeneral += " AND team.Id={0}";
+                SQLQueryGeneral += " AND t.Id={0}";
             }
             if(request != null && request.Team != null && request.Team != "")
             {
-                SQLQueryGeneral += " AND Team LIKE '%{1}%'";
+                SQLQueryGeneral += " AND t.Team LIKE '%{1}%'";
             }
             if (request != null && request.IdManager > 0)
             {
-                SQLQueryGeneral += " AND IdUserManager={2}";
+                SQLQueryGeneral += " AND tsb.Id_Leader={2}";
             }
             string SQLQuery = String.Format(SQLQueryGeneral, request.Id, request.Team, request.IdManager);
 
@@ -83,7 +91,7 @@ namespace NTTLapso.Repository
 
         public async Task<List<TeamManagerDataResponse>> GetTeamsManagerList(int IdTeam, int IdUser)
         {
-            string SQLQueryGeneral = "SELECT DISTINCT t.IdUserManager AS 'Id', CONCAT(user.Name, ' ', user.surnames) AS 'Name', user.Email AS 'Email' " +
+            string SQLQueryGeneral = "SELECT DISTINCT t.IdUserManager AS 'Id', user.Name AS 'Name', user.Email AS 'Email' " +
                 "FROM team t JOIN `user` ON user.Id = t.IdUserManager JOIN user_team ut ON t.Id = ut.IdTeam WHERE 1=1";
             if (IdTeam  > 0)
             {
@@ -100,5 +108,6 @@ namespace NTTLapso.Repository
 
             return response;
         }
+
     }
 }
