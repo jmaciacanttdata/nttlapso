@@ -157,7 +157,7 @@ namespace NTTLapso.Repository
         {
             List<VacationData> response = new List<VacationData>();
 
-            string SQLQueryGeneral = "SELECT vacation.Id AS IdVacation, U.Id AS IdUserPetition, U.Name, ' ', U.Surnames) AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
+            string SQLQueryGeneral = "SELECT vacation.Id AS IdVacation, U.Id AS IdUserPetition, U.Name AS 'UserName', PT.Id AS 'IdPetitionType', PT.Value AS 'Petition', PetitionDate FROM vacation INNER JOIN `user` U ON IdUserPetition = U.Id INNER JOIN petition_type PT ON IdPetitionType = PT.Id"
                 /*"SELECT IdUserPetition, user.Name, PetitionDate, IdPetitionType FROM vacation INNER JOIN user ON user.Id = IdUserPetition WHERE 1=1"*/;
             if (request != null && request.IdUserPetition > 0)
             {
