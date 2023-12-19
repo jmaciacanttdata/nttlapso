@@ -146,6 +146,22 @@ namespace NTTLapso.Service
             return columnasIncurred;
         }
 
+        private List<Tuple<bool, string, string, Func<string, string>?>> GetParamererizationColumns()
+        {
+            var CreateTuple = Tuple.Create<bool, string, string, Func<string, string>?>;
+
+            var columnasParamererization = new List<Tuple<bool, string, string, Func<string, string>?>>
+            {
+                CreateTuple(true, "Nombre servicio",        "service",      null),
+                CreateTuple(true, "Nombre Service Team",    "service_team", null),
+                CreateTuple(true, "CSL",                    "csl",          null),
+                CreateTuple(true, "CSSL",                   "cssl",         null),
+                CreateTuple(true, "Gerente",                "manager",      null),
+            };
+
+            return columnasParamererization;
+        }
+
         private List<T> DownloadAndExtractExcelData<T>(string pathToFileFromServer, string downloadFilename, string worksheetName, Func<List<Tuple<bool, string, string, Func<string, string>?>>> dictionaryFunc) 
         {
             _sharePointDownloader.Download(pathToFileFromServer, _saveDirectory);
@@ -527,6 +543,10 @@ namespace NTTLapso.Service
                 int consolidatedEntries = await _repo.CreateConsolidation();
                 log.LogOk("Tabla de consolidacion creada correctamente. "+ consolidatedEntries + " empleados consolidados.");
 
+                log.LogIf("Creando tabla de consolidacion de líderes...");
+                int leadersConsolidated = await _repo.CreateLeaderConsolidation();
+                log.LogOk("Tabla de consolidation de lideres creada correctamente. "+leadersConsolidated+" líderes consolidados.");
+
                 resp.Completed = true;
                 resp.NumConsolidate = consolidatedEntries;
                 resp.Log = log;
@@ -657,6 +677,10 @@ namespace NTTLapso.Service
                 await _repo.TruncateEmployees();
                 log.LogOk("Tabla employees truncada correctamente.");
 
+                log.LogIf("Truncando tabla leaders...");
+                await _repo.TruncateLeaders();
+                log.LogOk("Tabla leaders truncada correctamente.");
+
                 // OBTENER DATOS DE LOS EXCELS.
                 log.LogIf("Leyendo datos de empleados del excel...");
                 List<Employee> employeesData = DownloadAndExtractExcelData<Employee>("Documentos%20compartidos/General/Data/Headcount.xlsx", "Headcount.xlsx", "Detalle", GetEmployeesColumns);
@@ -669,6 +693,10 @@ namespace NTTLapso.Service
                 log.LogIf("Leyendo datos de incurridos del excel...");
                 List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/Incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle", GetIncurredColumns);
                 log.LogOk("Datos de incurridos del excel leídos correctamente.  ");
+
+                log.LogIf("Leyendo datos de parametrización del excel...");
+                List<Leaders> managersData = DownloadAndExtractExcelData<Leaders>("Documentos%20compartidos/General/Data/Parametrizacion.xlsx", "Parametrizacion.xlsx", "Top Management", GetParamererizationColumns);
+                log.LogOk("Datos de parametrización del excel leídos correctamente.  ");
 
                 // INSERCION DE DATOS EN TABLAS.
 
@@ -683,6 +711,10 @@ namespace NTTLapso.Service
                 log.LogIf("Insertando incurridos del excel en la base de datos...");
                 await _repo.InsertIncurreds(incurredsData);
                 log.LogOk("Incurridos insertados correctamente.");
+
+                log.LogIf("Insertando supervisores del excel en la base de datos...");
+                await _repo.InsertLeaders(managersData);
+                log.LogOk("Supervisores insertados correctamente.");
 
                 log.LogOk("Se ha completado el volcado de datos.");
 
