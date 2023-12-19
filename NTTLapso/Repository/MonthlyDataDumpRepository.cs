@@ -37,13 +37,13 @@ namespace NTTLapso.Repository
 
         public async Task<List<EmployeeBySupervisor>> GetEmployeesBySupervisorId(string? supervisorId)
         {
-            var result = conn.Query(String.Format("SELECT id_employee from leader_remaining_hours where id_supervisor = {0}", supervisorId));
+            var result = conn.Query(String.Format("SELECT id_employee from leader_hierarchy where id_supervisor = {0}", supervisorId));
             return result.Select(emp => new EmployeeBySupervisor { Id = Convert.ToInt32(emp.id_employee) }).ToList();
         }
 
         public async Task<List<EmployeeRemainingHours>> GetServiceOfEmployeeById(string employeeId)
         {
-            var result = conn.Query(String.Format("SELECT service from leader_remaining_hours where id_supervisor = {0}", employeeId));
+            var result = conn.Query(String.Format("SELECT service from leader_hierarchy where id_supervisor = {0}", employeeId));
             return result.Select(emp => new EmployeeRemainingHours { service_team = emp.service }).ToList();
         }
 
@@ -83,9 +83,29 @@ namespace NTTLapso.Repository
             }
         }
 
+        public async Task InsertLeaders(List<Leaders> leadersList)
+        {
+            StringBuilder sqlInsert = new StringBuilder("SET FOREIGN_KEY_CHECKS = 0; INSERT INTO leaders VALUES ");
+
+            string insertParams = "('{0}', '{1}', '{2}', '{3}', '{4}')";
+
+            foreach (var param in leadersList)
+            {
+                sqlInsert.Append(String.Format(insertParams + ((param != leadersList.Last()) ? "," : ""), param.service, param.service_team, param.csl, param.cssl, param.manager));
+            }
+
+            sqlInsert.Append("; SET FOREIGN_KEY_CHECKS = 1;");
+            conn.Query(sqlInsert.ToString());
+        }
+
         public async Task CreateLeaderRemainingHours()
         {
-            conn.Execute("CALL SP_CREATE_LEADER_REMAINING_HOURS();");
+            conn.Execute("CALL SP_CREATE_LEADER_HIERARCHY();");
+        }
+
+        public async Task<int> CreateLeaderConsolidation()
+        {
+            return conn.Query<int>("CALL SP_CREATE_LEADER_CONSOLIDATION();").FirstOrDefault();
         }
 
         public async Task<List<LeaderRemainingHours>> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
@@ -93,8 +113,8 @@ namespace NTTLapso.Repository
             StringBuilder queryBuilder = new StringBuilder
                 (
                 @"
-                    SELECT id_supervisor, id_employee, employee_name, remaining_hours
-                    FROM leader_remaining_hours
+                    SELECT DISTINCT l.id_supervisor, l.id_employee, l.employee_name, h.difference_hours AS remaining_hours
+                    FROM leader_hierarchy l INNER JOIN monthly_incurred_hours h ON l.id_employee = h.id_employee
                 "
                 );
 
@@ -104,19 +124,19 @@ namespace NTTLapso.Repository
                 int num_params = 0;
                 if(leader_id != null)
                 {
-                    paramsBuilder.Append(String.Format( ((num_params > 0)? " AND ":"") + "id_supervisor = '{0}'", leader_id));
+                    paramsBuilder.Append(String.Format( ((num_params > 0)? " AND ":"") + "l.id_supervisor = '{0}'", leader_id));
                     num_params++;
                 }
 
                 if(employee_id != null)
                 {
-                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "id_employee = '{0}'", employee_id));
+                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "l.id_employee = '{0}'", employee_id));
                     num_params++;
                 }
 
                 if (service != null)
                 {
-                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "service = '{0}'", service));
+                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "l.service = '{0}'", service));
                     num_params++;
                 }
 
@@ -131,7 +151,7 @@ namespace NTTLapso.Repository
             StringBuilder queryBuilder = new StringBuilder(
                 @"
                     SELECT l.id_employee, l.employee_name, l.service, i.task_id, i.date, SUM(REPLACE(i.incurred_hours, ',', '.')) AS incurred_hours
-                    FROM leader_remaining_hours l
+                    FROM leader_hierarchy l
 	                    INNER JOIN incurred i ON l.id_employee = i.id_employee AND l.service = i.service_name
                     WHERE 1=1
                 "
@@ -274,6 +294,12 @@ namespace NTTLapso.Repository
             TruncateTable(tableName, true);
         }
 
+        public async Task TruncateLeaders()
+        {
+            string tableName = "leaders";
+            TruncateTable(tableName, true);
+        }
+
         public async Task TruncateSchedules()
         {
             string tableName = "schedules";
@@ -373,19 +399,7 @@ namespace NTTLapso.Repository
 
         public async Task<int> CreateConsolidation()
         {
-            conn.Execute("CALL SP_CREATE_CONSOLIDATION;");
-
-            string query =
-                @"
-                SELECT COUNT(sc.id_employee) 
-                FROM (
-	                SELECT c.id_employee, c.name, c.service, c.service_team, c.NotEmployees, c.NotSchedules, c.NotIncurred
-	                FROM consolidation c
-	                WHERE c.id_employee IS NOT NULL
-	                GROUP BY id_employee, NAME, service, service_team
-                ) sc   
-                ";
-            return conn.Query<int>(query).FirstOrDefault();
+            return conn.Query<int>("CALL SP_CREATE_CONSOLIDATION;").FirstOrDefault();
         }
 
         public async Task<List<Consolidation>> GetConsolidatedEmployees()
@@ -400,5 +414,6 @@ namespace NTTLapso.Repository
 
             return conn.Query<Consolidation>(query).ToList();
         }
+
     }
 }
