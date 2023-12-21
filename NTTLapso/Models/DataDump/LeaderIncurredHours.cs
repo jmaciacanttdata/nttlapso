@@ -7,7 +7,7 @@
         public string service { get; set; } = String.Empty;
         public string task_id { get; set; } = String.Empty;
         public string date { get; set; } = String.Empty;
-        public string incurred_hours { get; set; } = string.Empty;
+        public float incurred_hours { get; set; } = 0;
     }
 
     public class LeaderIncurredHoursResponse : SimpleResponse

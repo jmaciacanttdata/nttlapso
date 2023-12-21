@@ -150,9 +150,13 @@ namespace NTTLapso.Repository
         {
             StringBuilder queryBuilder = new StringBuilder(
                 @"
-                    SELECT l.id_employee, l.employee_name, l.service, i.task_id, i.date, SUM(REPLACE(i.incurred_hours, ',', '.')) AS incurred_hours
+                    SELECT DISTINCT l.id_employee, l.employee_name, l.service, i.task_id, i.date, CAST(REPLACE(i.incurred_hours, ',', '.') AS FLOAT) AS incurred_hours
                     FROM leader_hierarchy l
-	                    INNER JOIN incurred i ON l.id_employee = i.id_employee AND l.service = i.service_name
+                    INNER JOIN (
+	                    SELECT id_employee, service_name AS service, task_id, DATE, SUM(REPLACE(incurred_hours, ',', '.')) AS incurred_hours
+	                    FROM incurred 
+	                    GROUP BY id_employee, service_name, task_id, date
+                    ) AS i ON l.id_employee = i.id_employee AND l.service = i.service
                     WHERE 1=1
                 "
             );
@@ -177,8 +181,6 @@ namespace NTTLapso.Repository
 
                 queryBuilder.Append(paramsBuilder.ToString());
             }
-
-            queryBuilder.Append(" GROUP BY l.id_employee, l.service, i.task_id, i.date");
 
             return conn.Query<LeaderIncurredHours>(queryBuilder.ToString()).ToList();
         }
