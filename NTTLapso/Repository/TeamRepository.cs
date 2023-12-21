@@ -20,34 +20,48 @@ namespace NTTLapso.Repository
             _config = config;
         }
 
-        public async Task<List<TeamData>> List(TeamRequest? request)
+        public async Task<List<TeamData>> List()
+        {
+            var result = conn.Query<TeamData>(String.Format("SELECT * FROM team")).ToList();
+            return result.Select(team => new TeamData { Id = team.Id, Team = team.Team}).ToList();
+        }
+
+        public async Task<bool> IsTeamLeader(int idManager)
+        {
+            return conn.Query(String.Format("SELECT Id_Leader from team_supervised_by where Id_Leader = {0}", idManager)).Count() > 0;
+        }
+
+        public async Task<List<TeamData>> ListTeamsByLeaderId(int idManager)
         {
             List<TeamData> response = new List<TeamData>();
 
-            string SQLQueryGeneral =
-                @"
-                    SELECT t.Id, t.Team, tsb.Id_Leader, u.name
-                    FROM team_supervised_by tsb 
-	                    INNER JOIN team t ON tsb.Id_Team = t.Id 
-	                    INNER JOIN user u ON tsb.Id_Leader = u.Id
-                    WHERE 1=1
-                ";
+            string query = String.Format("SELECT t.Id, Team FROM team t INNER JOIN team_supervised_by tsb ON tsb.Id_Team = t.Id where Id_Leader = {0}", idManager);
+            response = conn.Query<TeamData>(query).ToList();
 
-            if (request != null && request.Id > 0)
-            {
-                SQLQueryGeneral += " AND t.Id={0}";
-            }
-            if(request != null && request.Team != null && request.Team != "")
-            {
-                SQLQueryGeneral += " AND t.Team LIKE '%{1}%'";
-            }
-            if (request != null && request.IdManager > 0)
-            {
-                SQLQueryGeneral += " AND tsb.Id_Leader={2}";
-            }
-            string SQLQuery = String.Format(SQLQueryGeneral, request.Id, request.Team, request.IdManager);
+            return response;
+        }
 
-            response = conn.Query<TeamData>(SQLQuery).ToList();
+        public async Task<List<TeamData>> GetTeamGridData()
+        {
+            List<TeamData> response = new List<TeamData>();
+
+            string query = "SELECT t.Id, tsb.Id_Leader, t.Team, name AS 'Username'FROM team_supervised_by tsb INNER JOIN user u ON u.Id = tsb.Id_Leader INNER JOIN team t ON t.Id = tsb.Id_Team ORDER BY t.Team ASC";
+            string sqlQuery = String.Format(query);
+            var queryResponse = conn.Query(sqlQuery);
+
+            foreach(var row in  queryResponse)
+            {
+                TeamData teamData = new TeamData
+                {
+                    Id = row.Id,
+                    Team = row.Team,
+                    IdManager = row.Id_Leader,
+                    Manager = row.Username
+                };
+                response.Add(teamData);
+            }
+
+
             return response;
         }
 

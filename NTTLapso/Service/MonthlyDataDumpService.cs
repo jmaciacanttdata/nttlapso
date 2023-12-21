@@ -240,6 +240,38 @@ namespace NTTLapso.Service
             return response;
         }
 
+        public async Task<EmployeeRemainingHoursResponse> GetServiceOfEmployeeById(string? supervisorId)
+        {
+            LogBuilder log = new LogBuilder();
+            EmployeeRemainingHoursResponse response = new EmployeeRemainingHoursResponse();
+
+            try
+            {
+                SimpleResponse responseExists = await EmployeeExists(supervisorId);
+
+                if (supervisorId != null && !responseExists.Completed)
+                {
+                    log.Append(responseExists.Log);
+                    response.Completed = responseExists.Completed;
+                    response.StatusCode = 400;
+                    response.Log = log;
+                    return response;
+                }
+
+                log.LogIf("Obteniendo lista de servicios por el empleado con id " + supervisorId + "...");
+                response.EmployeesList = await _repo.GetServiceOfEmployeeById(supervisorId);
+                log.LogIf("Lista de empleados obtenida correctamente");
+            } catch (Exception e)
+            {
+                log.LogErr(e.Message);
+                response.Completed = false;
+                response.StatusCode = 500;
+                response.Log = log;
+            }
+
+            return response;
+        }
+
         public async Task<SimpleResponse> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             LogBuilder log = new LogBuilder();

@@ -36,6 +36,14 @@ namespace NTTLapso.Controllers
             return response.Completed ? Ok(response) : StatusCode(response.StatusCode, response);
         }
 
+        [Route("GetServiceOfEmployeeById")]
+        [HttpGet]
+        public async Task<ActionResult> GetServiceOfEmployeeById(string supervisorId)
+        {
+            var response = await _service.GetServiceOfEmployeeById(supervisorId);
+            return response.Completed ? Ok(response) : StatusCode(response.StatusCode, response);
+        }
+
         [Route("CalculateMonthlyIncurredHours")]
         [HttpPost]
         public async Task<ActionResult> CalculateMonthlyIncurredHours()

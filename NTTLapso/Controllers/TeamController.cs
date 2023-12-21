@@ -21,17 +21,78 @@ namespace NTTLapso.Controllers
             _service = new TeamService(_config);
         }
 
-
-        [HttpPost]
+        [HttpGet]
         [Route("List")]
         [Authorize]
-        public async Task<ListTeamResponse> List(TeamRequest? request)
+        public async Task<ListTeamResponse> List()
+        {
+            ListTeamResponse response = new ListTeamResponse();
+            List<TeamData> responseList = new List<TeamData>();
+
+            try
+            {
+                responseList = await _service.List();
+                response.IsSuccess = true;
+                response.Data = responseList;
+                response.Error = null;
+            } catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+
+            return response;
+        }
+
+        [HttpGet]
+        [Route("ListTeamsByLeaderId")]
+        [Authorize]
+        public async Task<ListTeamResponse> ListTeamsByLeaderId(int idManager)
+        {
+            ListTeamResponse response = new ListTeamResponse();
+            List<TeamData> responseList = new List<TeamData>();
+
+            try
+            {
+                responseList = await _service.ListTeamsByLeaderId(idManager);
+                response.IsSuccess = true;
+                response.Data = responseList;
+                response.Error = null;
+            }
+            catch (Exception ex)
+            {
+                Error _error = new Error(ex);
+                response.IsSuccess = false;
+                response.Error = _error;
+            }
+
+            return response;
+        }
+
+        [HttpGet]
+        [Route("IsTeamLeader")]
+        [Authorize]
+        public async Task<bool> IsTeamLeader(int idManager)
+        {
+            var response = false;
+
+            try { response = await _service.IsTeamLeader(idManager); }
+            catch (Exception ex) { Error _error = new Error(ex);}
+
+            return response;
+        }
+
+        [HttpGet]
+        [Route("GetTeamGridData")]
+        [Authorize]
+        public async Task<ListTeamResponse> GetTeamGridData()
         {
             ListTeamResponse response = new ListTeamResponse();
             List<TeamData> responseList = new List<TeamData>();
             try
             {
-                responseList = await _service.List(request);
+                responseList = await _service.GetTeamGridData();
                 response.IsSuccess = true;
                 response.Data = responseList;
                 response.Error = null;

@@ -14,10 +14,10 @@ namespace NTTLapso.Service
             _configuration = config;
             _repo = new TeamRepository(_configuration);
         }
-        public async Task<List<TeamData>> List(TeamRequest request)
-        {
-            return await _repo.List(request);
-        }
+        public async Task<List<TeamData>> List() => await _repo.List();
+        public async Task<bool> IsTeamLeader(int idManager) => await _repo.IsTeamLeader(idManager);
+        public async Task<List<TeamData>> ListTeamsByLeaderId(int idManager) => await _repo.ListTeamsByLeaderId(idManager);
+        public async Task<List<TeamData>> GetTeamGridData() => await _repo.GetTeamGridData();
 
         public async Task Create(TeamRequest request)
         {
