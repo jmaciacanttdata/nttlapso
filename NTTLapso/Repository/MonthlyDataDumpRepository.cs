@@ -37,8 +37,8 @@ namespace NTTLapso.Repository
 
         public async Task<List<EmployeeBySupervisor>> GetEmployeesBySupervisorId(string? supervisorId)
         {
-            var result = conn.Query(String.Format("SELECT id_employee from leader_hierarchy where id_supervisor = {0}", supervisorId));
-            return result.Select(emp => new EmployeeBySupervisor { Id = Convert.ToInt32(emp.id_employee) }).ToList();
+            var result = conn.Query(String.Format("SELECT DISTINCT id_employee, employee_name from leader_hierarchy where id_supervisor = {0}", supervisorId));
+            return result.Select(emp => new EmployeeBySupervisor { Id = Convert.ToInt32(emp.id_employee), Name = emp.employee_name }).ToList();
         }
 
         public async Task<List<EmployeeRemainingHours>> GetServiceOfEmployeeById(string supervisorId)
