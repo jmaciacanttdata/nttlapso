@@ -1,9 +1,13 @@
 ﻿using Dapper;
+using Microsoft.SharePoint.Client;
 using MySqlConnector;
+using NTTLapso.Models.DataDump;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Process.UserCharge;
 using NTTLapso.Models.Users;
 using NTTLapso.Support_methods;
+using NTTLapso.Tools;
+using System.Web.Mvc;
 
 namespace NTTLapso.Repository
 {
@@ -105,6 +109,13 @@ namespace NTTLapso.Repository
             return response;
         }
 
+        public async Task<List<UserRank>> GetUserRank(UserListRequest user)
+        {
+
+            var result = conn.Query<UserRank>(String.Format("SELECT user_rank FROM user_hierarchy where id_user = {0}", user.Id)).FirstOrDefault();
+            return new List<UserRank> { result };
+        }
+
         public async Task<NewUserChargeRequest> Create(CreateUserRequest request)
         {
             NewUserChargeRequest response = new NewUserChargeRequest();
@@ -174,14 +185,6 @@ namespace NTTLapso.Repository
         {
             string SQLQueryGeneral = String.Format("DELETE FROM user WHERE Id={0};", Id);
             conn.Query(SQLQueryGeneral);
-        }
-
-        public async Task<int> GetUserTeamRol(int Id, int IdTeam)
-        {
-            int response = 0;
-            string SQLQueryGeneral = string.Format("SELECT IdRol FROM user_team_rol WHERE IdUserTeam = (SELECT user_team.Id FROM user_team WHERE IdUser = {0} AND IdTeam = {1})", Id, IdTeam);
-            response = conn.ExecuteScalar<int>(SQLQueryGeneral);
-            return response;
         }
 
         public async Task ChangeUserState(ChangeUserStateRequest request)
