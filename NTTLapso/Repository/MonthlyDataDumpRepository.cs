@@ -195,7 +195,7 @@ namespace NTTLapso.Repository
 
                 String.Format(
                 @"
-                    SELECT DISTINCT e.id_employee, e.name, m.total_incurred_hours
+                    SELECT DISTINCT e.id_employee, e.name, m.total_hours, m.total_incurred_hours
                     FROM employees e INNER JOIN monthly_incurred_hours m ON e.id_employee = m.id_employee
                     WHERE m.month = '{0}' AND m.year = '{1}'
                 ", month, year)

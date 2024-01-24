@@ -4,6 +4,7 @@
     {
         public string id_employee {  get; set; }
         public string name { get; set; }
+        public string total_hours { get; set; }
         public string total_incurred_hours { get; set; }
     }
 
