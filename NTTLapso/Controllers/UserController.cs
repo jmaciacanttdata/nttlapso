@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NTTLapso.Models.Enum;
 using NTTLapso.Models.General;
 using NTTLapso.Models.Mail;
@@ -14,7 +15,7 @@ namespace NTTLapso.Controllers
 {
     [ApiController]
     [Route("NTTLapso/User")]
-    public class UserController
+    public class UserController : ControllerBase
     {
         private readonly IConfiguration _config;
         private readonly ILogger<UserController> _logger;
@@ -31,6 +32,7 @@ namespace NTTLapso.Controllers
             _textNotificationService = new TextNotificationService(_config);
             _processService = new ProcessService(_config);
         }
+
         [HttpPost]
         [Route("List")]
         [Authorize]
@@ -53,6 +55,15 @@ namespace NTTLapso.Controllers
             }
             
             return response;
+        }
+
+        [HttpPost]
+        [Route("GetUserRank")]
+        [Authorize]
+        public async Task<ActionResult> GetUserRank(UserListRequest user)
+        {
+            var response = await _userService.GetUserRank(user);
+            return response.Completed ? Ok(response) : StatusCode(response.StatusCode, response);
         }
 
         [HttpPost]
@@ -210,25 +221,6 @@ namespace NTTLapso.Controllers
 
             }
 
-            return response;
-        }
-        [HttpPost]
-        [Route("GetUserTeamRol")]
-        [Authorize]
-        public async Task<int> GetUserTeamRol(UserRol request)
-        {
-            int response = 0;
-            try
-            {
-       
-                response = await _userService.GetUserTeamRol(request.Id, request.IdTeam);
-            }
-            catch (Exception ex)
-            {
-     
-                response = 0;
-               
-            }
             return response;
         }
 
