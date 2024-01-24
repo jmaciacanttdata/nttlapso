@@ -20,30 +20,6 @@ namespace NTTLapso.Controllers
             _service = new MonthlyDataDumpService(_config);
         }
 
-        [Route("CreateLeaderRemainingHours")]
-        [HttpPost]
-        public async Task<ActionResult> CreateLeaderRemaininghHours()
-        {
-            var resp = await _service.CreateLeaderRemainingHours();
-            return (resp.Completed) ? Ok(resp) : StatusCode(resp.StatusCode, resp);
-        }
-
-        [Route("GetEmployeesBySupervisorId")]
-        [HttpGet]
-        public async Task<ActionResult> GetEmployeesBySupervisorId(string supervisorId)
-        {
-            var response = await _service.GetEmployeesBySupervisorId(supervisorId);
-            return response.Completed ? Ok(response) : StatusCode(response.StatusCode, response);
-        }
-
-        [Route("GetServiceOfEmployeeById")]
-        [HttpGet]
-        public async Task<ActionResult> GetServiceOfEmployeeById(string supervisorId)
-        {
-            var response = await _service.GetServiceOfEmployeeById(supervisorId);
-            return response.Completed ? Ok(response) : StatusCode(response.StatusCode, response);
-        }
-
         [Route("CalculateMonthlyIncurredHours")]
         [HttpPost]
         public async Task<ActionResult> CalculateMonthlyIncurredHours()
@@ -103,23 +79,27 @@ namespace NTTLapso.Controllers
             
 
             // CREAR TABLA DE HORAS INCURRIDAS POR LIDERES
-            var leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
+           // var leaderRemainingHoursResp = await _service.CreateLeaderRemainingHours();
+           // if (!leaderRemainingHoursResp.Completed) return StatusCode(leaderRemainingHoursResp.StatusCode, leaderRemainingHoursResp);
 
-            finalResp.Completed = leaderRemainingHoursResp.Completed;
-            finalResp.StatusCode = leaderRemainingHoursResp.StatusCode;
-            finalResp.Log.Append(leaderRemainingHoursResp.Log);
+          //  finalResp.Log.Append(leaderRemainingHoursResp.Log);
+
+            // CREAR TABLA DE USER_HIERARCHY
+            var userHierarchy = await _service.CreateUsersHierarchy();
+            if (!userHierarchy.Completed) return StatusCode(userHierarchy.StatusCode, userHierarchy);
+
+            finalResp.Log.Append(userHierarchy.Log);
+ 
+            var dumpIntoUsers = await _service.DumpEmployeesIntoUsers();
+
+            finalResp.Completed = dumpIntoUsers.Completed;
+            finalResp.StatusCode = dumpIntoUsers.StatusCode;
+            finalResp.Log.Append(dumpIntoUsers.Log);
             finalResp.NumConsolidate = consolidationResp.NumConsolidate;
 
             return (finalResp.Completed) ? Ok(finalResp) : StatusCode(finalResp.StatusCode, finalResp);
         }
 
-        [Route("DumpEmployeesIntoUsers")]
-        [HttpPost]
-        public async Task<ActionResult> DumpEmployeesIntoUsers()
-        {
-            var resp = await _service.DumpEmployeesIntoUsers();
-            return StatusCode(resp.StatusCode, resp);
-        }
 
         [Route("GetLeaderRemainingHours")]
         [HttpGet]

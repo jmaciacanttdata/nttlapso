@@ -146,22 +146,6 @@ namespace NTTLapso.Service
             return columnasIncurred;
         }
 
-        private List<Tuple<bool, string, string, Func<string, string>?>> GetParamererizationColumns()
-        {
-            var CreateTuple = Tuple.Create<bool, string, string, Func<string, string>?>;
-
-            var columnasParamererization = new List<Tuple<bool, string, string, Func<string, string>?>>
-            {
-                CreateTuple(true, "Nombre servicio",        "service",      null),
-                CreateTuple(true, "Nombre Service Team",    "service_team", null),
-                CreateTuple(true, "CSL",                    "csl",          null),
-                CreateTuple(true, "CSSL",                   "cssl",         null),
-                CreateTuple(true, "Gerente",                "manager",      null),
-            };
-
-            return columnasParamererization;
-        }
-
         private List<T> DownloadAndExtractExcelData<T>(string pathToFileFromServer, string downloadFilename, string worksheetName, Func<List<Tuple<bool, string, string, Func<string, string>?>>> dictionaryFunc) 
         {
             _sharePointDownloader.Download(pathToFileFromServer, _saveDirectory);
@@ -202,74 +186,6 @@ namespace NTTLapso.Service
             resp.Log = log;
 
             return resp;
-        }
-
-        public async Task<EmployeeBySupervisorResponse> GetEmployeesBySupervisorId(string? supervisorId)
-        {
-            LogBuilder log = new LogBuilder();
-            var response = new EmployeeBySupervisorResponse();
-            try
-            {
-                SimpleResponse responseExists = await EmployeeExists(supervisorId);
-                if (supervisorId != null && !responseExists.Completed)
-                {
-                    log.Append(responseExists.Log);
-                    response.Completed = responseExists.Completed;
-                    response.StatusCode = 400;
-                    response.Log = log;
-                    return response;
-                }
-
-                log.LogIf("Obteniendo lista de empleados por el supervisor con id " + supervisorId + "...");
-                response.EmployeesList = await _repo.GetEmployeesBySupervisorId(supervisorId);
-                log.LogIf("Lista de empleados obtenida correctamente");
-
-                response.Completed = true;
-                response.StatusCode = 200;
-                response.Log = log;
-
-            }
-            catch (Exception e)
-            {
-                log.LogErr(e.Message);
-                response.Completed = false;
-                response.StatusCode = 500;
-                response.Log = log;
-            }
-
-            return response;
-        }
-
-        public async Task<EmployeeRemainingHoursResponse> GetServiceOfEmployeeById(string? supervisorId)
-        {
-            LogBuilder log = new LogBuilder();
-            EmployeeRemainingHoursResponse response = new EmployeeRemainingHoursResponse();
-
-            try
-            {
-                SimpleResponse responseExists = await EmployeeExists(supervisorId);
-
-                if (supervisorId != null && !responseExists.Completed)
-                {
-                    log.Append(responseExists.Log);
-                    response.Completed = responseExists.Completed;
-                    response.StatusCode = 400;
-                    response.Log = log;
-                    return response;
-                }
-
-                log.LogIf("Obteniendo lista de servicios por el empleado con id " + supervisorId + "...");
-                response.EmployeesList = await _repo.GetServiceOfEmployeeById(supervisorId);
-                log.LogIf("Lista de empleados obtenida correctamente");
-            } catch (Exception e)
-            {
-                log.LogErr(e.Message);
-                response.Completed = false;
-                response.StatusCode = 500;
-                response.Log = log;
-            }
-
-            return response;
         }
 
         public async Task<SimpleResponse> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
@@ -575,9 +491,9 @@ namespace NTTLapso.Service
                 int consolidatedEntries = await _repo.CreateConsolidation();
                 log.LogOk("Tabla de consolidacion creada correctamente. "+ consolidatedEntries + " empleados consolidados.");
 
-                log.LogIf("Creando tabla de consolidacion de líderes...");
-                int leadersConsolidated = await _repo.CreateLeaderConsolidation();
-                log.LogOk("Tabla de consolidation de lideres creada correctamente. "+leadersConsolidated+" líderes consolidados.");
+                //log.LogIf("Creando tabla de consolidacion de líderes...");
+                //int leadersConsolidated = await _repo.CreateLeaderConsolidation();
+                //log.LogOk("Tabla de consolidation de lideres creada correctamente. "+leadersConsolidated+" líderes consolidados.");
 
                 resp.Completed = true;
                 resp.NumConsolidate = consolidatedEntries;
@@ -618,29 +534,6 @@ namespace NTTLapso.Service
 
             resp.Log = log;
 
-            return resp;
-        }
-
-        public async Task<SimpleResponse> CreateLeaderRemainingHours()
-        {
-            LogBuilder log = new LogBuilder();
-            var resp = new SimpleResponse();
-
-            try
-            {
-                log.LogIf("Creando tabla de horas incurridas por empleados supervisados por lideres...");
-                await _repo.CreateLeaderRemainingHours();
-                log.LogOk("Tabla creada correctamente.");
-                resp.Completed = true;
-            }
-            catch (Exception e)
-            {
-                log.LogErr(e.Message);
-                resp.Completed = false;
-                resp.StatusCode = 500;
-            }
-
-            resp.Log = log;
             return resp;
         }
 
@@ -686,7 +579,30 @@ namespace NTTLapso.Service
 
             return resp;
         }
-    
+
+        public async Task<SimpleResponse> CreateUsersHierarchy()
+        {
+            LogBuilder log = new LogBuilder();
+            var response = new SimpleResponse();
+
+            try
+            {
+                log.LogIf("Creando la tabla de jerarquia de usuarios...");
+                await _repo.CreateUsersHierarchy();
+                log.LogOk("Se ha creado la tabla de jerarquia correctamente");
+
+                response.Completed = true;
+            } catch(Exception ex)
+            {
+                log.LogErr(ex.Message);
+                response.Completed = false;
+                response.StatusCode = 500;
+            }
+            response.Log = log;
+
+            return response;
+        }
+
         public async Task<NumConsolidationResponse> LoadDataFromExcels()
         {
             var resp = new NumConsolidationResponse();
@@ -709,10 +625,6 @@ namespace NTTLapso.Service
                 await _repo.TruncateEmployees();
                 log.LogOk("Tabla employees truncada correctamente.");
 
-                log.LogIf("Truncando tabla leaders...");
-                await _repo.TruncateLeaders();
-                log.LogOk("Tabla leaders truncada correctamente.");
-
                 // OBTENER DATOS DE LOS EXCELS.
                 log.LogIf("Leyendo datos de empleados del excel...");
                 List<Employee> employeesData = DownloadAndExtractExcelData<Employee>("Documentos%20compartidos/General/Data/Headcount.xlsx", "Headcount.xlsx", "Detalle", GetEmployeesColumns);
@@ -726,9 +638,6 @@ namespace NTTLapso.Service
                 List<Incurred> incurredsData = DownloadAndExtractExcelData<Incurred>("Documentos%20compartidos/General/Data/Incurridos/Incurridos%20Periodo%20en%20curso.xlsx", "Incurridos Periodo en curso.xlsx", "Detalle", GetIncurredColumns);
                 log.LogOk("Datos de incurridos del excel leídos correctamente.  ");
 
-                log.LogIf("Leyendo datos de parametrización del excel...");
-                List<Leaders> managersData = DownloadAndExtractExcelData<Leaders>("Documentos%20compartidos/General/Data/Parametrizacion.xlsx", "Parametrizacion.xlsx", "Top Management", GetParamererizationColumns);
-                log.LogOk("Datos de parametrización del excel leídos correctamente.  ");
 
                 // INSERCION DE DATOS EN TABLAS.
 
@@ -743,10 +652,6 @@ namespace NTTLapso.Service
                 log.LogIf("Insertando incurridos del excel en la base de datos...");
                 await _repo.InsertIncurreds(incurredsData);
                 log.LogOk("Incurridos insertados correctamente.");
-
-                log.LogIf("Insertando supervisores del excel en la base de datos...");
-                await _repo.InsertLeaders(managersData);
-                log.LogOk("Supervisores insertados correctamente.");
 
                 log.LogOk("Se ha completado el volcado de datos.");
 

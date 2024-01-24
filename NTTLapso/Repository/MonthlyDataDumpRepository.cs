@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.SharePoint.Client;
 using MySqlConnector;
 using NTTLapso.Models.DataDump;
 
@@ -33,18 +34,6 @@ namespace NTTLapso.Repository
             string sql = "SELECT id_employee FROM employees WHERE LENGTH(id_employee)>0 GROUP BY id_employee";
 
             return (conn.Query<Employee>(sql)).ToList();
-        }
-
-        public async Task<List<EmployeeBySupervisor>> GetEmployeesBySupervisorId(string? supervisorId)
-        {
-            var result = conn.Query(String.Format("SELECT id_employee from leader_hierarchy where id_supervisor = {0}", supervisorId));
-            return result.Select(emp => new EmployeeBySupervisor { Id = Convert.ToInt32(emp.id_employee) }).ToList();
-        }
-
-        public async Task<List<EmployeeRemainingHours>> GetServiceOfEmployeeById(string supervisorId)
-        {
-            var result = conn.Query(String.Format("SELECT service from leader_hierarchy where id_supervisor = {0}", supervisorId));
-            return result.Select(emp => new EmployeeRemainingHours { service_team = emp.service }).ToList();
         }
 
         public async Task<float> GetTotalHours(string? userId)
@@ -83,38 +72,16 @@ namespace NTTLapso.Repository
             }
         }
 
-        public async Task InsertLeaders(List<Leaders> leadersList)
-        {
-            StringBuilder sqlInsert = new StringBuilder("SET FOREIGN_KEY_CHECKS = 0; INSERT INTO leaders VALUES ");
-
-            string insertParams = "('{0}', '{1}', '{2}', '{3}', '{4}')";
-
-            foreach (var param in leadersList)
-            {
-                sqlInsert.Append(String.Format(insertParams + ((param != leadersList.Last()) ? "," : ""), param.service, param.service_team, param.csl, param.cssl, param.manager));
-            }
-
-            sqlInsert.Append("; SET FOREIGN_KEY_CHECKS = 1;");
-            conn.Query(sqlInsert.ToString());
-        }
-
-        public async Task CreateLeaderRemainingHours()
-        {
-            conn.Execute("CALL SP_CREATE_LEADER_HIERARCHY();");
-        }
-
-        public async Task<int> CreateLeaderConsolidation()
-        {
-            return conn.Query<int>("CALL SP_CREATE_LEADER_CONSOLIDATION();").FirstOrDefault();
-        }
-
         public async Task<List<LeaderRemainingHours>> GetLeaderRemainingHours(string? leader_id, string? employee_id, string? service)
         {
             StringBuilder queryBuilder = new StringBuilder
                 (
                 @"
-                    SELECT DISTINCT l.id_supervisor, l.id_employee, l.employee_name, h.difference_hours AS remaining_hours
-                    FROM leader_hierarchy l INNER JOIN monthly_incurred_hours h ON l.id_employee = h.id_employee
+                    SELECT DISTINCT uh1.id_user AS id_supervisor, uh2.id_user AS id_employee, uh2.user_name AS employee_name,
+                        mih.difference_hours AS remaining_hours
+                    FROM user_hierarchy uh1
+                        INNER JOIN user_hierarchy uh2 ON uh1.user_rank > uh2.user_rank AND uh1.service = uh2.service
+                        INNER JOIN monthly_incurred_hours mih
                 "
                 );
 
@@ -124,19 +91,19 @@ namespace NTTLapso.Repository
                 int num_params = 0;
                 if(leader_id != null)
                 {
-                    paramsBuilder.Append(String.Format( ((num_params > 0)? " AND ":"") + "l.id_supervisor = '{0}'", leader_id));
+                    paramsBuilder.Append(String.Format( ((num_params > 0)? " AND ":"") + "uh1.id_user = '{0}'", leader_id));
                     num_params++;
                 }
 
                 if(employee_id != null)
                 {
-                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "l.id_employee = '{0}'", employee_id));
+                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "uh2.id_user = '{0}'", employee_id));
                     num_params++;
                 }
 
                 if (service != null)
                 {
-                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "l.service = '{0}'", service));
+                    paramsBuilder.Append(String.Format(((num_params > 0) ? " AND " : "") + "uh1.service = '{0}'", service));
                     num_params++;
                 }
 
@@ -150,14 +117,15 @@ namespace NTTLapso.Repository
         {
             StringBuilder queryBuilder = new StringBuilder(
                 @"
-                    SELECT DISTINCT l.id_employee, l.employee_name, l.service, i.task_id, i.date, CAST(REPLACE(i.incurred_hours, ',', '.') AS FLOAT) AS incurred_hours
-                    FROM leader_hierarchy l
-                    INNER JOIN (
-	                    SELECT id_employee, service_name AS service, task_id, DATE, SUM(REPLACE(incurred_hours, ',', '.')) AS incurred_hours
-	                    FROM incurred 
-	                    GROUP BY id_employee, service_name, task_id, date
-                    ) AS i ON l.id_employee = i.id_employee AND l.service = i.service
-                    WHERE 1=1
+                    SELECT DISTINCT 
+		            uh2.id_user AS id_employee, uh2.user_name AS employee_name, uh2.service, i.task_id, i.date, CAST(REPLACE(i.incurred_hours, ',', '.') AS FLOAT) AS incurred_hours
+                    FROM user_hierarchy uh1
+                    INNER JOIN user_hierarchy uh2 ON uh1.user_rank > uh2.user_rank  AND uh1.service = uh2.service
+                    INNER JOIN (     
+                        SELECT id_employee, service_name AS service, task_id, date, SUM(CAST(REPLACE(incurred_hours, ',', '.') AS FLOAT)) AS incurred_hours 
+                        FROM incurred i     
+                        GROUP BY id_employee, service_name, task_id, date) AS i ON uh2.id_user = i.id_employee AND uh2.service = i.service
+                    WHERE 1 = 1
                 "
             );
 
@@ -166,17 +134,17 @@ namespace NTTLapso.Repository
                 StringBuilder paramsBuilder = new StringBuilder();
                 if (leader_id != null)
                 {
-                    paramsBuilder.Append(String.Format(" AND l.id_supervisor = '{0}'", leader_id));
+                    paramsBuilder.Append(String.Format(" AND uh1.id_user = '{0}'", leader_id));
                 }
 
                 if (employee_id != null)
                 {
-                    paramsBuilder.Append(String.Format(" AND l.id_employee = '{0}'", employee_id));
+                    paramsBuilder.Append(String.Format(" AND uh2.id_user = '{0}'", employee_id));
                 }
 
                 if (service != null)
                 {
-                    paramsBuilder.Append(String.Format(" AND l.service = '{0}'", service));
+                    paramsBuilder.Append(String.Format(" AND uh2.service = '{0}'", service));
                 }
 
                 queryBuilder.Append(paramsBuilder.ToString());
@@ -269,6 +237,8 @@ namespace NTTLapso.Repository
             return conn.Query<Schedule>(query.ToString()).ToList();
         }
 
+        //BD 
+
         public async Task CreateCalculated(MonthlyIncurredHours monthlyIncurred)
         {                
             string sqlInsert = String.Format(
@@ -293,12 +263,6 @@ namespace NTTLapso.Repository
         public async Task TruncateEmployees()
         {
             string tableName = "employees";
-            TruncateTable(tableName, true);
-        }
-
-        public async Task TruncateLeaders()
-        {
-            string tableName = "leaders";
             TruncateTable(tableName, true);
         }
 
@@ -402,6 +366,11 @@ namespace NTTLapso.Repository
         public async Task<int> CreateConsolidation()
         {
             return conn.Query<int>("CALL SP_CREATE_CONSOLIDATION;").FirstOrDefault();
+        }
+
+        public async Task CreateUsersHierarchy()
+        {
+            conn.Execute("CALL SP_CREATE_USERS_HIERARCHY");
         }
 
         public async Task<List<Consolidation>> GetConsolidatedEmployees()

@@ -4,6 +4,7 @@
     {
         public int? IdVacation { get; set; }
         public int IdUser { get; set; }
+        public string Service { get; set; }
 
         public int IdPetitionType { get; set; }
 
