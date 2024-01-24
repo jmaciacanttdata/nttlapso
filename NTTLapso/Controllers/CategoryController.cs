@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NTTLapso.Models.Category;
 using NTTLapso.Models.General;
-using NTTLapso.Models.Category;
 using NTTLapso.Models.Login;
 using NTTLapso.Service;
 using System.IdentityModel.Tokens.Jwt;

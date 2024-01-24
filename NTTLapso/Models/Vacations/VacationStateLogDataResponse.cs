@@ -14,6 +14,7 @@ namespace NTTLapso.Models.Vacations
         public DateTime PetitionDate { get; set; }
 
         public DateTime StateDate { get; set; }
+        public string Service {  get; set; }
 
         public string Detail { get; set; }
     }

@@ -209,24 +209,27 @@ namespace NTTLapso.Repository
         {
             List<VacationStateLogDataResponse> response = new List<VacationStateLogDataResponse>();
 
-            string SQLQueryGeneral = "SELECT IdVacation, U.Id AS IdUser, U.Name AS 'UserName', PT.Id AS 'IdPetitionType', " +
+            string SQLQueryGeneral = "SELECT IdVacation, U.Id AS IdUser, U.Name AS 'UserName', uh.service, PT.Id AS 'IdPetitionType', " +
                 "PT.Value AS 'ValuePetitionType', PS.Id AS 'IdPetitionState', PS.Value AS 'ValuePetitionState', V.PetitionDate AS 'PetitionDate', " +
                 "StateDate, Detail FROM vacation_state_log INNER JOIN vacation V ON IdVacation = V.Id INNER JOIN `user` U ON IdUserState = U.Id " +
-                "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id";
+                "INNER JOIN petition_type PT ON V.IdPetitionType = PT.Id INNER JOIN petition_state PS ON IdState = PS.Id JOIN user_hierarchy uh " +
+                "ON U.name = uh.user_name";
             if (request != null && request.IdUser > 0)
                 SQLQueryGeneral += " AND U.Id={0}";
             if (request != null && request.IdVacation > 0)
-                SQLQueryGeneral += " AND IdVacation={5}";
+                SQLQueryGeneral += " AND IdVacation={6}";
             if (request != null && request.IdPetitionType > 0)
                 SQLQueryGeneral += " AND PT.Id={1}";
             if (request != null && request.IdPetitionState > 0)
                 SQLQueryGeneral += " AND PS.Id={2}";
+            if (request != null && !String.IsNullOrEmpty(request.Service))
+                SQLQueryGeneral += " AND uh.service='{3}'";
             if (request != null && request.PetitionDate.Date.ToString("yyyy-MM-dd") != "" && request.PetitionDate > new DateTime())
-                SQLQueryGeneral += " AND V.PetitionDate='{3}'";
+                SQLQueryGeneral += " AND V.PetitionDate='{4}'";
             if (request != null && request.StateDate.ToString() != "" && request.StateDate > new DateTime())
-                SQLQueryGeneral += " AND StateDate='{4}'";
+                SQLQueryGeneral += " AND StateDate='{5}'";
 
-            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"), request.IdVacation);
+            string SQLQuery = String.Format(SQLQueryGeneral, request.IdUser, request.IdPetitionType, request.IdPetitionState, request.Service, request.PetitionDate.Date.ToString("yyyy-MM-dd"), request.StateDate.Date.ToString("yyyy-MM-dd"), request.IdVacation);
 
             var SQLResponse =  conn.Query(SQLQuery).ToList();
 
@@ -239,6 +242,7 @@ namespace NTTLapso.Repository
                 logResponse.PetitionState = new IdValue() { Id = log.IdPetitionState, Value = log.ValuePetitionState };
                 logResponse.PetitionDate = log.PetitionDate;
                 logResponse.StateDate = log.StateDate;
+                logResponse.Service = log.service;
                 logResponse.Detail = log.Detail;
 
                 response.Add(logResponse);
